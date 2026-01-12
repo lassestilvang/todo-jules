@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import AddTaskForm from '../components/add-task-form';
-import Task from '../components/task';
+import { useSearchParams } from 'next/navigation';
+import Task from '../../components/task';
 
 interface Task {
   id: number;
@@ -20,30 +20,33 @@ interface Task {
   attachment: string;
 }
 
-const Home = () => {
+const Search = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-
-  const fetchTasks = async () => {
-    const response = await fetch('/api/tasks');
-    const data = await response.json();
-    setTasks(data);
-  };
+  const searchParams = useSearchParams();
+  const query = searchParams.get('query');
 
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    if (query) {
+      const fetchTasks = async () => {
+        const response = await fetch(`/api/search?query=${query}`);
+        const data = await response.json();
+        setTasks(data);
+      };
+
+      fetchTasks();
+    }
+  }, [query]);
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Inbox</h1>
+      <h1 className="text-2xl font-bold">Search Results for "{query}"</h1>
       <div className="mt-4">
         {tasks.map((task) => (
           <Task key={task.id} task={task} />
         ))}
       </div>
-      <AddTaskForm onTaskAdded={fetchTasks} />
     </div>
   );
 };
 
-export default Home;
+export default Search;

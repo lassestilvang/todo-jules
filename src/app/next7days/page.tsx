@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import AddTaskForm from '../components/add-task-form';
-import Task from '../components/task';
+import Task from '../../../components/task';
 
 interface Task {
   id: number;
@@ -20,30 +19,29 @@ interface Task {
   attachment: string;
 }
 
-const Home = () => {
+const Next7Days = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
 
-  const fetchTasks = async () => {
-    const response = await fetch('/api/tasks');
-    const data = await response.json();
-    setTasks(data);
-  };
-
   useEffect(() => {
+    const fetchTasks = async () => {
+      const response = await fetch('/api/tasks/next7days');
+      const data = await response.json();
+      setTasks(data);
+    };
+
     fetchTasks();
   }, []);
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Inbox</h1>
+      <h1 className="text-2xl font-bold">Next 7 Days</h1>
       <div className="mt-4">
         {tasks.map((task) => (
           <Task key={task.id} task={task} />
         ))}
       </div>
-      <AddTaskForm onTaskAdded={fetchTasks} />
     </div>
   );
 };
 
-export default Home;
+export default Next7Days;
