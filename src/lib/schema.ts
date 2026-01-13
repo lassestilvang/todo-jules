@@ -1,5 +1,5 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
-import { sql, relations } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 
 export const lists = sqliteTable('lists', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -58,75 +58,3 @@ export const attachments = sqliteTable('attachments', {
   url: text('url').notNull(),
   taskId: integer('task_id').references(() => tasks.id, { onDelete: 'cascade' }),
 });
-
-export const taskHistory = sqliteTable('task_history', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  taskId: integer('task_id')
-    .references(() => tasks.id, { onDelete: 'cascade' })
-    .notNull(),
-  changedField: text('changed_field').notNull(),
-  oldValue: text('old_value'),
-  newValue: text('new_value'),
-  changedAt: integer('changed_at', { mode: 'timestamp' })
-    .default(sql`(strftime('%s', 'now'))`)
-    .notNull(),
-});
-
-export const listRelations = relations(lists, ({ many }) => ({
-  tasks: many(tasks),
-}));
-
-export const taskRelations = relations(tasks, ({ one, many }) => ({
-  list: one(lists, {
-    fields: [tasks.listId],
-    references: [lists.id],
-  }),
-  subtasks: many(subtasks),
-  labels: many(taskLabels),
-  reminders: many(reminders),
-  attachments: many(attachments),
-  history: many(taskHistory),
-}));
-
-export const subtaskRelations = relations(subtasks, ({ one }) => ({
-  task: one(tasks, {
-    fields: [subtasks.taskId],
-    references: [tasks.id],
-  }),
-}));
-
-export const labelRelations = relations(labels, ({ many }) => ({
-  taskLabels: many(taskLabels),
-}));
-
-export const taskLabelRelations = relations(taskLabels, ({ one }) => ({
-  task: one(tasks, {
-    fields: [taskLabels.taskId],
-    references: [tasks.id],
-  }),
-  label: one(labels, {
-    fields: [taskLabels.labelId],
-    references: [labels.id],
-  }),
-}));
-
-export const reminderRelations = relations(reminders, ({ one }) => ({
-  task: one(tasks, {
-    fields: [reminders.taskId],
-    references: [tasks.id],
-  }),
-}));
-
-export const attachmentRelations = relations(attachments, ({ one }) => ({
-  task: one(tasks, {
-    fields: [attachments.taskId],
-    references: [tasks.id],
-  }),
-}));
-
-export const taskHistoryRelations = relations(taskHistory, ({ one }) => ({
-  task: one(tasks, {
-    fields: [taskHistory.taskId],
-    references: [tasks.id],
-  }),
-}));
