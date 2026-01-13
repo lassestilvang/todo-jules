@@ -34,6 +34,6 @@ describe('POST /api/lists', () => {
     const data = await response.json();
 
     expect(response.status).toBe(201);
-    expect(data).toEqual({ message: 'List created' });
+    expect(data).toEqual({ id: 1, name: 'Test List', color: '#fff', emoji: '🎉' });
   });
 });
