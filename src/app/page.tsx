@@ -2,23 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import AddTaskForm from '../components/add-task-form';
-import Task from '../components/task';
-
-interface Task {
-  id: number;
-  name: string;
-  description: string;
-  date: string;
-  deadline: string;
-  priority: string;
-  completed: boolean;
-  estimate: number;
-  actualTime: number;
-  labels: string;
-  subtasks: string;
-  recurring: string;
-  attachment: string;
-}
+import TaskComponent from '../components/task';
+import { Task } from '../lib/types';
 
 const Home = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -38,7 +23,7 @@ const Home = () => {
       <h1 className="text-2xl font-bold">Inbox</h1>
       <div className="mt-4">
         {tasks.map((task) => (
-          <Task key={task.id} task={task} />
+          <TaskComponent key={task.id} task={task} />
         ))}
       </div>
       <AddTaskForm onTaskAdded={fetchTasks} />

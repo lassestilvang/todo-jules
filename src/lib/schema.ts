@@ -14,14 +14,10 @@ export const tasks = sqliteTable('tasks', {
   description: text('description'),
   date: integer('date', { mode: 'timestamp' }),
   deadline: integer('deadline', { mode: 'timestamp' }),
-  reminders: text('reminders'), // JSON string for reminders
   estimate: integer('estimate'), // in minutes
   actualTime: integer('actual_time'), // in minutes
-  labels: text('labels'), // JSON string for labels
   priority: text('priority').default('None'),
-  subtasks: text('subtasks'), // JSON string for subtasks
   recurring: text('recurring'),
-  attachment: text('attachment'),
   completed: integer('completed', { mode: 'boolean' }).default(false),
   listId: integer('list_id').references(() => lists.id),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(
@@ -30,4 +26,35 @@ export const tasks = sqliteTable('tasks', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(
     sql`(strftime('%s', 'now'))`
   ),
+});
+
+export const subtasks = sqliteTable('subtasks', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  completed: integer('completed', { mode: 'boolean' }).default(false),
+  taskId: integer('task_id').references(() => tasks.id, { onDelete: 'cascade' }),
+});
+
+export const labels = sqliteTable('labels', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  color: text('color'),
+  icon: text('icon'),
+});
+
+export const taskLabels = sqliteTable('task_labels', {
+  taskId: integer('task_id').references(() => tasks.id, { onDelete: 'cascade' }),
+  labelId: integer('label_id').references(() => labels.id, { onDelete: 'cascade' }),
+});
+
+export const reminders = sqliteTable('reminders', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  remindAt: integer('remind_at', { mode: 'timestamp' }).notNull(),
+  taskId: integer('task_id').references(() => tasks.id, { onDelete: 'cascade' }),
+});
+
+export const attachments = sqliteTable('attachments', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  url: text('url').notNull(),
+  taskId: integer('task_id').references(() => tasks.id, { onDelete: 'cascade' }),
 });
