@@ -15,7 +15,7 @@ export async function GET() {
     const allTasks = await db.query.tasks.findMany({
       with: {
         subtasks: true,
-        taskLabels: {
+        labels: {
           with: {
             label: true,
           },
