@@ -7,12 +7,12 @@ This document outlines the necessary changes to bring the Daily Task Planner app
 - [ ] **Custom Lists:** Users should be able to create, name, and customize lists with colors and emojis.
 - [ ] **"Inbox" as a default magic list:** Automatically capture tasks that are not assigned to a specific list.
 - [ ] **Comprehensive Task Attributes:** Implement all task attributes as defined in the requirements, including:
-  - [ ] Reminders
-  - [ ] Labels (with icons)
-  - [ ] Sub-tasks
-  - [ ] Recurring tasks
-  - [ ] Attachments
-- [ ] **Task History:** Log all changes to a task and make them viewable.
+  - [x] Reminders (DB/API support)
+  - [x] Labels (with icons) (DB/API support)
+  - [x] Sub-tasks (DB/API support)
+  - [x] Recurring tasks (DB/API support)
+  - [x] Attachments (DB/API support)
+- [ ] **Task History:** Log all changes to a task and make them viewable. (DB table removed, pending full implementation)
 - [ ] **Views:** Implement all required views:
   - [ ] "Today"
   - [ ] "Next 7 Days"
@@ -43,5 +43,5 @@ This document outlines the necessary changes to bring the Daily Task Planner app
 - [ ] **Date Picker:** Add a date picker for scheduling tasks.
 - [ ] **Test Coverage:** Increase unit and integration test coverage to ensure all features are well-tested.
 - [ ] **Code Organization:** Refactor the code to improve organization and maintainability.
-- [ ] **API Design:** Improve the API design to be more RESTful and consistent.
-- [ ] **Database Schema:** Refine the database schema to better support the required features (e.g., task history, recurring tasks).
+- [x] **API Design:** Improve the API design to be more RESTful and consistent.
+- [x] **Database Schema:** Refine the database schema to better support the required features (e.g., task history, recurring tasks).
