@@ -30,6 +30,8 @@ describe('PUT /api/tasks/[id]', () => {
         delete: vi.fn().mockReturnThis(),
         insert: vi.fn().mockReturnThis(),
         values: vi.fn(),
+        select: vi.fn().mockReturnThis(),
+        from: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([updatedTask]) }),
       };
       return await callback(tx);
     });

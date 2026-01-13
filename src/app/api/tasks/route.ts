@@ -8,6 +8,7 @@ import {
   attachments,
 } from '../../../lib/schema';
 import { eq } from 'drizzle-orm';
+import { createTaskSchema } from '../../../lib/validators';
 
 export async function GET() {
   try {
@@ -36,53 +37,54 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const validatedBody = createTaskSchema.parse(body);
 
     const createdTask = await db.transaction(async (tx) => {
       const [newTask] = await tx
         .insert(tasks)
         .values({
-          name: body.name,
-          description: body.description,
-          date: body.date ? new Date(body.date) : null,
-          deadline: body.deadline ? new Date(body.deadline) : null,
-          estimate: body.estimate,
-          actualTime: body.actualTime,
-          priority: body.priority,
-          recurring: body.recurring,
-          listId: body.listId,
+          name: validatedBody.name,
+          description: validatedBody.description,
+          date: validatedBody.date ? new Date(validatedBody.date) : null,
+          deadline: validatedBody.deadline ? new Date(validatedBody.deadline) : null,
+          estimate: validatedBody.estimate,
+          actualTime: validatedBody.actualTime,
+          priority: validatedBody.priority,
+          recurring: validatedBody.recurring,
+          listId: validatedBody.listId,
         })
         .returning();
 
-      if (body.subtasks && body.subtasks.length > 0) {
+      if (validatedBody.subtasks && validatedBody.subtasks.length > 0) {
         await tx.insert(subtasks).values(
-          body.subtasks.map((subtask: any) => ({
+          validatedBody.subtasks.map((subtask) => ({
             ...subtask,
             taskId: newTask.id,
           }))
         );
       }
 
-      if (body.labels && body.labels.length > 0) {
+      if (validatedBody.labels && validatedBody.labels.length > 0) {
         await tx.insert(taskLabels).values(
-          body.labels.map((labelId: number) => ({
+          validatedBody.labels.map((labelId) => ({
             taskId: newTask.id,
             labelId,
           }))
         );
       }
 
-      if (body.reminders && body.reminders.length > 0) {
+      if (validatedBody.reminders && validatedBody.reminders.length > 0) {
         await tx.insert(reminders).values(
-          body.reminders.map((reminder: any) => ({
+          validatedBody.reminders.map((reminder) => ({
             ...reminder,
             taskId: newTask.id,
           }))
         );
       }
 
-      if (body.attachments && body.attachments.length > 0) {
+      if (validatedBody.attachments && validatedBody.attachments.length > 0) {
         await tx.insert(attachments).values(
-          body.attachments.map((attachment: any) => ({
+          validatedBody.attachments.map((attachment) => ({
             ...attachment,
             taskId: newTask.id,
           }))

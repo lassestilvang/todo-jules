@@ -8,6 +8,7 @@ import {
   attachments,
 } from '../../../../lib/schema';
 import { eq, and } from 'drizzle-orm';
+import { updateTaskSchema } from '../../../../lib/validators';
 
 export async function PUT(
   request: Request,
@@ -16,67 +17,77 @@ export async function PUT(
   try {
     const taskId = parseInt(params.id, 10);
     const body = await request.json();
+    const validatedBody = updateTaskSchema.parse(body);
 
     const updatedTask = await db.transaction(async (tx) => {
+      if (Object.keys(validatedBody).length > 0) {
+        await tx
+          .update(tasks)
+          .set({
+            ...validatedBody,
+            date: validatedBody.date ? new Date(validatedBody.date) : undefined,
+            deadline: validatedBody.deadline
+              ? new Date(validatedBody.deadline)
+              : undefined,
+          })
+          .where(eq(tasks.id, taskId));
+      }
+
       const [updated] = await tx
-        .update(tasks)
-        .set({
-          name: body.name,
-          description: body.description,
-          date: body.date ? new Date(body.date) : null,
-          deadline: body.deadline ? new Date(body.deadline) : null,
-          estimate: body.estimate,
-          actualTime: body.actualTime,
-          priority: body.priority,
-          recurring: body.recurring,
-          completed: body.completed,
-          listId: body.listId,
-        })
-        .where(eq(tasks.id, taskId))
-        .returning();
+        .select()
+        .from(tasks)
+        .where(eq(tasks.id, taskId));
 
       // Handle subtasks
-      await tx.delete(subtasks).where(eq(subtasks.taskId, taskId));
-      if (body.subtasks && body.subtasks.length > 0) {
-        await tx.insert(subtasks).values(
-          body.subtasks.map((subtask: any) => ({
-            ...subtask,
-            taskId: taskId,
-          }))
-        );
+      if (validatedBody.subtasks) {
+        await tx.delete(subtasks).where(eq(subtasks.taskId, taskId));
+        if (validatedBody.subtasks.length > 0) {
+          await tx.insert(subtasks).values(
+            validatedBody.subtasks.map((subtask) => ({
+              ...subtask,
+              taskId: taskId,
+            }))
+          );
+        }
       }
 
       // Handle labels
-      await tx.delete(taskLabels).where(eq(taskLabels.taskId, taskId));
-      if (body.labels && body.labels.length > 0) {
-        await tx.insert(taskLabels).values(
-          body.labels.map((labelId: number) => ({
-            taskId: taskId,
-            labelId,
-          }))
-        );
+      if (validatedBody.labels) {
+        await tx.delete(taskLabels).where(eq(taskLabels.taskId, taskId));
+        if (validatedBody.labels.length > 0) {
+          await tx.insert(taskLabels).values(
+            validatedBody.labels.map((labelId) => ({
+              taskId: taskId,
+              labelId,
+            }))
+          );
+        }
       }
 
       // Handle reminders
-      await tx.delete(reminders).where(eq(reminders.taskId, taskId));
-      if (body.reminders && body.reminders.length > 0) {
-        await tx.insert(reminders).values(
-          body.reminders.map((reminder: any) => ({
-            ...reminder,
-            taskId: taskId,
-          }))
-        );
+      if (validatedBody.reminders) {
+        await tx.delete(reminders).where(eq(reminders.taskId, taskId));
+        if (validatedBody.reminders.length > 0) {
+          await tx.insert(reminders).values(
+            validatedBody.reminders.map((reminder) => ({
+              ...reminder,
+              taskId: taskId,
+            }))
+          );
+        }
       }
 
       // Handle attachments
-      await tx.delete(attachments).where(eq(attachments.taskId, taskId));
-      if (body.attachments && body.attachments.length > 0) {
-        await tx.insert(attachments).values(
-          body.attachments.map((attachment: any) => ({
-            ...attachment,
-            taskId: taskId,
-          }))
-        );
+      if (validatedBody.attachments) {
+        await tx.delete(attachments).where(eq(attachments.taskId, taskId));
+        if (validatedBody.attachments.length > 0) {
+          await tx.insert(attachments).values(
+            validatedBody.attachments.map((attachment) => ({
+              ...attachment,
+              taskId: taskId,
+            }))
+          );
+        }
       }
 
       return updated;
