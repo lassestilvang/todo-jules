@@ -15,6 +15,20 @@
       "when": 1768249995875,
       "tag": "0001_graceful_northstar",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1768303132937,
+      "tag": "0002_yielding_thor",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1768303190441,
+      "tag": "0003_good_the_fury",
+      "breakpoints": true
     }
   ]
 }
