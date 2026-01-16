@@ -1,21 +1,22 @@
 import { NextResponse } from 'next/server';
-import { db } from '../../../../lib/db';
+import { db } from '@/lib/db';
 import {
   tasks,
   subtasks,
   taskLabels,
   reminders,
   attachments,
-} from '../../../../lib/schema';
+} from '@/lib/schema';
 import { eq, and } from 'drizzle-orm';
-import { updateTaskSchema } from '../../../../lib/validators';
+import { updateTaskSchema } from '@/lib/validators';
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const taskId = parseInt(params.id, 10);
+    const { id } = await params;
+    const taskId = parseInt(id, 10);
     const body = await request.json();
     const validatedBody = updateTaskSchema.parse(body);
 
@@ -108,10 +109,11 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const taskId = parseInt(params.id, 10);
+    const { id } = await params;
+    const taskId = parseInt(id, 10);
     await db.delete(tasks).where(eq(tasks.id, taskId));
 
     return NextResponse.json(

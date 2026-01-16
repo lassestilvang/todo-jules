@@ -2,6 +2,7 @@ import React from 'react';
 import { getTasksForInbox } from '@/app/actions/task';
 import { TaskList } from '@/components/lists/task-list';
 import AddTaskForm from '@/components/add-task-form';
+import { Task } from '@/lib/types';
 
 export default async function InboxPage() {
   // @ts-ignore
