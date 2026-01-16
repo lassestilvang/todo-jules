@@ -15,7 +15,7 @@ async function main() {
   console.log('Applied first migration.');
 
   // 2. Transfer data from JSON columns to new tables
-  const tasksWithOldSchema = sqlite.prepare('SELECT * FROM tasks').all();
+  const tasksWithOldSchema = sqlite.prepare('SELECT * FROM tasks').all() as any[];
 
   for (const task of tasksWithOldSchema) {
     if (task.subtasks) {
@@ -28,7 +28,7 @@ async function main() {
         const parsedLabels = JSON.parse(task.labels);
         for (const label of parsedLabels) {
             let labelId;
-            const existingLabel = sqlite.prepare('SELECT id FROM labels WHERE name = ?').get(label.name);
+            const existingLabel = sqlite.prepare('SELECT id FROM labels WHERE name = ?').get(label.name) as any;
             if (existingLabel) {
                 labelId = existingLabel.id;
             } else {

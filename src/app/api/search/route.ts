@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { db } from '../../../../lib/db';
-import { tasks } from '../../../../lib/schema';
+import { db } from '@/lib/db';
+import { tasks } from '@/lib/schema';
 import Fuse from 'fuse.js';
 
 export async function GET(request: Request) {

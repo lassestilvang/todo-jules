@@ -1,41 +1,25 @@
-'use client';
+import React from 'react';
+import { getTasksForToday } from '@/app/actions/task';
+import { TaskList } from '@/components/lists/task-list';
+import AddTaskForm from '@/components/add-task-form';
 
-import React, { useEffect, useState } from 'react';
-import Task from '../../../components/task';
-
-interface Task {
-  id: number;
-  name: string;
-  description: string;
-  date: string;
-  deadline: string;
-  priority: string;
-  completed: boolean;
-}
-
-const Today = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-
-  useEffect(() => {
-    const fetchTasks = async () => {
-      const response = await fetch('/api/tasks/today');
-      const data = await response.json();
-      setTasks(data);
-    };
-
-    fetchTasks();
-  }, []);
+export default async function TodayPage() {
+  // @ts-ignore
+  const tasks = await getTasksForToday();
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold">Today</h1>
-      <div className="mt-4">
-        {tasks.map((task) => (
-          <Task key={task.id} task={task} />
-        ))}
+    <div className="container mx-auto max-w-4xl">
+      <h1 className="text-3xl font-bold mb-6">Today</h1>
+
+      <div className="mb-8">
+        {/* @ts-ignore */}
+        <TaskList tasks={tasks} />
+      </div>
+
+      <div className="mt-8 border-t pt-8">
+        <h2 className="text-xl font-semibold mb-4">Add New Task</h2>
+        <AddTaskForm />
       </div>
     </div>
   );
-};
-
-export default Today;
+}
