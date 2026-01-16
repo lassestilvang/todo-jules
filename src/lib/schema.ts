@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
 import { sql, relations } from 'drizzle-orm';
 
 export const lists = sqliteTable('lists', {
@@ -26,6 +26,10 @@ export const tasks = sqliteTable('tasks', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(
     sql`(strftime('%s', 'now'))`
   ),
+}, (table) => {
+  return {
+    dateIdx: index('tasks_date_idx').on(table.date),
+  }
 });
 
 export const subtasks = sqliteTable('subtasks', {
