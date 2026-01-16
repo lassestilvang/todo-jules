@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface AddListFormProps {
     onListAdded?: () => void;
@@ -28,20 +29,32 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
     e.preventDefault();
     setIsPending(true);
 
-    await createList(name, color, emoji);
-
-    setIsPending(false);
-    setOpen(false);
-    setName('');
-    setColor('#64748b');
-    setEmoji('📋');
-    if(onListAdded) onListAdded();
+    try {
+        const result = await createList(name, color, emoji);
+        if (result.success) {
+            toast.success('List created');
+            setOpen(false);
+            setName('');
+            setColor('#64748b');
+            setEmoji('📋');
+            if(onListAdded) onListAdded();
+        } else {
+            toast.error(typeof result.error === 'string' ? result.error : 'Failed to create list');
+        }
+    } catch(e) {
+        toast.error('An error occurred');
+    } finally {
+        setIsPending(false);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="text-muted-foreground hover:text-foreground">
+        <button
+            className="text-muted-foreground hover:text-foreground"
+            aria-label="Create new list"
+        >
           <Plus className="h-4 w-4" />
         </button>
       </DialogTrigger>

@@ -5,6 +5,7 @@ import { createTask } from '@/app/actions/task';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface AddTaskFormProps {
   onTaskAdded?: () => void;
@@ -27,24 +28,33 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
     const formData = {
         name,
         description,
-        priority,
-        date: date ? new Date(date) : undefined,
+        priority: priority as 'None' | 'Low' | 'Medium' | 'High' | undefined,
+        // Using string date, schema will transform it
+        date: date || undefined,
         listId,
     }
 
-    // @ts-ignore
-    await createTask(formData);
+    try {
+        // @ts-ignore
+        const result = await createTask(formData);
 
-    setIsPending(false);
-    // Reset form
-    setName('');
-    setDescription('');
-    setDate('');
-    setDeadline('');
-    setPriority('None');
-
-    if (onTaskAdded) {
-        onTaskAdded();
+        if (result.success) {
+            toast.success('Task created');
+            setName('');
+            setDescription('');
+            setDate('');
+            setDeadline('');
+            setPriority('None');
+            if (onTaskAdded) {
+                onTaskAdded();
+            }
+        } else {
+            toast.error('Failed to create task');
+        }
+    } catch (error) {
+        toast.error('An error occurred');
+    } finally {
+        setIsPending(false);
     }
   };
 

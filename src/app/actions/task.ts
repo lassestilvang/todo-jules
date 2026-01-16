@@ -1,10 +1,12 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { tasks, taskLabels, labels, reminders, attachments, subtasks } from '@/lib/schema';
+import { tasks } from '@/lib/schema';
 import { eq, isNull, and, gte, lte, asc, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { logTaskHistory } from '@/lib/history';
+import { createTaskSchema } from '@/lib/validators';
+import { z } from 'zod';
 
 // Helper to get today's start and end timestamps
 const getTodayRange = () => {
@@ -93,21 +95,15 @@ export async function getTasksForNext7Days() {
   });
 }
 
-export async function createTask(data: {
-  name: string;
-  description?: string;
-  date?: Date;
-  listId?: number;
-  priority?: string;
-}) {
+export async function createTask(data: z.input<typeof createTaskSchema>) {
+  const validation = createTaskSchema.safeParse(data);
+  if (!validation.success) {
+      return { success: false, error: validation.error.flatten().fieldErrors };
+  }
+
   try {
-    const result = await db.insert(tasks).values({
-      name: data.name,
-      description: data.description,
-      date: data.date,
-      listId: data.listId,
-      priority: data.priority,
-    }).returning();
+    // @ts-ignore
+    const result = await db.insert(tasks).values(validation.data).returning();
 
     const newTask = result[0];
     await logTaskHistory(newTask.id, 'created', null, 'Task created');
@@ -132,12 +128,14 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
     const updatedTask = result[0];
 
     // Log history for changed fields
-    for (const key in data) {
-      const k = key as keyof typeof data;
+    const keys = Object.keys(data) as (keyof typeof data)[];
+    for (const key of keys) {
+      const newValue = data[key];
       // @ts-ignore
-      if (data[k] !== currentTask[k]) {
-        // @ts-ignore
-        await logTaskHistory(id, key, String(currentTask[k]), String(data[k]));
+      const oldValue = currentTask[key];
+
+      if (newValue !== oldValue) {
+        await logTaskHistory(id, key, String(oldValue), String(newValue));
       }
     }
 

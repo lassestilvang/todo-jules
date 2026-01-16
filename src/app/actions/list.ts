@@ -4,14 +4,17 @@ import { db } from '@/lib/db';
 import { lists } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { createListSchema } from '@/lib/validators';
 
 export async function createList(name: string, color: string, emoji: string) {
+  const validation = createListSchema.safeParse({ name, color, emoji });
+
+  if (!validation.success) {
+      return { success: false, error: 'Validation failed' };
+  }
+
   try {
-    const result = await db.insert(lists).values({
-      name,
-      color,
-      emoji,
-    }).returning();
+    const result = await db.insert(lists).values(validation.data).returning();
 
     revalidatePath('/', 'layout');
     return { success: true, data: result[0] };
