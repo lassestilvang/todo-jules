@@ -2,96 +2,99 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Task } from '../lib/types';
+import { Task } from '@/lib/types';
+import { toggleTaskCompletion } from '@/app/actions/task';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, Clock } from 'lucide-react';
+import { TaskHistory } from '@/components/task-history';
 
 interface TaskProps {
   task: Task;
 }
 
-const Task = ({ task }: TaskProps) => {
+const TaskComponent = ({ task }: TaskProps) => {
+  const handleToggle = async (checked: boolean) => {
+    await toggleTaskCompletion(task.id, checked);
+  };
+
   return (
     <motion.div
-      whileHover={{ scale: 1.02 }}
-      className="bg-gray-800 p-4 rounded-lg mb-4"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2 }}
     >
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold">{task.name}</h3>
-        {task.priority && task.priority !== 'None' && (
-          <span
-            className={`px-2 py-1 rounded-full text-sm ${
-              task.priority === 'High'
-                ? 'bg-red-500'
-                : task.priority === 'Medium'
-                ? 'bg-yellow-500'
-                : task.priority === 'Low'
-                ? 'bg-green-500'
-                : 'bg-gray-500'
-            }`}
-          >
-            {task.priority}
-          </span>
-        )}
-      </div>
+      <Card className={`mb-3 transition-colors hover:shadow-md ${task.completed ? 'opacity-60 bg-muted/50' : 'bg-card'}`}>
+        <CardContent className="p-4 flex items-start gap-4">
+          <div className="pt-1">
+            <Checkbox
+                checked={task.completed}
+                onCheckedChange={handleToggle}
+            />
+          </div>
 
-      {task.description && (
-        <p className="text-gray-400 mt-2">{task.description}</p>
-      )}
+          <div className="flex-1 space-y-1">
+            <div className="flex items-center justify-between">
+                <h3 className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                    {task.name}
+                </h3>
+                <div className="flex items-center gap-2">
+                    <TaskHistory taskId={task.id} />
+                    {task.priority && task.priority !== 'None' && (
+                    <Badge variant={
+                        task.priority === 'High' ? 'destructive' :
+                        task.priority === 'Medium' ? 'default' : 'secondary'
+                    }>
+                        {task.priority}
+                    </Badge>
+                    )}
+                </div>
+            </div>
 
-      {task.labels.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-2">
-          {task.labels.map(({ label }) => (
-            <span
-              key={label.id}
-              className="px-2 py-1 rounded-full text-xs"
-              style={{ backgroundColor: label.color || '#4A5568' }}
-            >
-              {label.icon && <span className="mr-1">{label.icon}</span>}
-              {label.name}
-            </span>
-          ))}
-        </div>
-      )}
+            {task.description && (
+              <p className="text-sm text-muted-foreground line-clamp-2">{task.description}</p>
+            )}
 
-      {task.subtasks.length > 0 && (
-        <div className="mt-4">
-          <h4 className="text-md font-semibold">Subtasks</h4>
-          <ul className="list-disc list-inside mt-2">
-            {task.subtasks.map((subtask) => (
-              <li
-                key={subtask.id}
-                className={`${subtask.completed ? 'line-through text-gray-500' : ''}`}
-              >
-                {subtask.name}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+            <div className="flex flex-wrap gap-2 mt-2">
+                {task.date && (
+                    <div className="flex items-center text-xs text-muted-foreground">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {new Date(task.date).toLocaleDateString()}
+                    </div>
+                )}
+                 {task.deadline && (
+                    <div className="flex items-center text-xs text-red-400">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {new Date(task.deadline).toLocaleDateString()}
+                    </div>
+                )}
+            </div>
 
-      <div className="flex items-center justify-between mt-4">
-        <div>
-          {task.date && (
-            <p className="text-sm">
-              <strong>Date:</strong> {new Date(task.date).toLocaleDateString()}
-            </p>
-          )}
-          {task.deadline && (
-            <p className="text-sm">
-              <strong>Deadline:</strong>{' '}
-              {new Date(task.deadline).toLocaleDateString()}
-            </p>
-          )}
-        </div>
-        <button
-          className={`px-4 py-2 rounded ${
-            task.completed ? 'bg-green-500' : 'bg-gray-500'
-          }`}
-        >
-          {task.completed ? 'Completed' : 'Mark as complete'}
-        </button>
-      </div>
+            {task.labels && task.labels.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {task.labels.map(({ label }) => (
+                  <Badge
+                    key={label.id}
+                    variant="outline"
+                    className="text-xs"
+                    style={{
+                        borderColor: label.color || undefined,
+                        color: label.color || undefined
+                    }}
+                  >
+                    {label.icon && <span className="mr-1">{label.icon}</span>}
+                    {label.name}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </motion.div>
   );
 };
 
-export default Task;
+export default TaskComponent;

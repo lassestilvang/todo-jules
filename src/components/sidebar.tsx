@@ -1,69 +1,111 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import { LayoutList, Calendar, CalendarDays, Inbox, Trash2 } from 'lucide-react';
+import { ThemeToggle } from './theme-toggle';
 import AddListForm from './add-list-form';
-import { motion } from 'framer-motion';
+import { deleteList } from '@/app/actions/list';
+import { Button } from './ui/button';
 
-interface ListItem {
-  id: number;
-  name: string;
-  color: string;
-  emoji: string;
+interface SidebarProps {
+  initialLists?: { id: number; name: string; color: string; emoji: string }[];
 }
 
-const Sidebar = () => {
-  const [lists, setLists] = useState<ListItem[]>([]);
+const Sidebar = ({ initialLists = [] }: SidebarProps) => {
+  const pathname = usePathname();
 
-  useEffect(() => {
-    const fetchLists = async () => {
-      const response = await fetch('/api/lists');
-      const data = await response.json();
-      setLists(data);
-    };
+  const links = [
+    { href: '/', label: 'Inbox', icon: Inbox },
+    { href: '/today', label: 'Today', icon: Calendar },
+    { href: '/next7days', label: 'Next 7 Days', icon: CalendarDays },
+    { href: '/upcoming', label: 'Upcoming', icon: LayoutList },
+  ];
 
-    fetchLists();
-  }, []);
+  const handleDeleteList = async (e: React.MouseEvent, id: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if(confirm('Are you sure you want to delete this list?')) {
+        await deleteList(id);
+    }
+  }
 
   return (
-    <aside className="w-64 bg-gray-800 text-white p-4">
-      <h2 className="text-xl font-bold mb-4">Task Planner</h2>
-      <nav>
-        <ul>
-          <motion.li whileHover={{ scale: 1.1 }} className="mb-2">
-            <a href="/today" className="hover:text-gray-300">
-              Today
-            </a>
-          </motion.li>
-          <motion.li whileHover={{ scale: 1.1 }} className="mb-2">
-            <a href="#" className="hover:text-gray-300">
-              Next 7 Days
-            </a>
-          </motion.li>
-          <motion.li whileHover={{ scale: 1.1 }} className="mb-2">
-            <a href="#" className="hover:text-gray-300">
-              Upcoming
-            </a>
-          </motion.li>
-          <motion.li whileHover={{ scale: 1.1 }} className="mb-2">
-            <a href="/" className="hover:text-gray-300">
-              All
-            </a>
-          </motion.li>
+    <aside className="w-64 border-r bg-card flex flex-col h-full">
+      <div className="p-6">
+        <h2 className="text-xl font-bold flex items-center gap-2">
+           Daily Planner
+        </h2>
+      </div>
+
+      <nav className="flex-1 px-4 overflow-y-auto">
+        <ul className="space-y-2">
+          {links.map((link) => {
+            const Icon = link.icon;
+            const isActive = pathname === link.href;
+
+            return (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                    isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {link.label}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
+
+        <div className="mt-8">
+            <div className="flex items-center justify-between px-3 mb-2">
+                <h3 className="text-sm font-semibold text-muted-foreground">My Lists</h3>
+                <AddListForm />
+            </div>
+
+            <ul className="space-y-1">
+                {initialLists.length === 0 && (
+                     <div className="px-3 text-sm text-muted-foreground italic">
+                        No lists yet
+                    </div>
+                )}
+                {initialLists.map((list) => {
+                    const isActive = pathname === `/lists/${list.id}`;
+                    return (
+                        <li key={list.id} className="group flex items-center">
+                            <Link
+                                href={`/lists/${list.id}`}
+                                className={cn(
+                                    "flex-1 flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                                    isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                                )}
+                            >
+                                <span className="text-base">{list.emoji}</span>
+                                <span className="truncate">{list.name}</span>
+                            </Link>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100 h-8 w-8 text-muted-foreground hover:text-destructive"
+                                onClick={(e) => handleDeleteList(e, list.id)}
+                            >
+                                <Trash2 className="h-3 w-3" />
+                            </Button>
+                        </li>
+                    )
+                })}
+            </ul>
+        </div>
       </nav>
-      <div className="mt-8">
-        <h3 className="text-lg font-bold mb-2">My Lists</h3>
-        <ul>
-          {lists.map((list) => (
-            <motion.li whileHover={{ scale: 1.1 }} key={list.id} className="mb-2">
-              <span style={{ color: list.color }} className="mr-2">
-                {list.emoji}
-              </span>
-              {list.name}
-            </motion.li>
-          ))}
-        </ul>
-        <AddListForm />
+
+      <div className="p-4 border-t">
+        <ThemeToggle />
       </div>
     </aside>
   );
