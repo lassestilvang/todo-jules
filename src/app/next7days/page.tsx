@@ -3,7 +3,7 @@ import { getTasksForNext7Days } from '@/app/actions/task';
 import { TaskList } from '@/components/lists/task-list';
 
 export default async function Next7DaysPage() {
-  // @ts-ignore
+  // @ts-expect-error type mismatch
   const tasks = await getTasksForNext7Days();
 
   return (
@@ -11,7 +11,7 @@ export default async function Next7DaysPage() {
       <h1 className="text-3xl font-bold mb-6">Next 7 Days</h1>
 
       <div className="mb-8">
-        {/* @ts-ignore */}
+        {/* @ts-expect-error type mismatch */}
         <TaskList tasks={tasks} />
       </div>
     </div>

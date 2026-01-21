@@ -44,7 +44,7 @@ export default async function ListPage({ params }: { params: Promise<{ id: strin
       </div>
 
       <div className="mb-8">
-        {/* @ts-ignore */}
+        {/* @ts-expect-error type mismatch */}
         <TaskList tasks={listTasks} />
       </div>
 

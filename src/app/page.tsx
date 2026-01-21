@@ -2,10 +2,9 @@ import React from 'react';
 import { getTasksForInbox } from '@/app/actions/task';
 import { TaskList } from '@/components/lists/task-list';
 import AddTaskForm from '@/components/add-task-form';
-import { Task } from '@/lib/types';
 
 export default async function InboxPage() {
-  // @ts-ignore
+  // @ts-expect-error type mismatch
   const tasks = await getTasksForInbox();
 
   return (
@@ -13,7 +12,7 @@ export default async function InboxPage() {
       <h1 className="text-3xl font-bold mb-6">Inbox</h1>
 
       <div className="mb-8">
-        {/* @ts-ignore */}
+        {/* @ts-expect-error type mismatch */}
         <TaskList tasks={tasks} />
       </div>
 

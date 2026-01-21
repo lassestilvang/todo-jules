@@ -1,5 +1,3 @@
-import { db } from '@/lib/db';
-import { lists } from '@/lib/schema';
 import { getLists } from '@/app/actions/list';
 import Sidebar from '@/components/sidebar';
 

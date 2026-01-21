@@ -102,7 +102,7 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
   }
 
   try {
-    // @ts-ignore
+    // @ts-expect-error type mismatch
     const result = await db.insert(tasks).values(validation.data).returning();
 
     const newTask = result[0];
@@ -131,7 +131,7 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
     const keys = Object.keys(data) as (keyof typeof data)[];
     for (const key of keys) {
       const newValue = data[key];
-      // @ts-ignore
+      // @ts-expect-error type mismatch
       const oldValue = currentTask[key];
 
       if (newValue !== oldValue) {
