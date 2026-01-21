@@ -31,13 +31,25 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     if (isOpen) {
-      setLoading(true);
-      getTaskHistory(taskId).then((data) => {
-        // @ts-ignore
-        setHistory(data);
-        setLoading(false);
-      });
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const data = await getTaskHistory(taskId);
+                if (isMounted) {
+                    setHistory(data);
+                }
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+        fetchData();
+    }
+    return () => {
+        isMounted = false;
     }
   }, [isOpen, taskId]);
 

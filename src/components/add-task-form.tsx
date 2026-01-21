@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import { createTask } from '@/app/actions/task';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { DateTimePicker } from '@/components/date-time-picker';
+import { Label } from '@/components/ui/label';
 
 interface AddTaskFormProps {
   onTaskAdded?: () => void;
@@ -13,11 +14,11 @@ interface AddTaskFormProps {
 }
 
 const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
-  const router = useRouter();
+  // const router = useRouter();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [date, setDate] = useState('');
-  const [deadline, setDeadline] = useState('');
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [deadline, setDeadline] = useState<Date | undefined>(undefined);
   const [priority, setPriority] = useState('None');
   const [isPending, setIsPending] = useState(false);
 
@@ -29,21 +30,23 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
         name,
         description,
         priority: priority as 'None' | 'Low' | 'Medium' | 'High' | undefined,
-        // Using string date, schema will transform it
-        date: date || undefined,
+        // Convert Date objects to ISO string or keep as Date depending on what Server Action expects.
+        // Looking at schema, it uses integer mode timestamp, but usually server actions handle Date objects if Zod is configured.
+        // The original code used a string from type="date" input.
+        date: date ? date : undefined,
+        deadline: deadline ? deadline : undefined,
         listId,
     }
 
     try {
-        // @ts-ignore
         const result = await createTask(formData);
 
         if (result.success) {
             toast.success('Task created');
             setName('');
             setDescription('');
-            setDate('');
-            setDeadline('');
+            setDate(undefined);
+            setDeadline(undefined);
             setPriority('None');
             if (onTaskAdded) {
                 onTaskAdded();
@@ -52,6 +55,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
             toast.error('Failed to create task');
         }
     } catch (error) {
+        console.error(error);
         toast.error('An error occurred');
     } finally {
         setIsPending(false);
@@ -61,9 +65,9 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 bg-card p-6 rounded-lg border">
       <div>
-        <label htmlFor="task-name" className="block text-sm font-medium mb-1">
+        <Label htmlFor="task-name" className="mb-1 block">
           Task Name
-        </label>
+        </Label>
         <Input
           type="text"
           id="task-name"
@@ -74,9 +78,9 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
         />
       </div>
       <div>
-        <label htmlFor="description" className="block text-sm font-medium mb-1">
+        <Label htmlFor="description" className="mb-1 block">
           Description
-        </label>
+        </Label>
         <textarea
           id="description"
           value={description}
@@ -87,25 +91,22 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-            <label htmlFor="date" className="block text-sm font-medium mb-1">
-            Date
-            </label>
-            <Input
-            type="date"
-            id="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            />
+            <Label className="mb-1 block">Date</Label>
+            <DateTimePicker date={date} setDate={setDate} label="Pick a date" />
         </div>
         <div>
-            <label htmlFor="priority" className="block text-sm font-medium mb-1">
+            <Label className="mb-1 block">Deadline</Label>
+            <DateTimePicker date={deadline} setDate={setDeadline} label="Set deadline" />
+        </div>
+        <div>
+            <Label htmlFor="priority" className="mb-1 block">
             Priority
-            </label>
+            </Label>
             <select
             id="priority"
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
-            className="w-full h-9 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+            className="w-full h-10 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
             >
             <option value="None">None</option>
             <option value="Low">Low</option>
