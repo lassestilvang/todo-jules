@@ -5,25 +5,10 @@ import { useSearchParams } from 'next/navigation';
 import Task from '../../components/task';
 // import { Task } from '@/lib/types';
 
-interface Task {
-  id: number;
-  name: string;
-  description: string | null;
-  date: string | null;
-  deadline: string | null;
-  priority: string | null;
-  completed: boolean;
-  estimate: number | null;
-  actualTime: number | null;
-  recurring: string | null;
-  subtasks: any[];
-  labels: any[];
-  reminders: any[];
-  attachments: any[];
-}
+import { Task as TaskType } from '@/lib/types';
 
 const SearchContent = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<TaskType[]>([]);
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
 
@@ -32,7 +17,7 @@ const SearchContent = () => {
       const fetchTasks = async () => {
         const response = await fetch(`/api/search?query=${query}`);
         const data = await response.json();
-        setTasks(data as Task[]);
+        setTasks(data as TaskType[]);
       };
 
       fetchTasks();
@@ -41,7 +26,7 @@ const SearchContent = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Search Results for "{query}"</h1>
+      <h1 className="text-2xl font-bold">Search Results for &quot;{query}&quot;</h1>
       <div className="mt-4">
         {tasks.map((task) => (
           <Task key={task.id} task={task} />
