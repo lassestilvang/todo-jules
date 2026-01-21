@@ -1,7 +1,7 @@
 export type Subtask = {
   id: number;
   name: string;
-  completed: boolean;
+  completed: boolean | null;
 };
 
 export type Label = {
@@ -12,12 +12,12 @@ export type Label = {
 };
 
 export type TaskLabel = {
-  label: Label;
+  label: Label | null;
 };
 
 export type Reminder = {
   id: number;
-  remindAt: string;
+  remindAt: Date;
 };
 
 export type Attachment = {
@@ -29,10 +29,10 @@ export type Task = {
   id: number;
   name: string;
   description: string | null;
-  date: string | null;
-  deadline: string | null;
+  date: Date | null;
+  deadline: Date | null;
   priority: string | null;
-  completed: boolean;
+  completed: boolean | null;
   estimate: number | null;
   actualTime: number | null;
   recurring: string | null;

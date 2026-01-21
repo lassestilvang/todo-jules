@@ -30,7 +30,7 @@ const TaskComponent = ({ task }: TaskProps) => {
         <CardContent className="p-4 flex items-start gap-4">
           <div className="pt-1">
             <Checkbox
-                checked={task.completed}
+                 checked={task.completed ?? false}
                 onCheckedChange={handleToggle}
             />
           </div>
@@ -74,7 +74,7 @@ const TaskComponent = ({ task }: TaskProps) => {
 
             {task.labels && task.labels.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
-                {task.labels.map(({ label }) => (
+                {task.labels.map(({ label }) => label && (
                   <Badge
                     key={label.id}
                     variant="outline"

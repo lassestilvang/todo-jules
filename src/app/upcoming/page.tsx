@@ -3,7 +3,6 @@ import { getTasksForUpcoming } from '@/app/actions/task';
 import { TaskList } from '@/components/lists/task-list';
 
 export default async function UpcomingPage() {
-  // @ts-expect-error type mismatch
   const tasks = await getTasksForUpcoming();
 
   return (
@@ -11,7 +10,6 @@ export default async function UpcomingPage() {
       <h1 className="text-3xl font-bold mb-6">Upcoming</h1>
 
       <div className="mb-8">
-        {/* @ts-expect-error type mismatch */}
         <TaskList tasks={tasks} />
       </div>
     </div>

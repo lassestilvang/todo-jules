@@ -38,7 +38,6 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
             try {
                 const data = await getTaskHistory(taskId);
                 if (isMounted) {
-                    // @ts-expect-error type mismatch type mismatch
                     setHistory(data);
                 }
             } finally {

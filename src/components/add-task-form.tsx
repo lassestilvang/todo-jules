@@ -39,7 +39,6 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
     }
 
     try {
-        // @ts-expect-error type mismatch
         const result = await createTask(formData);
 
         if (result.success) {

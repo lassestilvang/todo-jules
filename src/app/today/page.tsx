@@ -4,7 +4,6 @@ import { TaskList } from '@/components/lists/task-list';
 import AddTaskForm from '@/components/add-task-form';
 
 export default async function TodayPage() {
-  // @ts-expect-error type mismatch
   const tasks = await getTasksForToday();
 
   return (
@@ -12,7 +11,6 @@ export default async function TodayPage() {
       <h1 className="text-3xl font-bold mb-6">Today</h1>
 
       <div className="mb-8">
-        {/* @ts-expect-error type mismatch */}
         <TaskList tasks={tasks} />
       </div>
 

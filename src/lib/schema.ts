@@ -19,6 +19,7 @@ export const tasks = sqliteTable('tasks', {
   priority: text('priority').default('None'),
   recurring: text('recurring'),
   completed: integer('completed', { mode: 'boolean' }).default(false),
+  order: integer('order').default(0),
   listId: integer('list_id').references(() => lists.id),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(
     sql`(strftime('%s', 'now'))`
