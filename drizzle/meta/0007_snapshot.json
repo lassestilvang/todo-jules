@@ -1,7 +1,11 @@
 {
   "version": "6",
   "dialect": "sqlite",
+<<<<<<< HEAD
   "id": "c1ef13eb-2e31-4876-9ee6-1d2d628920e4",
+=======
+  "id": "9828c791-db17-4768-9bf2-b47f1b6cf472",
+>>>>>>> origin/main
   "prevId": "6ecdf5b7-f70b-4ef8-ab45-a86386be0981",
   "tables": {
     "attachments": {
@@ -416,6 +420,7 @@
           "autoincrement": false,
           "default": false
         },
+<<<<<<< HEAD
         "order": {
           "name": "order",
           "type": "integer",
@@ -424,6 +429,8 @@
           "autoincrement": false,
           "default": 0
         },
+=======
+>>>>>>> origin/main
         "list_id": {
           "name": "list_id",
           "type": "integer",

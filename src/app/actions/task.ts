@@ -95,6 +95,8 @@ export async function getTasksForNext7Days() {
   });
 }
 
+import { HistoryLog } from '@/lib/history';
+
 export async function createTask(data: z.input<typeof createTaskSchema>) {
   const validation = createTaskSchema.safeParse(data);
   if (!validation.success) {
@@ -105,7 +107,14 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
     const result = await db.insert(tasks).values(validation.data).returning();
 
     const newTask = result[0];
-    await logTaskHistory(newTask.id, 'created', null, 'Task created');
+    await logTaskHistory([
+      {
+        taskId: newTask.id,
+        changedField: 'created',
+        oldValue: null,
+        newValue: 'Task created',
+      },
+    ]);
 
     revalidatePath('/', 'layout');
     return { success: true, data: newTask };
@@ -127,15 +136,23 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
     const updatedTask = result[0];
 
     // Log history for changed fields
+    const historyLogs: HistoryLog[] = [];
     const keys = Object.keys(data) as (keyof typeof data)[];
     for (const key of keys) {
       const newValue = data[key];
       const oldValue = currentTask[key as keyof typeof currentTask];
 
       if (newValue !== oldValue) {
-        await logTaskHistory(id, key, String(oldValue), String(newValue));
+        historyLogs.push({
+          taskId: id,
+          changedField: key,
+          oldValue: String(oldValue),
+          newValue: String(newValue),
+        });
       }
     }
+
+    await logTaskHistory(historyLogs);
 
     revalidatePath('/', 'layout');
     return { success: true, data: updatedTask };
