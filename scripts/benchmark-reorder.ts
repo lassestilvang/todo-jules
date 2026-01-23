@@ -41,6 +41,9 @@ async function runBenchmark() {
 
   // We need to fetch the list ID in case it's not 1 (if appending)
   const list = db.select().from(lists).where(eq(lists.name, 'Bench List')).get();
+  if (!list) {
+    throw new Error('Bench List not found');
+  }
   const listId = list.id;
 
   const ITEM_COUNT = 1000;

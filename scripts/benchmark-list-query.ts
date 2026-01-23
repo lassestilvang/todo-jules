@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
 import * as schema from '../src/lib/schema';
-import { eq } from 'drizzle-orm';
+import { eq, count } from 'drizzle-orm';
 import { lists, tasks } from '../src/lib/schema';
 
 const DB_FILE = 'bench.db';
@@ -13,7 +13,7 @@ async function main() {
 
   // Check if data exists
   try {
-    const listCount = await db.select({ count: schema.lists.id }).from(schema.lists).then(res => res.length);
+    const listCount = db.select({ value: count() }).from(schema.lists).get()?.value ?? 0;
 
     if (listCount === 0) {
         console.log('Seeding data...');
@@ -26,7 +26,7 @@ async function main() {
             emoji: '📝',
         });
         }
-        await db.insert(lists).values(listsToInsert);
+        db.insert(lists).values(listsToInsert).run();
 
         // Get list IDs
         const allLists = await db.query.lists.findMany();
@@ -47,7 +47,7 @@ async function main() {
         // Batch insert tasks to avoid limits
         const BATCH_SIZE = 500;
         for (let i = 0; i < tasksToInsert.length; i += BATCH_SIZE) {
-        await db.insert(tasks).values(tasksToInsert.slice(i, i + BATCH_SIZE));
+        db.insert(tasks).values(tasksToInsert.slice(i, i + BATCH_SIZE)).run();
         }
         console.log('Seeding complete.');
     } else {
