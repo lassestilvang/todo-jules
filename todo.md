@@ -53,3 +53,4 @@ This document outlines the necessary changes to bring the Daily Task Planner app
 - [x] **API Design:** Improve the API design to be more RESTful and consistent.
 - [x] **Database Schema:** Refine the database schema to better support the required features (e.g., task history, recurring tasks).
 - [x] **Performance:** Optimize application performance (loading times, rendering).
+  - [x] Optimize search API to use database-level filtering (SQL LIKE) instead of in-memory Fuse.js.
