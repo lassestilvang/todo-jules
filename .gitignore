@@ -43,4 +43,4 @@ npm_output.log
 next-env.d.ts
 
 # database
-sqlite.db
+*.db

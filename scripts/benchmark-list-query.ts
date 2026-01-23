@@ -13,7 +13,7 @@ async function main() {
 
   // Check if data exists
   try {
-    const listCount = await db.select({ count: schema.lists.id }).from(schema.lists).then(res => res.length);
+    const listCount = db.select({ count: schema.lists.id }).from(schema.lists).all().length;
 
     if (listCount === 0) {
         console.log('Seeding data...');
@@ -26,10 +26,10 @@ async function main() {
             emoji: '📝',
         });
         }
-        await db.insert(lists).values(listsToInsert);
+        db.insert(lists).values(listsToInsert).run();
 
         // Get list IDs
-        const allLists = await db.query.lists.findMany();
+        const allLists = db.query.lists.findMany();
 
         // Seed 10,000 tasks (100 per list)
         console.log('Seeding 10,000 tasks...');
@@ -47,7 +47,7 @@ async function main() {
         // Batch insert tasks to avoid limits
         const BATCH_SIZE = 500;
         for (let i = 0; i < tasksToInsert.length; i += BATCH_SIZE) {
-        await db.insert(tasks).values(tasksToInsert.slice(i, i + BATCH_SIZE));
+        db.insert(tasks).values(tasksToInsert.slice(i, i + BATCH_SIZE)).run();
         }
         console.log('Seeding complete.');
     } else {
@@ -60,7 +60,7 @@ async function main() {
     const targetListId = 50; // Middle of the pack
 
     // Warmup
-    await db.query.tasks.findMany({
+    db.query.tasks.findMany({
         where: eq(tasks.listId, targetListId),
         with: {
             subtasks: true,
@@ -72,7 +72,7 @@ async function main() {
 
     const start = performance.now();
     for (let i = 0; i < iterations; i++) {
-        await db.query.tasks.findMany({
+        db.query.tasks.findMany({
         where: eq(tasks.listId, targetListId),
         with: {
             subtasks: true,
