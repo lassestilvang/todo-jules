@@ -30,6 +30,7 @@ export const tasks = sqliteTable('tasks', {
 }, (table) => {
   return {
     dateIdx: index('tasks_date_idx').on(table.date),
+    listIdIdx: index('tasks_list_id_idx').on(table.listId),
   }
 });
 
