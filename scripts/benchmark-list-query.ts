@@ -13,7 +13,7 @@ async function main() {
 
   // Check if data exists
   try {
-    const listCount = db.select({ count: schema.lists.id }).from(schema.lists).all().length;
+    const listCount = db.select({ count: count() }).from(schema.lists).get()?.count ?? 0;
 
     if (listCount === 0) {
         console.log('Seeding data...');
