@@ -7,12 +7,28 @@ import {
   reminders,
   attachments,
 } from '../../../lib/schema';
-import { eq } from 'drizzle-orm';
+import { eq, count } from 'drizzle-orm';
 import { createTaskSchema } from '../../../lib/validators';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    let page = parseInt(searchParams.get('page') || '1');
+    let limit = parseInt(searchParams.get('limit') || '20');
+
+    // Validate and sanitize parameters
+    if (isNaN(page) || page < 1) page = 1;
+    if (isNaN(limit) || limit < 1) limit = 20;
+    if (limit > 100) limit = 100; // Cap limit for safety
+
+    const offset = (page - 1) * limit;
+
+    const [totalResult] = await db.select({ count: count() }).from(tasks);
+    const total = totalResult.count;
+
     const allTasks = await db.query.tasks.findMany({
+      limit: limit,
+      offset: offset,
       with: {
         subtasks: true,
         labels: {
@@ -24,7 +40,16 @@ export async function GET() {
         attachments: true,
       },
     });
-    return NextResponse.json(allTasks);
+
+    return NextResponse.json({
+      data: allTasks,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error('Error fetching tasks:', error);
     return NextResponse.json(
