@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
 import * as schema from '../src/lib/schema';
-import { eq } from 'drizzle-orm';
+import { eq, count } from 'drizzle-orm';
 import { lists, tasks } from '../src/lib/schema';
 
 const DB_FILE = 'bench.db';
@@ -13,7 +13,7 @@ async function main() {
 
   // Check if data exists
   try {
-    const listCount = db.select({ count: count() }).from(schema.lists).get()?.count ?? 0;
+    const listCount = db.select({ value: count() }).from(schema.lists).get()?.value ?? 0;
 
     if (listCount === 0) {
         console.log('Seeding data...');
@@ -29,7 +29,7 @@ async function main() {
         db.insert(lists).values(listsToInsert).run();
 
         // Get list IDs
-        const allLists = db.query.lists.findMany();
+        const allLists = await db.query.lists.findMany();
 
         // Seed 10,000 tasks (100 per list)
         console.log('Seeding 10,000 tasks...');
@@ -60,7 +60,7 @@ async function main() {
     const targetListId = 50; // Middle of the pack
 
     // Warmup
-    db.query.tasks.findMany({
+    await db.query.tasks.findMany({
         where: eq(tasks.listId, targetListId),
         with: {
             subtasks: true,
@@ -72,7 +72,7 @@ async function main() {
 
     const start = performance.now();
     for (let i = 0; i < iterations; i++) {
-        db.query.tasks.findMany({
+        await db.query.tasks.findMany({
         where: eq(tasks.listId, targetListId),
         with: {
             subtasks: true,
