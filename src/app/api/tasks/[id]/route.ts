@@ -9,6 +9,7 @@ import {
 } from '@/lib/schema';
 import { eq, and } from 'drizzle-orm';
 import { updateTaskSchema } from '@/lib/validators';
+import { invalidateTaskCountCache } from '@/lib/cache';
 
 export async function PUT(
   request: Request,
@@ -115,6 +116,8 @@ export async function DELETE(
     const { id } = await params;
     const taskId = parseInt(id, 10);
     await db.delete(tasks).where(eq(tasks.id, taskId));
+
+    invalidateTaskCountCache();
 
     return NextResponse.json(
       { message: 'Task deleted' },
