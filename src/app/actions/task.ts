@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { logTaskHistory } from '@/lib/history';
 import { createTaskSchema } from '@/lib/validators';
 import { z } from 'zod';
+import { invalidateTaskCountCache } from '@/lib/cache';
 
 // Helper to get today's start and end timestamps
 const getTodayRange = () => {
@@ -116,6 +117,7 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
       },
     ]);
 
+    invalidateTaskCountCache();
     revalidatePath('/', 'layout');
     return { success: true, data: newTask };
   } catch (error) {
@@ -165,6 +167,7 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
 export async function deleteTask(id: number) {
   try {
     await db.delete(tasks).where(eq(tasks.id, id));
+    invalidateTaskCountCache();
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {

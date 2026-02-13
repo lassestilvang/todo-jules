@@ -7,8 +7,9 @@ import {
   reminders,
   attachments,
 } from '../../../lib/schema';
-import { eq, count } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { createTaskSchema } from '../../../lib/validators';
+import { getTaskCount, invalidateTaskCountCache } from '../../../lib/cache';
 
 export async function GET(request: Request) {
   try {
@@ -23,8 +24,7 @@ export async function GET(request: Request) {
 
     const offset = (page - 1) * limit;
 
-    const [totalResult] = await db.select({ count: count() }).from(tasks);
-    const total = totalResult.count;
+    const total = await getTaskCount();
 
     const allTasks = await db.query.tasks.findMany({
       limit: limit,
@@ -118,6 +118,8 @@ export async function POST(request: Request) {
 
       return newTask;
     });
+
+    invalidateTaskCountCache();
 
     return NextResponse.json(
       { message: 'Task created', task: createdTask },
