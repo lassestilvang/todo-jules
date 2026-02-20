@@ -39,6 +39,10 @@ export const subtasks = sqliteTable('subtasks', {
   name: text('name').notNull(),
   completed: integer('completed', { mode: 'boolean' }).default(false),
   taskId: integer('task_id').references(() => tasks.id, { onDelete: 'cascade' }),
+}, (table) => {
+  return {
+    taskIdIdx: index('subtasks_task_id_idx').on(table.taskId),
+  }
 });
 
 export const labels = sqliteTable('labels', {
@@ -51,18 +55,31 @@ export const labels = sqliteTable('labels', {
 export const taskLabels = sqliteTable('task_labels', {
   taskId: integer('task_id').references(() => tasks.id, { onDelete: 'cascade' }),
   labelId: integer('label_id').references(() => labels.id, { onDelete: 'cascade' }),
+}, (table) => {
+  return {
+    taskIdIdx: index('task_labels_task_id_idx').on(table.taskId),
+    labelIdIdx: index('task_labels_label_id_idx').on(table.labelId),
+  }
 });
 
 export const reminders = sqliteTable('reminders', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   remindAt: integer('remind_at', { mode: 'timestamp' }).notNull(),
   taskId: integer('task_id').references(() => tasks.id, { onDelete: 'cascade' }),
+}, (table) => {
+  return {
+    taskIdIdx: index('reminders_task_id_idx').on(table.taskId),
+  }
 });
 
 export const attachments = sqliteTable('attachments', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   url: text('url').notNull(),
   taskId: integer('task_id').references(() => tasks.id, { onDelete: 'cascade' }),
+}, (table) => {
+  return {
+    taskIdIdx: index('attachments_task_id_idx').on(table.taskId),
+  }
 });
 
 export const taskHistory = sqliteTable('task_history', {
@@ -76,6 +93,10 @@ export const taskHistory = sqliteTable('task_history', {
   changedAt: integer('changed_at', { mode: 'timestamp' })
     .default(sql`(strftime('%s', 'now'))`)
     .notNull(),
+}, (table) => {
+  return {
+    taskIdIdx: index('task_history_task_id_idx').on(table.taskId),
+  }
 });
 
 export const listRelations = relations(lists, ({ many }) => ({
