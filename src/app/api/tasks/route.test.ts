@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST, GET } from './route.ts';
 import { db } from '../../../lib/db';
+import { invalidateTaskCountCache } from '../../../lib/cache';
 
 vi.mock('../../../lib/db', () => ({
   db: {
@@ -27,6 +28,7 @@ const mockTask = {
 describe('GET /api/tasks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    invalidateTaskCountCache(); // Clear cache to prevent state leakage
   });
 
   it('should return a paginated list of tasks', async () => {
@@ -106,6 +108,7 @@ describe('GET /api/tasks', () => {
 describe('POST /api/tasks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    invalidateTaskCountCache();
   });
 
   it('should return a 201 status code and the new task', async () => {

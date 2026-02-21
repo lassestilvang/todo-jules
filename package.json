@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run db:push && next build",
+    "build": "npm run db:push && npx tsx scripts/setup-triggers.ts && next build",
     "start": "next start",
     "lint": "eslint",
     "drizzle": "drizzle-kit generate",
