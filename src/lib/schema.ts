@@ -31,6 +31,7 @@ export const tasks = sqliteTable('tasks', {
   return {
     dateIdx: index('tasks_date_idx').on(table.date),
     listIdIdx: index('tasks_list_id_idx').on(table.listId),
+    inboxIdx: index('tasks_inbox_idx').on(table.listId, table.createdAt),
   }
 });
 

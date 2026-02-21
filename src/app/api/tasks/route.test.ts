@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST, GET } from './route.ts';
 import { db } from '../../../lib/db';
+import { getTaskCount, invalidateTaskCountCache } from '../../../lib/cache';
 
 vi.mock('../../../lib/db', () => ({
   db: {
@@ -12,6 +13,11 @@ vi.mock('../../../lib/db', () => ({
     transaction: vi.fn(),
     select: vi.fn(),
   },
+}));
+
+vi.mock('../../../lib/cache', () => ({
+  getTaskCount: vi.fn(),
+  invalidateTaskCountCache: vi.fn(),
 }));
 
 const mockTask = {
@@ -31,10 +37,7 @@ describe('GET /api/tasks', () => {
 
   it('should return a paginated list of tasks', async () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
-
-    const mockFrom = vi.fn().mockResolvedValue([{ count: 10 }]);
-    // @ts-ignore
-    vi.mocked(db.select).mockReturnValue({ from: mockFrom });
+    vi.mocked(getTaskCount).mockResolvedValue(10);
 
     const request = new Request('http://localhost/api/tasks?page=1&limit=10');
     const response = await GET(request);
@@ -58,10 +61,7 @@ describe('GET /api/tasks', () => {
 
   it('should handle pagination parameters correctly', async () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
-
-    const mockFrom = vi.fn().mockResolvedValue([{ count: 50 }]);
-    // @ts-ignore
-    vi.mocked(db.select).mockReturnValue({ from: mockFrom });
+    vi.mocked(getTaskCount).mockResolvedValue(50);
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
     const response = await GET(request);
@@ -83,10 +83,7 @@ describe('GET /api/tasks', () => {
 
   it('should use default values for invalid parameters', async () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
-
-    const mockFrom = vi.fn().mockResolvedValue([{ count: 10 }]);
-    // @ts-ignore
-    vi.mocked(db.select).mockReturnValue({ from: mockFrom });
+    vi.mocked(getTaskCount).mockResolvedValue(10);
 
     // Test with invalid page and limit
     const request = new Request('http://localhost/api/tasks?page=abc&limit=-5');
@@ -132,5 +129,6 @@ describe('POST /api/tasks', () => {
     expect(data.task).toBeDefined();
     expect(data.task.name).toBe(newTask.name);
     expect(db.transaction).toHaveBeenCalledTimes(1);
+    expect(invalidateTaskCountCache).toHaveBeenCalledTimes(1);
   });
 });
