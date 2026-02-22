@@ -44,7 +44,7 @@ async function main() {
     tasksToInsert.push({
       name: `Inbox Task ${i}`,
       listId: null,
-      createdAt: new Date(now - Math.floor(Math.random() * 10000000)), // Random date within ~4 months
+      createdAt: new Date(now - Math.floor(Math.random() * 10000000000)), // Random date within ~4 months
       updatedAt: new Date(),
     });
   }
