@@ -33,11 +33,15 @@ const mockTask = {
 describe('GET /api/tasks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    invalidateTaskCountCache(); // Clear cache before each test
   });
 
   it('should return a paginated list of tasks', async () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
-    vi.mocked(getTaskCount).mockResolvedValue(10);
+
+    const mockFrom = vi.fn().mockResolvedValue([{ count: 10 }]);
+    // @ts-expect-error Mocking db.select return value structure
+    vi.mocked(db.select).mockReturnValue({ from: mockFrom });
 
     const request = new Request('http://localhost/api/tasks?page=1&limit=10');
     const response = await GET(request);
@@ -61,7 +65,10 @@ describe('GET /api/tasks', () => {
 
   it('should handle pagination parameters correctly', async () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
-    vi.mocked(getTaskCount).mockResolvedValue(50);
+
+    const mockFrom = vi.fn().mockResolvedValue([{ count: 50 }]);
+    // @ts-expect-error Mocking db.select return value structure
+    vi.mocked(db.select).mockReturnValue({ from: mockFrom });
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
     const response = await GET(request);
@@ -83,7 +90,10 @@ describe('GET /api/tasks', () => {
 
   it('should use default values for invalid parameters', async () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
-    vi.mocked(getTaskCount).mockResolvedValue(10);
+
+    const mockFrom = vi.fn().mockResolvedValue([{ count: 10 }]);
+    // @ts-expect-error Mocking db.select return value structure
+    vi.mocked(db.select).mockReturnValue({ from: mockFrom });
 
     // Test with invalid page and limit
     const request = new Request('http://localhost/api/tasks?page=abc&limit=-5');
@@ -103,6 +113,7 @@ describe('GET /api/tasks', () => {
 describe('POST /api/tasks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    invalidateTaskCountCache();
   });
 
   it('should return a 201 status code and the new task', async () => {
