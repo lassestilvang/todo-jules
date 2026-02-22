@@ -85,7 +85,7 @@ async function main() {
     db.select().from(schema.tasks)
       .where(isNull(schema.tasks.listId))
       .orderBy(desc(schema.tasks.createdAt))
-      .run();
+      .all();
   }
   const end = performance.now();
 
