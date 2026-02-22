@@ -36,7 +36,7 @@ describe('GET /api/tasks', () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
 
     const mockFrom = vi.fn().mockResolvedValue([{ count: 10 }]);
-    // @ts-ignore
+    // @ts-expect-error Mocking db.select return value structure
     vi.mocked(db.select).mockReturnValue({ from: mockFrom });
 
     const request = new Request('http://localhost/api/tasks?page=1&limit=10');
@@ -63,7 +63,7 @@ describe('GET /api/tasks', () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
 
     const mockFrom = vi.fn().mockResolvedValue([{ count: 50 }]);
-    // @ts-ignore
+    // @ts-expect-error Mocking db.select return value structure
     vi.mocked(db.select).mockReturnValue({ from: mockFrom });
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
@@ -88,7 +88,7 @@ describe('GET /api/tasks', () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
 
     const mockFrom = vi.fn().mockResolvedValue([{ count: 10 }]);
-    // @ts-ignore
+    // @ts-expect-error Mocking db.select return value structure
     vi.mocked(db.select).mockReturnValue({ from: mockFrom });
 
     // Test with invalid page and limit
