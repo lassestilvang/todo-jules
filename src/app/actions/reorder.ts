@@ -15,7 +15,7 @@ export async function reorderTasks(items: { id: number; order: number }[]) {
     // 200 items * 3 = 600 variables, which is safe for the lower bound 999 limit.
     const CHUNK_SIZE = 200;
 
-    db.transaction((tx) => {
+    await db.transaction(async (tx) => {
       for (let i = 0; i < items.length; i += CHUNK_SIZE) {
         const chunk = items.slice(i, i + CHUNK_SIZE);
 
@@ -29,7 +29,7 @@ export async function reorderTasks(items: { id: number; order: number }[]) {
 
         const caseStatement = sql`case ${tasks.id} ${sql.join(sqlChunks, sql` `)} end`;
 
-        tx
+        await tx
           .update(tasks)
           .set({ order: caseStatement })
           .where(inArray(tasks.id, ids))
