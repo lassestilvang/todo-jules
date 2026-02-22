@@ -60,7 +60,7 @@ async function main() {
   }
 
   // Batch insert
-  const BATCH_SIZE = 500;
+  const BATCH_SIZE = 200;
   for (let i = 0; i < tasksToInsert.length; i += BATCH_SIZE) {
     db.insert(schema.tasks).values(tasksToInsert.slice(i, i + BATCH_SIZE)).run();
     if ((i + BATCH_SIZE) % 10000 === 0) console.log(`Inserted ${Math.min(i + BATCH_SIZE, tasksToInsert.length)} tasks...`);
