@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST, GET } from './route.ts';
 import { db } from '../../../lib/db';
-// @ts-ignore
-import { invalidateTaskCountCache } from '../../../lib/cache';
+import { getTaskCount, invalidateTaskCountCache } from '../../../lib/cache';
 
 vi.mock('../../../lib/db', () => ({
   db: {
@@ -14,6 +13,11 @@ vi.mock('../../../lib/db', () => ({
     transaction: vi.fn(),
     select: vi.fn(),
   },
+}));
+
+vi.mock('../../../lib/cache', () => ({
+  getTaskCount: vi.fn(),
+  invalidateTaskCountCache: vi.fn(),
 }));
 
 const mockTask = {
@@ -136,5 +140,6 @@ describe('POST /api/tasks', () => {
     expect(data.task).toBeDefined();
     expect(data.task.name).toBe(newTask.name);
     expect(db.transaction).toHaveBeenCalledTimes(1);
+    expect(invalidateTaskCountCache).toHaveBeenCalledTimes(1);
   });
 });

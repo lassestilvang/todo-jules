@@ -17,8 +17,8 @@ export async function GET(request: Request) {
       .from(tasks)
       .where(
         or(
-          like(tasks.name, `%${query}%`),
-          like(tasks.description, `%${query}%`)
+          like(tasks.name, `${query}%`),
+          like(tasks.description, `${query}%`)
         )
       );
 
