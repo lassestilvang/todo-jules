@@ -75,27 +75,30 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
-      setTasks((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over?.id);
-        const newItems = arrayMove(items, oldIndex, newIndex);
+      const oldTasks = [...tasks];
+      const oldIndex = tasks.findIndex((item) => item.id === active.id);
+      const newIndex = tasks.findIndex((item) => item.id === over?.id);
 
-        // Optimistic update done, now trigger server action
-        // We need to send the new order mapping
-        const updates = newItems.map((task, index) => ({
-            id: task.id,
-            order: index
-        }));
+      if (oldIndex === -1 || newIndex === -1) return;
 
-        // Execute server action in background
-        reorderTasks(updates).catch(err => {
-            console.error(err);
-            toast.error("Failed to save new order");
-            // Revert on error would require more complex state management, skipping for now
-        });
+      const newItems = arrayMove(tasks, oldIndex, newIndex);
+      setTasks(newItems);
 
-        return newItems;
-      });
+      const updates = newItems.map((task, index) => ({
+          id: task.id,
+          order: index
+      }));
+
+      try {
+        const result = await reorderTasks(updates);
+        if (!result.success) {
+          throw new Error(result.error || "Failed to reorder tasks");
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to save new order");
+        setTasks(oldTasks);
+      }
     }
   };
 

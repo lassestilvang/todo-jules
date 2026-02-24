@@ -1,1 +1,1 @@
-ALTER TABLE `tasks` ADD `order` integer DEFAULT 0;
+-- Replaced by 0006

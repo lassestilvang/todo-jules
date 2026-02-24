@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "c1ef13eb-2e31-4876-9ee6-1d2d628920e4",
-  "prevId": "81ab98ae-2070-4403-b893-db3783db2e14",
+  "id": "647362bc-6c82-4de3-a761-c9750a81e250",
+  "prevId": "c1ef13eb-2e31-4876-9ee6-1d2d628920e4",
   "tables": {
     "attachments": {
       "name": "attachments",
@@ -29,7 +29,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "attachments_task_id_idx": {
+          "name": "attachments_task_id_idx",
+          "columns": [
+            "task_id"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "attachments_task_id_tasks_id_fk": {
           "name": "attachments_task_id_tasks_id_fk",
@@ -150,7 +158,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "reminders_task_id_idx": {
+          "name": "reminders_task_id_idx",
+          "columns": [
+            "task_id"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "reminders_task_id_tasks_id_fk": {
           "name": "reminders_task_id_tasks_id_fk",
@@ -203,7 +219,15 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "subtasks_task_id_idx": {
+          "name": "subtasks_task_id_idx",
+          "columns": [
+            "task_id"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "subtasks_task_id_tasks_id_fk": {
           "name": "subtasks_task_id_tasks_id_fk",
@@ -270,7 +294,15 @@
           "default": "(strftime('%s', 'now'))"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "task_history_task_id_idx": {
+          "name": "task_history_task_id_idx",
+          "columns": [
+            "task_id"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "task_history_task_id_tasks_id_fk": {
           "name": "task_history_task_id_tasks_id_fk",
@@ -308,7 +340,22 @@
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "task_labels_task_id_idx": {
+          "name": "task_labels_task_id_idx",
+          "columns": [
+            "task_id"
+          ],
+          "isUnique": false
+        },
+        "task_labels_label_id_idx": {
+          "name": "task_labels_label_id_idx",
+          "columns": [
+            "label_id"
+          ],
+          "isUnique": false
+        }
+      },
       "foreignKeys": {
         "task_labels_task_id_tasks_id_fk": {
           "name": "task_labels_task_id_tasks_id_fk",
@@ -460,6 +507,14 @@
           "name": "tasks_list_id_idx",
           "columns": [
             "list_id"
+          ],
+          "isUnique": false
+        },
+        "tasks_inbox_idx": {
+          "name": "tasks_inbox_idx",
+          "columns": [
+            "list_id",
+            "created_at"
           ],
           "isUnique": false
         }
