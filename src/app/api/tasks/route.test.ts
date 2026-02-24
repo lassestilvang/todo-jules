@@ -33,7 +33,7 @@ const mockTask = {
 describe('GET /api/tasks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    invalidateTaskCountCache(); // Clear cache before each test
+    invalidateTaskCountCache(); // Clear cache to prevent state leakage
   });
 
   it('should return a paginated list of tasks', async () => {

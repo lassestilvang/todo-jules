@@ -161,3 +161,8 @@ export const taskHistoryRelations = relations(taskHistory, ({ one }) => ({
     references: [tasks.id],
   }),
 }));
+
+export const taskCounts = sqliteTable('task_counts', {
+  id: integer('id').primaryKey(),
+  count: integer('count').notNull().default(0),
+});
