@@ -36,11 +36,13 @@ async function main() {
     `);
 
     // 5. Initialize/Reset Count
-    await db.run(sql`DELETE FROM task_counts`);
-    await db.run(sql`
-      INSERT INTO task_counts (id, count)
-      SELECT 1, COUNT(*) FROM tasks
-    `);
+    await db.transaction(async (tx) => {
+      await tx.run(sql`DELETE FROM task_counts`);
+      await tx.run(sql`
+        INSERT INTO task_counts (id, count)
+        SELECT 1, COUNT(*) FROM tasks
+      `);
+    });
 
     console.log('Task count triggers setup complete.');
   } catch (error) {
