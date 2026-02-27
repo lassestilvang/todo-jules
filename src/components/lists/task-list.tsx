@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useOptimistic, useTransition } from 'react';
 import { Task } from '@/lib/types';
 import TaskComponent from '../task';
 import {
@@ -58,11 +58,11 @@ function SortableTaskItem({ task }: SortableTaskItemProps) {
 
 
 export function TaskList({ tasks: initialTasks }: TaskListProps) {
-  const [tasks, setTasks] = useState(initialTasks);
-
-  useEffect(() => {
-    setTasks(initialTasks);
-  }, [initialTasks]);
+  const [optimisticTasks, setOptimisticTasks] = useOptimistic(
+    initialTasks,
+    (state, newOrder: Task[]) => newOrder
+  );
+  const [isPending, startTransition] = useTransition();
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -75,34 +75,40 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
-      const oldTasks = [...tasks];
-      const oldIndex = tasks.findIndex((item) => item.id === active.id);
-      const newIndex = tasks.findIndex((item) => item.id === over?.id);
+      const oldIndex = optimisticTasks.findIndex((item) => item.id === active.id);
+      const newIndex = optimisticTasks.findIndex((item) => item.id === over?.id);
 
       if (oldIndex === -1 || newIndex === -1) return;
 
-      const newItems = arrayMove(tasks, oldIndex, newIndex);
-      setTasks(newItems);
+      const newItems = arrayMove(optimisticTasks, oldIndex, newIndex);
 
-      const updates = newItems.map((task, index) => ({
-          id: task.id,
-          order: index
-      }));
+      startTransition(async () => {
+        setOptimisticTasks(newItems);
 
-      try {
-        const result = await reorderTasks(updates);
-        if (!result.success) {
-          throw new Error(result.error || "Failed to reorder tasks");
+        const updates = newItems.map((task, index) => ({
+            id: task.id,
+            order: index
+        }));
+
+        try {
+          const result = await reorderTasks(updates);
+          if (!result.success) {
+            throw new Error(result.error || "Failed to reorder tasks");
+          }
+        } catch (err) {
+          console.error(err);
+          toast.error("Failed to save new order");
+          // No need to manually revert, useOptimistic handles it if the action fails/throws
+          // or if we trigger a revalidation that restores the original state.
+          // However, useOptimistic only reverts when the transition finishes if the *parent state* didn't update.
+          // Since reorderTasks calls revalidatePath, the parent component should re-render with the source-of-truth data.
+          // If the server action fails, the transition ends, and optimistic state is discarded.
         }
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to save new order");
-        setTasks(oldTasks);
-      }
+      });
     }
   };
 
-  if (tasks.length === 0) {
+  if (optimisticTasks.length === 0) {
     return (
       <div className="text-center text-muted-foreground mt-8">
         <p>No tasks found.</p>
@@ -117,11 +123,11 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
       onDragEnd={handleDragEnd}
     >
       <SortableContext
-        items={tasks.map(t => t.id)}
+        items={optimisticTasks.map(t => t.id)}
         strategy={verticalListSortingStrategy}
       >
         <div className="space-y-4">
-            {tasks.map((task) => (
+            {optimisticTasks.map((task) => (
                 <SortableTaskItem key={task.id} task={task} />
             ))}
         </div>
