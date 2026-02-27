@@ -16,23 +16,17 @@ export async function getTaskCount(): Promise<number> {
     return cachedTaskCount;
   }
 
-  // Optimization: Try to read from task_counts table first
-  try {
-    const [countResult] = await db.select().from(taskCounts).where(eq(taskCounts.id, 1));
-    if (countResult) {
-      cachedTaskCount = countResult.count;
-      lastFetch = now;
-      return cachedTaskCount;
-    }
-  } catch (e) {
-    // If table doesn't exist or other error, fall back to slow count
-    // This ensures robustness even if migrations/triggers failed
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('Failed to read taskCounts, falling back to slow count', e);
-    }
+  // Optimization: Read directly from task_counts table
+  // This assumes task_counts table is guaranteed to exist by setup-triggers.ts
+  const [countResult] = await db.select().from(taskCounts).where(eq(taskCounts.id, 1));
+
+  if (countResult) {
+    cachedTaskCount = countResult.count;
+    lastFetch = now;
+    return cachedTaskCount;
   }
 
-  // Fallback to slow count(*)
+  // Fallback to slow count(*) if for some reason the row doesn't exist (e.g. empty table)
   const [totalResult] = await db.select({ count: count() }).from(tasks);
   cachedTaskCount = totalResult.count;
   lastFetch = now;
