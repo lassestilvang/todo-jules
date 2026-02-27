@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST, GET } from './route.ts';
+import { POST, GET } from './route'; // Assumed .ts
 import { db } from '../../../lib/db';
-import { getTaskCount, invalidateTaskCountCache } from '../../../lib/cache';
+import * as cache from '../../../lib/cache';
 
+// Mock dependencies
 vi.mock('../../../lib/db', () => ({
   db: {
     query: {
@@ -33,15 +34,12 @@ const mockTask = {
 describe('GET /api/tasks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    invalidateTaskCountCache(); // Clear cache to prevent state leakage
   });
 
   it('should return a paginated list of tasks', async () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
-
-    const mockFrom = vi.fn().mockResolvedValue([{ count: 10 }]);
-    // @ts-expect-error Mocking db.select return value structure
-    vi.mocked(db.select).mockReturnValue({ from: mockFrom });
+    // Mock getTaskCount
+    vi.mocked(cache.getTaskCount).mockResolvedValue(10);
 
     const request = new Request('http://localhost/api/tasks?page=1&limit=10');
     const response = await GET(request);
@@ -65,10 +63,7 @@ describe('GET /api/tasks', () => {
 
   it('should handle pagination parameters correctly', async () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
-
-    const mockFrom = vi.fn().mockResolvedValue([{ count: 50 }]);
-    // @ts-expect-error Mocking db.select return value structure
-    vi.mocked(db.select).mockReturnValue({ from: mockFrom });
+    vi.mocked(cache.getTaskCount).mockResolvedValue(50);
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
     const response = await GET(request);
@@ -90,10 +85,7 @@ describe('GET /api/tasks', () => {
 
   it('should use default values for invalid parameters', async () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
-
-    const mockFrom = vi.fn().mockResolvedValue([{ count: 10 }]);
-    // @ts-expect-error Mocking db.select return value structure
-    vi.mocked(db.select).mockReturnValue({ from: mockFrom });
+    vi.mocked(cache.getTaskCount).mockResolvedValue(10);
 
     // Test with invalid page and limit
     const request = new Request('http://localhost/api/tasks?page=abc&limit=-5');
@@ -113,7 +105,6 @@ describe('GET /api/tasks', () => {
 describe('POST /api/tasks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    invalidateTaskCountCache();
   });
 
   it('should return a 201 status code and the new task', async () => {
@@ -124,11 +115,14 @@ describe('POST /api/tasks', () => {
     });
 
     vi.mocked(db.transaction).mockImplementation(async (callback) => {
+      // Mock the transaction context (tx)
       const tx = {
         insert: vi.fn().mockReturnThis(),
         values: vi.fn().mockReturnThis(),
         returning: vi.fn().mockResolvedValue([{ id: 1, name: 'Test Task' }]),
       };
+      // Execute the callback with the mock tx
+      // @ts-ignore
       return await callback(tx);
     });
 
@@ -140,6 +134,6 @@ describe('POST /api/tasks', () => {
     expect(data.task).toBeDefined();
     expect(data.task.name).toBe(newTask.name);
     expect(db.transaction).toHaveBeenCalledTimes(1);
-    expect(invalidateTaskCountCache).toHaveBeenCalledTimes(1);
+    expect(cache.invalidateTaskCountCache).toHaveBeenCalledTimes(1);
   });
 });
