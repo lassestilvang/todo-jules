@@ -80,40 +80,55 @@ export async function POST(request: Request) {
         })
         .returning();
 
+      // Parallelize dependent inserts
+      const insertPromises = [];
+
       if (validatedBody.subtasks && validatedBody.subtasks.length > 0) {
-        await tx.insert(subtasks).values(
-          validatedBody.subtasks.map((subtask) => ({
-            ...subtask,
-            taskId: newTask.id,
-          }))
+        insertPromises.push(
+          tx.insert(subtasks).values(
+            validatedBody.subtasks.map((subtask) => ({
+              ...subtask,
+              taskId: newTask.id,
+            }))
+          )
         );
       }
 
       if (validatedBody.labels && validatedBody.labels.length > 0) {
-        await tx.insert(taskLabels).values(
-          validatedBody.labels.map((labelId) => ({
-            taskId: newTask.id,
-            labelId,
-          }))
+        insertPromises.push(
+          tx.insert(taskLabels).values(
+            validatedBody.labels.map((labelId) => ({
+              taskId: newTask.id,
+              labelId,
+            }))
+          )
         );
       }
 
       if (validatedBody.reminders && validatedBody.reminders.length > 0) {
-        await tx.insert(reminders).values(
-          validatedBody.reminders.map((reminder) => ({
-            ...reminder,
-            taskId: newTask.id,
-          }))
+        insertPromises.push(
+          tx.insert(reminders).values(
+            validatedBody.reminders.map((reminder) => ({
+              ...reminder,
+              taskId: newTask.id,
+            }))
+          )
         );
       }
 
       if (validatedBody.attachments && validatedBody.attachments.length > 0) {
-        await tx.insert(attachments).values(
-          validatedBody.attachments.map((attachment) => ({
-            ...attachment,
-            taskId: newTask.id,
-          }))
+        insertPromises.push(
+          tx.insert(attachments).values(
+            validatedBody.attachments.map((attachment) => ({
+              ...attachment,
+              taskId: newTask.id,
+            }))
+          )
         );
+      }
+
+      if (insertPromises.length > 0) {
+        await Promise.all(insertPromises);
       }
 
       return newTask;
