@@ -26,7 +26,7 @@ const getNext7DaysRange = () => {
 };
 
 export async function getTasksForInbox() {
-  return await db.query.tasks.findMany({
+  return db.query.tasks.findMany({
     where: isNull(tasks.listId),
     with: {
       subtasks: true,
@@ -44,7 +44,7 @@ export async function getTasksForInbox() {
 
 export async function getTasksForToday() {
   const { start, end } = getTodayRange();
-  return await db.query.tasks.findMany({
+  return db.query.tasks.findMany({
     where: and(gte(tasks.date, start), lte(tasks.date, end)),
     with: {
       subtasks: true,
@@ -62,7 +62,7 @@ export async function getTasksForToday() {
 
 export async function getTasksForUpcoming() {
   const { end } = getTodayRange(); // Tasks after today
-  return await db.query.tasks.findMany({
+  return db.query.tasks.findMany({
     where: gte(tasks.date, end),
     with: {
       subtasks: true,
@@ -80,7 +80,7 @@ export async function getTasksForUpcoming() {
 
 export async function getTasksForNext7Days() {
   const { start, end } = getNext7DaysRange();
-  return await db.query.tasks.findMany({
+  return db.query.tasks.findMany({
     where: and(gte(tasks.date, start), lte(tasks.date, end)),
     with: {
       subtasks: true,
