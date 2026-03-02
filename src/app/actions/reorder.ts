@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
-import { eq, sql, inArray } from 'drizzle-orm';
+import { sql, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 export async function reorderTasks(items: { id: number; order: number }[]) {
@@ -15,7 +15,8 @@ export async function reorderTasks(items: { id: number; order: number }[]) {
     // 200 items * 3 = 600 variables, which is safe for the lower bound 999 limit.
     const CHUNK_SIZE = 200;
 
-    await db.transaction(async (tx) => {
+    // Use synchronous transaction for better-sqlite3
+    db.transaction((tx) => {
       for (let i = 0; i < items.length; i += CHUNK_SIZE) {
         const chunk = items.slice(i, i + CHUNK_SIZE);
 
@@ -29,7 +30,7 @@ export async function reorderTasks(items: { id: number; order: number }[]) {
 
         const caseStatement = sql`case ${tasks.id} ${sql.join(sqlChunks, sql` `)} end`;
 
-        await tx
+        tx
           .update(tasks)
           .set({ order: caseStatement })
           .where(inArray(tasks.id, ids))
