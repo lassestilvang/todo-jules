@@ -64,8 +64,12 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validatedBody = createTaskSchema.parse(body);
 
-    const createdTask = await db.transaction(async (tx) => {
-      const [newTask] = await tx
+    // better-sqlite3 requires synchronous transactions.
+    const createdTask = db.transaction((tx) => {
+      // Drizzle with better-sqlite3 returns results synchronously.
+      // Cast the result to any to bypass TS error if inferred type is wrong
+      // or explicit type the return.
+      const result = tx
         .insert(tasks)
         .values({
           name: validatedBody.name,
@@ -78,7 +82,9 @@ export async function POST(request: Request) {
           recurring: validatedBody.recurring,
           listId: validatedBody.listId,
         })
-        .returning();
+        .returning() as unknown as (typeof tasks.$inferSelect)[];
+
+      const newTask = result[0];
 
       // Parallelize dependent inserts
       const insertPromises = [];
