@@ -36,6 +36,7 @@ describe('GET /api/tasks', () => {
   });
 
   it('should return a paginated list of tasks', async () => {
+    vi.mocked(getTaskCount).mockResolvedValue(10);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
     vi.mocked(getTaskCount).mockResolvedValue(10);
 
@@ -53,13 +54,15 @@ describe('GET /api/tasks', () => {
     });
     expect(db.query.tasks.findMany).toHaveBeenCalledTimes(1);
     expect(db.query.tasks.findMany).toHaveBeenCalledWith({
-        limit: 10,
-        offset: 0,
-        with: expect.any(Object)
+      limit: 10,
+      offset: 0,
+      with: expect.any(Object)
     });
+    expect(getTaskCount).toHaveBeenCalledTimes(1);
   });
 
   it('should handle pagination parameters correctly', async () => {
+    vi.mocked(getTaskCount).mockResolvedValue(50);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
     vi.mocked(getTaskCount).mockResolvedValue(50);
 
@@ -82,6 +85,7 @@ describe('GET /api/tasks', () => {
   });
 
   it('should use default values for invalid parameters', async () => {
+    vi.mocked(getTaskCount).mockResolvedValue(10);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
     vi.mocked(getTaskCount).mockResolvedValue(10);
 
@@ -112,16 +116,15 @@ describe('POST /api/tasks', () => {
       body: JSON.stringify(newTask),
     });
 
-    // Mock db.transaction to execute the callback synchronously
-    vi.mocked(db.transaction).mockImplementation((callback) => {
-      const tx = {
-        insert: vi.fn().mockReturnThis(),
-        values: vi.fn().mockReturnThis(),
-        // Make returning() return an array with the new task synchronously
-        returning: vi.fn().mockReturnValue([{ id: 1, name: 'Test Task' }]),
-      };
-      // Synchronous execution of callback
-      return callback(tx);
+    const mockTx = {
+      insert: vi.fn().mockReturnThis(),
+      values: vi.fn().mockReturnThis(),
+      returning: vi.fn().mockResolvedValue([{ id: 1, name: 'Test Task' }]),
+    };
+
+    // @ts-expect-error Mocking transaction callback
+    vi.mocked(db.transaction).mockImplementation(async (callback) => {
+      return await callback(mockTx);
     });
 
     const response = await POST(request);
