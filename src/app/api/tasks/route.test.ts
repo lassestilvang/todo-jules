@@ -37,6 +37,7 @@ describe('GET /api/tasks', () => {
   });
 
   it('should return a paginated list of tasks', async () => {
+    vi.mocked(getTaskCount).mockResolvedValue(10);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
     // Mock getTaskCount
     vi.mocked(cache.getTaskCount).mockResolvedValue(10);
@@ -55,13 +56,15 @@ describe('GET /api/tasks', () => {
     });
     expect(db.query.tasks.findMany).toHaveBeenCalledTimes(1);
     expect(db.query.tasks.findMany).toHaveBeenCalledWith({
-        limit: 10,
-        offset: 0,
-        with: expect.any(Object)
+      limit: 10,
+      offset: 0,
+      with: expect.any(Object)
     });
+    expect(getTaskCount).toHaveBeenCalledTimes(1);
   });
 
   it('should handle pagination parameters correctly', async () => {
+    vi.mocked(getTaskCount).mockResolvedValue(50);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
     vi.mocked(cache.getTaskCount).mockResolvedValue(50);
 
@@ -84,6 +87,7 @@ describe('GET /api/tasks', () => {
   });
 
   it('should use default values for invalid parameters', async () => {
+    vi.mocked(getTaskCount).mockResolvedValue(10);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
     vi.mocked(cache.getTaskCount).mockResolvedValue(10);
 
@@ -114,6 +118,13 @@ describe('POST /api/tasks', () => {
       body: JSON.stringify(newTask),
     });
 
+    const mockTx = {
+      insert: vi.fn().mockReturnThis(),
+      values: vi.fn().mockReturnThis(),
+      returning: vi.fn().mockResolvedValue([{ id: 1, name: 'Test Task' }]),
+    };
+
+    // @ts-expect-error Mocking transaction callback
     vi.mocked(db.transaction).mockImplementation(async (callback) => {
       // Mock the transaction context (tx)
       const tx = {

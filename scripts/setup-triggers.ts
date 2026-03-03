@@ -6,7 +6,7 @@ async function main() {
 
   try {
     // 1. Ensure table exists (though schema push should have handled it)
-    await db.run(sql`
+    db.run(sql`
       CREATE TABLE IF NOT EXISTS task_counts (
         id INTEGER PRIMARY KEY,
         count INTEGER NOT NULL DEFAULT 0
@@ -14,11 +14,11 @@ async function main() {
     `);
 
     // 2. Drop existing triggers to ensure clean state
-    await db.run(sql`DROP TRIGGER IF EXISTS update_task_count_insert`);
-    await db.run(sql`DROP TRIGGER IF EXISTS update_task_count_delete`);
+    db.run(sql`DROP TRIGGER IF EXISTS update_task_count_insert`);
+    db.run(sql`DROP TRIGGER IF EXISTS update_task_count_delete`);
 
     // 3. Create Insert Trigger
-    await db.run(sql`
+    db.run(sql`
       CREATE TRIGGER update_task_count_insert
       AFTER INSERT ON tasks
       BEGIN
@@ -27,7 +27,7 @@ async function main() {
     `);
 
     // 4. Create Delete Trigger
-    await db.run(sql`
+    db.run(sql`
       CREATE TRIGGER update_task_count_delete
       AFTER DELETE ON tasks
       BEGIN
@@ -36,9 +36,9 @@ async function main() {
     `);
 
     // 5. Initialize/Reset Count
-    await db.transaction(async (tx) => {
-      await tx.run(sql`DELETE FROM task_counts`);
-      await tx.run(sql`
+    db.transaction((tx) => {
+      tx.run(sql`DELETE FROM task_counts`);
+      tx.run(sql`
         INSERT INTO task_counts (id, count)
         SELECT 1, COUNT(*) FROM tasks
       `);
