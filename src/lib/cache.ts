@@ -4,7 +4,11 @@ import { count, eq } from 'drizzle-orm';
 
 let cachedTaskCount: number | null = null;
 let lastFetch = 0;
-const TTL = 10000; // 10 seconds
+
+// Configurable Cache TTL via environment variable, defaulting to 10 seconds
+const TTL = process.env.TASK_COUNT_CACHE_TTL
+  ? parseInt(process.env.TASK_COUNT_CACHE_TTL, 10) || 10000
+  : 10000;
 
 /**
  * Gets the total task count, using a cached value if it's fresh.
