@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST, GET } from './route.ts';
+import { POST, GET } from './route'; // Assumed .ts
 import { db } from '../../../lib/db';
-import { getTaskCount, invalidateTaskCountCache } from '../../../lib/cache';
+import * as cache from '../../../lib/cache';
 
+// Mock dependencies
 vi.mock('../../../lib/db', () => ({
   db: {
     query: {
@@ -38,7 +39,8 @@ describe('GET /api/tasks', () => {
   it('should return a paginated list of tasks', async () => {
     vi.mocked(getTaskCount).mockResolvedValue(10);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
-    vi.mocked(getTaskCount).mockResolvedValue(10);
+    // Mock getTaskCount
+    vi.mocked(cache.getTaskCount).mockResolvedValue(10);
 
     const request = new Request('http://localhost/api/tasks?page=1&limit=10');
     const response = await GET(request);
@@ -64,7 +66,7 @@ describe('GET /api/tasks', () => {
   it('should handle pagination parameters correctly', async () => {
     vi.mocked(getTaskCount).mockResolvedValue(50);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
-    vi.mocked(getTaskCount).mockResolvedValue(50);
+    vi.mocked(cache.getTaskCount).mockResolvedValue(50);
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
     const response = await GET(request);
@@ -87,7 +89,7 @@ describe('GET /api/tasks', () => {
   it('should use default values for invalid parameters', async () => {
     vi.mocked(getTaskCount).mockResolvedValue(10);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
-    vi.mocked(getTaskCount).mockResolvedValue(10);
+    vi.mocked(cache.getTaskCount).mockResolvedValue(10);
 
     // Test with invalid page and limit
     const request = new Request('http://localhost/api/tasks?page=abc&limit=-5');
@@ -124,7 +126,15 @@ describe('POST /api/tasks', () => {
 
     // @ts-expect-error Mocking transaction callback
     vi.mocked(db.transaction).mockImplementation(async (callback) => {
-      return await callback(mockTx);
+      // Mock the transaction context (tx)
+      const tx = {
+        insert: vi.fn().mockReturnThis(),
+        values: vi.fn().mockReturnThis(),
+        returning: vi.fn().mockResolvedValue([{ id: 1, name: 'Test Task' }]),
+      };
+      // Execute the callback with the mock tx
+      // @ts-ignore
+      return await callback(tx);
     });
 
     const response = await POST(request);
@@ -135,6 +145,6 @@ describe('POST /api/tasks', () => {
     expect(data.task).toBeDefined();
     expect(data.task.name).toBe(newTask.name);
     expect(db.transaction).toHaveBeenCalledTimes(1);
-    expect(invalidateTaskCountCache).toHaveBeenCalledTimes(1);
+    expect(cache.invalidateTaskCountCache).toHaveBeenCalledTimes(1);
   });
 });
