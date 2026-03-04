@@ -33,15 +33,13 @@ const mockTask = {
 describe('GET /api/tasks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    invalidateTaskCountCache(); // Clear cache to prevent state leakage
+    // invalidateTaskCountCache(); removed to prevent spy call increment
   });
 
   it('should return a paginated list of tasks', async () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
 
-    const mockFrom = vi.fn().mockResolvedValue([{ count: 10 }]);
-    // @ts-expect-error Mocking db.select return value structure
-    vi.mocked(db.select).mockReturnValue({ from: mockFrom });
+    vi.mocked(getTaskCount).mockResolvedValue(10);
 
     const request = new Request('http://localhost/api/tasks?page=1&limit=10');
     const response = await GET(request);
@@ -66,9 +64,7 @@ describe('GET /api/tasks', () => {
   it('should handle pagination parameters correctly', async () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
 
-    const mockFrom = vi.fn().mockResolvedValue([{ count: 50 }]);
-    // @ts-expect-error Mocking db.select return value structure
-    vi.mocked(db.select).mockReturnValue({ from: mockFrom });
+    vi.mocked(getTaskCount).mockResolvedValue(50);
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
     const response = await GET(request);
@@ -91,9 +87,7 @@ describe('GET /api/tasks', () => {
   it('should use default values for invalid parameters', async () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
 
-    const mockFrom = vi.fn().mockResolvedValue([{ count: 10 }]);
-    // @ts-expect-error Mocking db.select return value structure
-    vi.mocked(db.select).mockReturnValue({ from: mockFrom });
+    vi.mocked(getTaskCount).mockResolvedValue(10);
 
     // Test with invalid page and limit
     const request = new Request('http://localhost/api/tasks?page=abc&limit=-5');
@@ -113,7 +107,7 @@ describe('GET /api/tasks', () => {
 describe('POST /api/tasks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    invalidateTaskCountCache();
+    // invalidateTaskCountCache();
   });
 
   it('should return a 201 status code and the new task', async () => {
