@@ -32,7 +32,7 @@ export const db = drizzle(
               // To safely support both, we can check if it's a returning statement.
               const isReturning = /\sreturning\s/i.test(sql);
               if (isReturning) {
-                  const values = rows.map((row: any) => Object.values(row));
+                  const values = rows.map((row: Record<string, unknown>) => Object.values(row));
                   resolve(values);
               } else {
                   resolve(rows);
