@@ -30,7 +30,7 @@ export const db = drizzle(
               // Drizzle map values bug with sqlite-proxy when using objects:
               // For returning clauses, Drizzle expects values array, but for normal select, rows.
               // To safely support both, we can check if it's a returning statement.
-              const isReturning = /returning/i.test(sql);
+              const isReturning = /\sreturning\s/i.test(sql);
               if (isReturning) {
                   const values = rows.map((row: any) => Object.values(row));
                   resolve(values);
