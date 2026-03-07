@@ -14,7 +14,7 @@ sqlite.run('PRAGMA foreign_keys = ON');
 export const db = drizzle(
   async (sql, params, method) => {
     try {
-      const rows: any[] = await new Promise((resolve, reject) => {
+      const rows: unknown[] = await new Promise((resolve, reject) => {
         if (method === 'run') {
           // sqlite3 doesn't return rows for run(), so if Drizzle sends an UPDATE with RETURNING
           // as 'run', it's problematic. But Drizzle seems to send 'all' for RETURNING.
@@ -30,9 +30,9 @@ export const db = drizzle(
               // Drizzle map values bug with sqlite-proxy when using objects:
               // For returning clauses, Drizzle expects values array, but for normal select, rows.
               // To safely support both, we can check if it's a returning statement.
-              const isReturning = /\sreturning\s/i.test(sql);
+              const isReturning = /returning/i.test(sql);
               if (isReturning) {
-                  const values = rows.map((row: Record<string, unknown>) => Object.values(row));
+                  const values = rows.map((row: any) => Object.values(row));
                   resolve(values);
               } else {
                   resolve(rows);
