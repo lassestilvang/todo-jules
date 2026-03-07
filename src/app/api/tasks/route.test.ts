@@ -34,13 +34,12 @@ const mockTask = {
 describe('GET /api/tasks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Cache invalidation removed from setup to prevent interference with call count assertions
   });
 
   it('should return a paginated list of tasks', async () => {
-    vi.mocked(getTaskCount).mockResolvedValue(10);
-    vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
-    // Mock getTaskCount
     vi.mocked(cache.getTaskCount).mockResolvedValue(10);
+    vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
 
     const request = new Request('http://localhost/api/tasks?page=1&limit=10');
     const response = await GET(request);
@@ -60,13 +59,12 @@ describe('GET /api/tasks', () => {
       offset: 0,
       with: expect.any(Object)
     });
-    expect(getTaskCount).toHaveBeenCalledTimes(1);
+    expect(cache.getTaskCount).toHaveBeenCalledTimes(1);
   });
 
   it('should handle pagination parameters correctly', async () => {
-    vi.mocked(getTaskCount).mockResolvedValue(50);
-    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
     vi.mocked(cache.getTaskCount).mockResolvedValue(50);
+    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
     const response = await GET(request);
@@ -87,9 +85,8 @@ describe('GET /api/tasks', () => {
   });
 
   it('should use default values for invalid parameters', async () => {
-    vi.mocked(getTaskCount).mockResolvedValue(10);
-    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
     vi.mocked(cache.getTaskCount).mockResolvedValue(10);
+    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
 
     // Test with invalid page and limit
     const request = new Request('http://localhost/api/tasks?page=abc&limit=-5');
@@ -130,7 +127,7 @@ describe('POST /api/tasks', () => {
       const tx = {
         insert: vi.fn().mockReturnThis(),
         values: vi.fn().mockReturnThis(),
-        returning: vi.fn().mockResolvedValue([{ id: 1, name: 'Test Task' }]),
+        returning: vi.fn().mockReturnValue([{ id: 1, name: 'Test Task' }]),
       };
       // Execute the callback with the mock tx
       // @ts-ignore
