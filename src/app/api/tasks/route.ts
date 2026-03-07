@@ -87,45 +87,55 @@ export async function POST(request: Request) {
       const newTask = result[0];
 
       // Parallelize dependent inserts
-
+      const insertPromises = [];
 
       if (validatedBody.subtasks && validatedBody.subtasks.length > 0) {
-        tx.insert(subtasks).values(
+        insertPromises.push(
+          tx.insert(subtasks).values(
             validatedBody.subtasks.map((subtask) => ({
               ...subtask,
               taskId: newTask.id,
             }))
-          ).run();
+          )
+        );
       }
 
       if (validatedBody.labels && validatedBody.labels.length > 0) {
-        tx.insert(taskLabels).values(
+        insertPromises.push(
+          tx.insert(taskLabels).values(
             validatedBody.labels.map((labelId) => ({
               taskId: newTask.id,
               labelId,
             }))
-          ).run();
+          )
+        );
       }
 
       if (validatedBody.reminders && validatedBody.reminders.length > 0) {
-        tx.insert(reminders).values(
+        insertPromises.push(
+          tx.insert(reminders).values(
             validatedBody.reminders.map((reminder) => ({
               ...reminder,
               taskId: newTask.id,
             }))
-          ).run();
+          )
+        );
       }
 
       if (validatedBody.attachments && validatedBody.attachments.length > 0) {
-        tx.insert(attachments).values(
+        insertPromises.push(
+          tx.insert(attachments).values(
             validatedBody.attachments.map((attachment) => ({
               ...attachment,
               taskId: newTask.id,
             }))
-          ).run();
+          )
+        );
       }
 
-
+      if (insertPromises.length > 0) {
+        await Promise.all(insertPromises);
+      }
 
       return newTask;
     });

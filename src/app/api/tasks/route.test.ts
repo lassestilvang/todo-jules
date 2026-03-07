@@ -115,8 +115,14 @@ describe('POST /api/tasks', () => {
       body: JSON.stringify(newTask),
     });
 
+    const mockTx = {
+      insert: vi.fn().mockReturnThis(),
+      values: vi.fn().mockReturnThis(),
+      returning: vi.fn().mockResolvedValue([{ id: 1, name: 'Test Task' }]),
+    };
+
     // @ts-expect-error Mocking transaction callback
-    vi.mocked(db.transaction).mockImplementation((callback) => {
+    vi.mocked(db.transaction).mockImplementation(async (callback) => {
       // Mock the transaction context (tx)
       const tx = {
         insert: vi.fn().mockReturnThis(),
@@ -124,7 +130,8 @@ describe('POST /api/tasks', () => {
         returning: vi.fn().mockReturnValue([{ id: 1, name: 'Test Task' }]),
       };
       // Execute the callback with the mock tx
-      return callback(tx);
+      // @ts-ignore
+      return await callback(tx);
     });
 
     const response = await POST(request);
