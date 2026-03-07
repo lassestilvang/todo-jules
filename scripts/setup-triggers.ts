@@ -1,7 +1,7 @@
 import { db } from '../src/lib/db';
 import { sql } from 'drizzle-orm';
 
-async function main() {
+function main() {
   console.log('Setting up task count triggers...');
 
   try {
@@ -36,12 +36,14 @@ async function main() {
     `);
 
     // 5. Initialize/Reset Count
+    // Use an IIFE or normal closure to avoid returning a Promise since better-sqlite3 throws if so
     db.transaction((tx) => {
       tx.run(sql`DELETE FROM task_counts`);
       tx.run(sql`
         INSERT INTO task_counts (id, count)
         SELECT 1, COUNT(*) FROM tasks
       `);
+      return;
     });
 
     console.log('Task count triggers setup complete.');

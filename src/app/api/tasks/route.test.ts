@@ -34,6 +34,7 @@ const mockTask = {
 describe('GET /api/tasks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Cache invalidation removed from setup to prevent interference with call count assertions
   });
 
   it('should return a paginated list of tasks', async () => {
@@ -41,6 +42,7 @@ describe('GET /api/tasks', () => {
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
     // Mock getTaskCount
     vi.mocked(cache.getTaskCount).mockResolvedValue(10);
+    vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
 
     const request = new Request('http://localhost/api/tasks?page=1&limit=10');
     const response = await GET(request);
@@ -67,6 +69,7 @@ describe('GET /api/tasks', () => {
     vi.mocked(cache.getTaskCount).mockResolvedValue(50);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
     vi.mocked(cache.getTaskCount).mockResolvedValue(50);
+    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
     const response = await GET(request);
@@ -90,6 +93,7 @@ describe('GET /api/tasks', () => {
     vi.mocked(cache.getTaskCount).mockResolvedValue(10);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
     vi.mocked(cache.getTaskCount).mockResolvedValue(10);
+    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
 
     // Test with invalid page and limit
     const request = new Request('http://localhost/api/tasks?page=abc&limit=-5');
