@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
 import { eq, isNull, and, gte, lte, asc, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { after } from 'next/server';
 import { logTaskHistory } from '@/lib/history';
 import { createTaskSchema } from '@/lib/validators';
 import { z } from 'zod';
@@ -108,14 +109,16 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
     const result = await db.insert(tasks).values(validation.data).returning();
 
     const newTask = result[0];
-    await logTaskHistory([
-      {
-        taskId: newTask.id,
-        changedField: 'created',
-        oldValue: null,
-        newValue: 'Task created',
-      },
-    ]);
+    after(async () => {
+        await logTaskHistory([
+          {
+            taskId: newTask.id,
+            changedField: 'created',
+            oldValue: null,
+            newValue: 'Task created',
+          },
+        ]);
+    });
 
     invalidateTaskCountCache();
     revalidatePath('/', 'layout');
@@ -154,7 +157,9 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
       }
     }
 
-    await logTaskHistory(historyLogs);
+    after(async () => {
+        await logTaskHistory(historyLogs);
+    });
 
     revalidatePath('/', 'layout');
     return { success: true, data: updatedTask };

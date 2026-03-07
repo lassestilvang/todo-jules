@@ -36,15 +36,14 @@ function main() {
     `);
 
     // 5. Initialize/Reset Count
-    // To satisfy TypeScript with better-sqlite3 generic transaction signature,
-    // which might still expect a Promise based on Drizzle's unified interface types
-    // despite being executed synchronously by the driver.
-    db.transaction(async (tx) => {
+    // Use an IIFE or normal closure to avoid returning a Promise since better-sqlite3 throws if so
+    db.transaction((tx) => {
       tx.run(sql`DELETE FROM task_counts`);
       tx.run(sql`
         INSERT INTO task_counts (id, count)
         SELECT 1, COUNT(*) FROM tasks
       `);
+      return;
     });
 
     console.log('Task count triggers setup complete.');
