@@ -40,6 +40,9 @@ describe('GET /api/tasks', () => {
   it('should return a paginated list of tasks', async () => {
     vi.mocked(cache.getTaskCount).mockResolvedValue(10);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
+    // Mock getTaskCount
+    vi.mocked(cache.getTaskCount).mockResolvedValue(10);
+    vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
 
     const request = new Request('http://localhost/api/tasks?page=1&limit=10');
     const response = await GET(request);
@@ -65,6 +68,8 @@ describe('GET /api/tasks', () => {
   it('should handle pagination parameters correctly', async () => {
     vi.mocked(cache.getTaskCount).mockResolvedValue(50);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
+    vi.mocked(cache.getTaskCount).mockResolvedValue(50);
+    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
     const response = await GET(request);
@@ -85,6 +90,8 @@ describe('GET /api/tasks', () => {
   });
 
   it('should use default values for invalid parameters', async () => {
+    vi.mocked(cache.getTaskCount).mockResolvedValue(10);
+    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
     vi.mocked(cache.getTaskCount).mockResolvedValue(10);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
 
@@ -115,23 +122,19 @@ describe('POST /api/tasks', () => {
       body: JSON.stringify(newTask),
     });
 
-    const mockTx = {
-      insert: vi.fn().mockReturnThis(),
-      values: vi.fn().mockReturnThis(),
-      returning: vi.fn().mockResolvedValue([{ id: 1, name: 'Test Task' }]),
-    };
+
 
     // @ts-expect-error Mocking transaction callback
-    vi.mocked(db.transaction).mockImplementation(async (callback) => {
+    vi.mocked(db.transaction).mockImplementation((callback) => {
       // Mock the transaction context (tx)
+      const returningMock = { all: vi.fn().mockReturnValue([{ id: 1, name: 'Test Task' }]) };
       const tx = {
         insert: vi.fn().mockReturnThis(),
         values: vi.fn().mockReturnThis(),
-        returning: vi.fn().mockReturnValue([{ id: 1, name: 'Test Task' }]),
+        returning: vi.fn().mockReturnValue(returningMock),
+        run: vi.fn()
       };
-      // Execute the callback with the mock tx
-      // @ts-ignore
-      return await callback(tx);
+      return callback(tx);
     });
 
     const response = await POST(request);

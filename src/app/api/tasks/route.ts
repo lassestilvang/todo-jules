@@ -7,7 +7,7 @@ import {
   reminders,
   attachments,
 } from '../../../lib/schema';
-import { eq } from 'drizzle-orm';
+
 import { createTaskSchema } from '../../../lib/validators';
 import { getTaskCount, invalidateTaskCountCache } from '../../../lib/cache';
 
@@ -82,60 +82,50 @@ export async function POST(request: Request) {
           recurring: validatedBody.recurring,
           listId: validatedBody.listId,
         })
-        .returning() as unknown as (typeof tasks.$inferSelect)[];
+        .returning().all() as unknown as (typeof tasks.$inferSelect)[];
 
       const newTask = result[0];
 
-      // Parallelize dependent inserts
-      const insertPromises = [];
+      // Execute dependent inserts sequentially (better-sqlite3 transactions are synchronous)
+
 
       if (validatedBody.subtasks && validatedBody.subtasks.length > 0) {
-        insertPromises.push(
-          tx.insert(subtasks).values(
+        tx.insert(subtasks).values(
             validatedBody.subtasks.map((subtask) => ({
               ...subtask,
               taskId: newTask.id,
             }))
-          )
-        );
+          ).run();
       }
 
       if (validatedBody.labels && validatedBody.labels.length > 0) {
-        insertPromises.push(
-          tx.insert(taskLabels).values(
+        tx.insert(taskLabels).values(
             validatedBody.labels.map((labelId) => ({
               taskId: newTask.id,
               labelId,
             }))
-          )
-        );
+          ).run();
       }
 
       if (validatedBody.reminders && validatedBody.reminders.length > 0) {
-        insertPromises.push(
-          tx.insert(reminders).values(
+        tx.insert(reminders).values(
             validatedBody.reminders.map((reminder) => ({
               ...reminder,
               taskId: newTask.id,
             }))
-          )
-        );
+          ).run();
       }
 
       if (validatedBody.attachments && validatedBody.attachments.length > 0) {
-        insertPromises.push(
-          tx.insert(attachments).values(
+        tx.insert(attachments).values(
             validatedBody.attachments.map((attachment) => ({
               ...attachment,
               taskId: newTask.id,
             }))
-          )
-        );
+          ).run();
       }
 
-      if (insertPromises.length > 0) {
-        await Promise.all(insertPromises);
-      }
+
 
       return newTask;
     });
