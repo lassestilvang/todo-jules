@@ -85,10 +85,13 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
       startTransition(async () => {
         setOptimisticTasks(newItems);
 
-        const updates = newItems.map((task, index) => ({
+        // Optimization: Only update tasks that have actually changed their position
+        const updates = newItems
+          .map((task, index) => ({
             id: task.id,
             order: index
-        }));
+          }))
+          .filter((update, index) => update.id !== optimisticTasks[index].id);
 
         try {
           const result = await reorderTasks(updates);
