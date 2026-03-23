@@ -7,7 +7,8 @@ async function benchmark() {
   const req = new Request('http://localhost/api/tasks?page=1&limit=20');
 
   // Warm up
-  for (let i = 0; i < 5; i++) {
+  const WARMUP_ITERATIONS = 5;
+  for (let i = 0; i < WARMUP_ITERATIONS; i++) {
     await GET(req);
   }
 
