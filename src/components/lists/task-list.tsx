@@ -101,11 +101,6 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
         } catch (err) {
           console.error(err);
           toast.error("Failed to save new order");
-          // No need to manually revert, useOptimistic handles it if the action fails/throws
-          // or if we trigger a revalidation that restores the original state.
-          // However, useOptimistic only reverts when the transition finishes if the *parent state* didn't update.
-          // Since reorderTasks calls revalidatePath, the parent component should re-render with the source-of-truth data.
-          // If the server action fails, the transition ends, and optimistic state is discarded.
         }
       });
     }
