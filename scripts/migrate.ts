@@ -17,37 +17,53 @@ async function main() {
   // 2. Transfer data from JSON columns to new tables
   const tasksWithOldSchema = sqlite.prepare('SELECT * FROM tasks').all() as any[];
 
-  for (const task of tasksWithOldSchema) {
-    if (task.subtasks) {
-      const parsedSubtasks = JSON.parse(task.subtasks);
-      for (const subtask of parsedSubtasks) {
-        sqlite.prepare('INSERT INTO subtasks (name, completed, task_id) VALUES (?, ?, ?)').run(subtask.name, subtask.completed, task.id);
+  const insertSubtask = sqlite.prepare('INSERT INTO subtasks (name, completed, task_id) VALUES (?, ?, ?)');
+  const selectLabel = sqlite.prepare('SELECT id FROM labels WHERE name = ?');
+  const insertLabel = sqlite.prepare('INSERT INTO labels (name, color, icon) VALUES (?, ?, ?)');
+  const insertTaskLabel = sqlite.prepare('INSERT INTO task_labels (task_id, label_id) VALUES (?, ?)');
+  const insertReminder = sqlite.prepare('INSERT INTO reminders (remind_at, task_id) VALUES (?, ?)');
+  const insertAttachment = sqlite.prepare('INSERT INTO attachments (url, task_id) VALUES (?, ?)');
+
+  const labelCache = new Map<string, number | bigint>();
+
+  const transferData = sqlite.transaction(() => {
+    for (const task of tasksWithOldSchema) {
+      if (task.subtasks) {
+        const parsedSubtasks = JSON.parse(task.subtasks);
+        for (const subtask of parsedSubtasks) {
+          insertSubtask.run(subtask.name, subtask.completed, task.id);
+        }
       }
-    }
-    if (task.labels) {
+      if (task.labels) {
         const parsedLabels = JSON.parse(task.labels);
         for (const label of parsedLabels) {
-            let labelId;
-            const existingLabel = sqlite.prepare('SELECT id FROM labels WHERE name = ?').get(label.name) as any;
+          let labelId = labelCache.get(label.name);
+          if (!labelId) {
+            const existingLabel = selectLabel.get(label.name) as any;
             if (existingLabel) {
-                labelId = existingLabel.id;
+              labelId = existingLabel.id;
             } else {
-                const result = sqlite.prepare('INSERT INTO labels (name, color, icon) VALUES (?, ?, ?)').run(label.name, label.color, label.icon);
-                labelId = result.lastInsertRowid;
+              const result = insertLabel.run(label.name, label.color, label.icon);
+              labelId = result.lastInsertRowid;
             }
-            sqlite.prepare('INSERT INTO task_labels (task_id, label_id) VALUES (?, ?)').run(task.id, labelId);
+            labelCache.set(label.name, labelId);
+          }
+          insertTaskLabel.run(task.id, labelId);
         }
-    }
-    if (task.reminders) {
+      }
+      if (task.reminders) {
         const parsedReminders = JSON.parse(task.reminders);
         for (const reminder of parsedReminders) {
-            sqlite.prepare('INSERT INTO reminders (remind_at, task_id) VALUES (?, ?)').run(reminder.remindAt, task.id);
+          insertReminder.run(reminder.remindAt, task.id);
         }
+      }
+      if (task.attachment) {
+        insertAttachment.run(task.attachment, task.id);
+      }
     }
-    if (task.attachment) {
-        sqlite.prepare('INSERT INTO attachments (url, task_id) VALUES (?, ?)').run(task.attachment, task.id);
-    }
-  }
+  });
+
+  transferData();
   console.log('Data transfer complete.');
 
   // 3. Apply the second migration to drop the old columns
