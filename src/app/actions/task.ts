@@ -29,6 +29,7 @@ const getNext7DaysRange = () => {
 export async function getTasksForInbox() {
   return db.query.tasks.findMany({
     where: isNull(tasks.listId),
+    limit: 50,
     with: {
       subtasks: true,
       labels: {
