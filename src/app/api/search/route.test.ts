@@ -29,7 +29,9 @@ describe('GET /api/search', () => {
 
     vi.mocked(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue(mockTasks)
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue(mockTasks)
+        })
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);

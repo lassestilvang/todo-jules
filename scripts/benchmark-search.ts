@@ -1,3 +1,4 @@
+import { describe, it } from 'vitest';
 import { GET } from '../src/app/api/search/route';
 import { db } from '../src/lib/db';
 import { tasks } from '../src/lib/schema';
@@ -33,36 +34,36 @@ async function seed(targetCount: number) {
   console.log('\nSeeding complete.');
 }
 
-async function benchmark() {
-  const TARGET_COUNT = 100000; // 10k for noticeable impact
-  await seed(TARGET_COUNT);
+describe('benchmark', () => {
+  it('search speed', async () => {
+    const TARGET_COUNT = 100000; // 10k for noticeable impact
+    await seed(TARGET_COUNT);
 
-  console.log('Starting benchmark...');
+    console.log('Starting benchmark...');
 
-  const queries = ['Task', 'Description', 'random', '999', 'Meeting'];
-  let totalDuration = 0;
-  const iterations = 5;
+    const queries = ['Task', 'Description', 'random', '999', 'Meeting'];
+    let totalDuration = 0;
+    const iterations = 5;
 
-  for (const query of queries) {
-    let queryDuration = 0;
-    for (let i = 0; i < iterations; i++) {
-      // Mock Request
-      const req = new Request(`http://localhost/api/search?query=${query}`);
+    for (const query of queries) {
+      let queryDuration = 0;
+      for (let i = 0; i < iterations; i++) {
+        // Mock Request
+        const req = new Request(`http://localhost/api/search?query=${query}`);
 
-      const start = performance.now();
-      //
-      await GET(req);
-      const end = performance.now();
+        const start = performance.now();
+        //
+        await GET(req);
+        const end = performance.now();
 
-      queryDuration += (end - start);
+        queryDuration += (end - start);
+      }
+      const avg = queryDuration / iterations;
+      console.log(`Query "${query}": ${avg.toFixed(2)}ms (avg of ${iterations})`);
+      totalDuration += queryDuration;
     }
-    const avg = queryDuration / iterations;
-    console.log(`Query "${query}": ${avg.toFixed(2)}ms (avg of ${iterations})`);
-    totalDuration += queryDuration;
-  }
 
-  console.log(`Total time for ${queries.length * iterations} queries: ${totalDuration.toFixed(2)}ms`);
-  console.log(`Average per query: ${(totalDuration / (queries.length * iterations)).toFixed(2)}ms`);
-}
-
-benchmark().catch(console.error);
+    console.log(`Total time for ${queries.length * iterations} queries: ${totalDuration.toFixed(2)}ms`);
+    console.log(`Average per query: ${(totalDuration / (queries.length * iterations)).toFixed(2)}ms`);
+  }, 60000);
+});
