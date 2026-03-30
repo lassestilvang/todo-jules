@@ -20,7 +20,8 @@ export async function GET(request: Request) {
           like(tasks.name, `${query}%`),
           like(tasks.description, `${query}%`)
         )
-      );
+      )
+      .limit(20);
 
     return NextResponse.json(results);
   } catch (error) {
