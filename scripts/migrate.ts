@@ -1,10 +1,8 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
 import * as fs from 'fs';
 import * as path from 'path';
 
 const sqlite = new Database('sqlite.db');
-const db = drizzle(sqlite);
 
 async function main() {
   console.log('Running migration...');
@@ -15,6 +13,7 @@ async function main() {
   console.log('Applied first migration.');
 
   // 2. Transfer data from JSON columns to new tables
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tasksWithOldSchema = sqlite.prepare('SELECT * FROM tasks').all() as any[];
 
   const insertSubtask = sqlite.prepare('INSERT INTO subtasks (name, completed, task_id) VALUES (?, ?, ?)');
@@ -39,6 +38,7 @@ async function main() {
         for (const label of parsedLabels) {
           let labelId = labelCache.get(label.name);
           if (!labelId) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const existingLabel = selectLabel.get(label.name) as any;
             if (existingLabel) {
               labelId = existingLabel.id;
