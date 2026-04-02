@@ -168,7 +168,7 @@ function run() {
 
   // cleanup
   sqlite.close();
-  require('fs').unlinkSync(dbPath);
+  fs.unlinkSync(dbPath);
 }
 
 run();
