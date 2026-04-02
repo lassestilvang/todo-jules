@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3';
+import * as fs from 'fs';
 
 function run() {
   const dbPath = 'benchmark_migration_actual.db';
