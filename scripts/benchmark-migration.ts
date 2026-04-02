@@ -137,7 +137,7 @@ function run() {
         for (const label of parsedLabels) {
           let labelId = labelCache.get(label.name);
           if (!labelId) {
-            const existingLabel = selectLabel.get(label.name) as any;
+            const existingLabel = selectLabel.get(label.name) as { id: number | bigint } | undefined;
             if (existingLabel) {
               labelId = existingLabel.id;
             } else {
