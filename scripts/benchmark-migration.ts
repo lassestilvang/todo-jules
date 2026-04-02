@@ -75,7 +75,7 @@ function run() {
         const parsedLabels = JSON.parse(task.labels);
         for (const label of parsedLabels) {
           let labelId;
-          const existingLabel = sqlite.prepare('SELECT id FROM labels WHERE name = ?').get(label.name) as any;
+          const existingLabel = sqlite.prepare('SELECT id FROM labels WHERE name = ?').get(label.name) as { id: number | bigint } | undefined;
           if (existingLabel) {
             labelId = existingLabel.id;
           } else {
