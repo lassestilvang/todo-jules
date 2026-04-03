@@ -29,17 +29,27 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [hasFetched, setHasFetched] = useState(false);
+
+  // Reset state when taskId changes to prevent stale data
+  useEffect(() => {
+    setHistory([]);
+    setHasFetched(false);
+  }, [taskId]);
 
   useEffect(() => {
     let isMounted = true;
-    if (isOpen) {
+    if (isOpen && !hasFetched) {
         const fetchData = async () => {
             setLoading(true);
             try {
                 const data = await getTaskHistory(taskId);
                 if (isMounted) {
                     setHistory(data);
+                    setHasFetched(true);
                 }
+            } catch (error) {
+                console.error("Failed to fetch history", error);
             } finally {
                 if (isMounted) {
                     setLoading(false);
@@ -51,7 +61,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
     return () => {
         isMounted = false;
     }
-  }, [isOpen, taskId]);
+  }, [isOpen, taskId, hasFetched]);
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
