@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
-import { like, or } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 
 export async function GET(request: Request) {
   try {
@@ -15,12 +15,7 @@ export async function GET(request: Request) {
     const results = await db
       .select()
       .from(tasks)
-      .where(
-        or(
-          like(tasks.name, `${query}%`),
-          like(tasks.description, `${query}%`)
-        )
-      )
+      .where(sql`id IN (SELECT rowid FROM tasks_fts WHERE tasks_fts MATCH ${'"' + query.replace(/"/g, '""') + '*"'})`)
       .limit(20);
 
     return NextResponse.json(results);

@@ -46,6 +46,56 @@ function main() {
       return;
     });
 
+
+    console.log('Setting up FTS5 virtual table and triggers...');
+
+    // Create FTS5 virtual table
+    db.run(sql`
+      CREATE VIRTUAL TABLE IF NOT EXISTS tasks_fts USING fts5(
+        name,
+        description,
+        content='tasks',
+        content_rowid='id'
+      )
+    `);
+
+    // Drop existing FTS5 triggers to ensure clean state
+    db.run(sql`DROP TRIGGER IF EXISTS tasks_fts_insert`);
+    db.run(sql`DROP TRIGGER IF EXISTS tasks_fts_delete`);
+    db.run(sql`DROP TRIGGER IF EXISTS tasks_fts_update`);
+
+    // Create FTS5 Insert Trigger
+    db.run(sql`
+      CREATE TRIGGER tasks_fts_insert AFTER INSERT ON tasks
+      BEGIN
+        INSERT INTO tasks_fts(rowid, name, description) VALUES (new.id, new.name, new.description);
+      END;
+    `);
+
+    // Create FTS5 Delete Trigger
+    db.run(sql`
+      CREATE TRIGGER tasks_fts_delete AFTER DELETE ON tasks
+      BEGIN
+        INSERT INTO tasks_fts(tasks_fts, rowid, name, description) VALUES ('delete', old.id, old.name, old.description);
+      END;
+    `);
+
+    // Create FTS5 Update Trigger
+    db.run(sql`
+      CREATE TRIGGER tasks_fts_update AFTER UPDATE ON tasks
+      BEGIN
+        INSERT INTO tasks_fts(tasks_fts, rowid, name, description) VALUES ('delete', old.id, old.name, old.description);
+        INSERT INTO tasks_fts(rowid, name, description) VALUES (new.id, new.name, new.description);
+      END;
+    `);
+
+    // Initialize/Reset FTS5 data
+    db.transaction((tx) => {
+      // Rebuild the entire FTS index
+      tx.run(sql`INSERT INTO tasks_fts(tasks_fts) VALUES('rebuild')`);
+      return;
+    });
+
     console.log('Task count triggers setup complete.');
   } catch (error) {
     console.error('Failed to setup triggers:', error);
