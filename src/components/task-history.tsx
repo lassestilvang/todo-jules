@@ -25,6 +25,39 @@ interface HistoryItem {
   changedAt: Date;
 }
 
+interface CacheEntry {
+  data: HistoryItem[];
+  timestamp: number;
+}
+
+// Module-level cache to prevent redundant fetches
+// Use a Map with a max size to prevent memory leaks and a TTL for staleness.
+const historyCache = new Map<number, CacheEntry>();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 100;
+
+function getFromCache(taskId: number): HistoryItem[] | null {
+  const entry = historyCache.get(taskId);
+  if (!entry) return null;
+
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    historyCache.delete(taskId);
+    return null;
+  }
+  return entry.data;
+}
+
+function setToCache(taskId: number, data: HistoryItem[]) {
+  if (historyCache.size >= MAX_CACHE_SIZE) {
+    // Remove oldest entry
+    const oldestKey = historyCache.keys().next().value;
+    if (oldestKey !== undefined) {
+      historyCache.delete(oldestKey);
+    }
+  }
+  historyCache.set(taskId, { data, timestamp: Date.now() });
+}
+
 export function TaskHistory({ taskId }: TaskHistoryProps) {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -33,18 +66,35 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
 
   // Reset state when taskId changes to prevent stale data
   useEffect(() => {
-    setHistory([]);
-    setHasFetched(false);
+    // Check if we already have it in cache for the new taskId
+    const cachedData = getFromCache(taskId);
+    if (cachedData) {
+      setHistory(cachedData);
+      setHasFetched(true);
+    } else {
+      setHistory([]);
+      setHasFetched(false);
+    }
   }, [taskId]);
 
   useEffect(() => {
     let isMounted = true;
     if (isOpen && !hasFetched) {
         const fetchData = async () => {
+            const cachedData = getFromCache(taskId);
+            if (cachedData) {
+                if (isMounted) {
+                    setHistory(cachedData);
+                    setHasFetched(true);
+                }
+                return;
+            }
+
             setLoading(true);
             try {
                 const data = await getTaskHistory(taskId);
                 if (isMounted) {
+                    setToCache(taskId, data);
                     setHistory(data);
                     setHasFetched(true);
                 }
@@ -111,4 +161,9 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
       </SheetContent>
     </Sheet>
   );
+}
+
+// For testing purposes
+export function clearHistoryCache() {
+  historyCache.clear();
 }
