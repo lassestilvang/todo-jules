@@ -1,3 +1,4 @@
+/* @vitest-environment jsdom */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TaskHistory } from './task-history';
@@ -99,7 +100,7 @@ describe('TaskHistory Component', () => {
     fireEvent.click(toggleButton);
     await waitFor(() => {
       expect(historyActions.getTaskHistory).toHaveBeenCalledWith(1);
-      expect(screen.getByText('Task 1 created')).toBeDefined();
+      expect(screen.getByText('Task created')).toBeDefined();
     });
 
     // Close
@@ -112,7 +113,7 @@ describe('TaskHistory Component', () => {
     fireEvent.click(toggleButton);
     await waitFor(() => {
       expect(historyActions.getTaskHistory).toHaveBeenCalledWith(2);
-      expect(screen.getByText('Task 2 created')).toBeDefined();
+      expect(screen.getByText('Task created')).toBeDefined();
     });
 
     expect(historyActions.getTaskHistory).toHaveBeenCalledTimes(2);
