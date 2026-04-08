@@ -11,6 +11,7 @@ export const createTaskSchema = z.object({
   actualTime: z.number().optional(),
   recurring: z.string().optional(),
   subtasks: z.array(z.object({
+    id: z.number().optional(),
     name: z.string(),
     completed: z.boolean().optional(),
   })).optional(),
@@ -32,6 +33,7 @@ export const updateTaskSchema = z.object({
   completed: z.boolean().optional(),
   listId: z.number().optional().nullable(),
   subtasks: z.array(z.object({
+    id: z.number().optional(),
     name: z.string(),
     completed: z.boolean().optional(),
   })).optional(),

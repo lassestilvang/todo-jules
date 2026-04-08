@@ -7,7 +7,7 @@ import {
   reminders,
   attachments,
 } from '@/lib/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import { updateTaskSchema } from '@/lib/validators';
 import { invalidateTaskCountCache } from '@/lib/cache';
 
@@ -42,14 +42,29 @@ export async function PUT(
 
       // Handle subtasks
       if (validatedBody.subtasks) {
-        await tx.delete(subtasks).where(eq(subtasks.taskId, taskId));
-        if (validatedBody.subtasks.length > 0) {
-          await tx.insert(subtasks).values(
-            validatedBody.subtasks.map((subtask) => ({
-              ...subtask,
-              taskId: taskId,
-            }))
-          );
+        const existingSubtasks = await tx.select().from(subtasks).where(eq(subtasks.taskId, taskId));
+
+        const incomingIds = validatedBody.subtasks.map((st) => st.id).filter((id) => id !== undefined);
+        const existingIds = existingSubtasks.map((st) => st.id);
+
+        const toDeleteIds = existingIds.filter((id) => !incomingIds.includes(id));
+        const toInsert = validatedBody.subtasks.filter((st) => st.id === undefined).map((st) => ({
+          name: st.name,
+          completed: st.completed,
+          taskId: taskId,
+        }));
+        const toUpdate = validatedBody.subtasks.filter((st) => st.id !== undefined);
+
+        if (toDeleteIds.length > 0) {
+          await tx.delete(subtasks).where(inArray(subtasks.id, toDeleteIds));
+        }
+        if (toInsert.length > 0) {
+          await tx.insert(subtasks).values(toInsert);
+        }
+        for (const st of toUpdate) {
+          await tx.update(subtasks)
+            .set({ name: st.name, completed: st.completed })
+            .where(eq(subtasks.id, st.id!));
         }
       }
 
