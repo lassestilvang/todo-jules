@@ -79,7 +79,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
 
   useEffect(() => {
     let isMounted = true;
-    if (isOpen && !hasFetched) {
+    if (isOpen && (!hasFetched || !getFromCache(taskId))) {
         const fetchData = async () => {
             const cachedData = getFromCache(taskId);
             if (cachedData) {
