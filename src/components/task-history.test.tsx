@@ -99,7 +99,7 @@ describe('TaskHistory Component', () => {
     fireEvent.click(toggleButton);
     await waitFor(() => {
       expect(historyActions.getTaskHistory).toHaveBeenCalledWith(1);
-      expect(screen.getByText(/Task created/i)).toBeDefined();
+      expect(screen.getByText('Task 1 created')).toBeDefined();
     });
 
     // Close
