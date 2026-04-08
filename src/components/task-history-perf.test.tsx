@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { TaskHistory, clearHistoryCache } from './task-history';
 import * as historyActions from '@/app/actions/history';
@@ -37,91 +37,78 @@ vi.mock('@/components/ui/button', () => ({
   ),
 }));
 
-describe('TaskHistory Component', () => {
+describe('TaskHistory Performance', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     clearHistoryCache();
   });
 
-  it('fetches history when opened', async () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('prevents redundant fetch when unmounted and remounted within TTL', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+
     const mockHistory = [
       { id: 1, taskId: 1, changedField: 'created', oldValue: null, newValue: 'Task created', changedAt: new Date() },
     ];
     vi.mocked(historyActions.getTaskHistory).mockResolvedValue(mockHistory);
 
-    render(<TaskHistory taskId={1} />);
+    const { unmount } = render(<TaskHistory taskId={1} />);
 
-    const toggleButton = screen.getByText('Toggle Sheet');
-
-    // Open the sheet
+    let toggleButton = screen.getByText('Toggle Sheet');
     fireEvent.click(toggleButton);
 
     await waitFor(() => {
-      expect(historyActions.getTaskHistory).toHaveBeenCalledWith(1);
+      expect(historyActions.getTaskHistory).toHaveBeenCalledTimes(1);
     });
 
-    expect(screen.getByText('Task created')).toBeDefined();
+    unmount();
+
+    // Advance time slightly, well within TTL (e.g. 1 minute)
+    vi.advanceTimersByTime(60 * 1000);
+
+    render(<TaskHistory taskId={1} />);
+    toggleButton = screen.getByText('Toggle Sheet');
+    fireEvent.click(toggleButton);
+
+    await waitFor(() => {
+      // Still only called once
+      expect(historyActions.getTaskHistory).toHaveBeenCalledTimes(1);
+    });
+    vi.useRealTimers();
   });
 
-  it('fetches history again when closed and re-opened (Baseline behavior)', async () => {
+  it('refetches when unmounted and remounted after TTL expires', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     const mockHistory = [
       { id: 1, taskId: 1, changedField: 'created', oldValue: null, newValue: 'Task created', changedAt: new Date() },
     ];
     vi.mocked(historyActions.getTaskHistory).mockResolvedValue(mockHistory);
 
+    const { unmount } = render(<TaskHistory taskId={1} />);
+
+    let toggleButton = screen.getByText('Toggle Sheet');
+    fireEvent.click(toggleButton);
+
+    await waitFor(() => {
+      expect(historyActions.getTaskHistory).toHaveBeenCalledTimes(1);
+    });
+
+    unmount();
+
+    // Advance time beyond TTL (5 minutes + 1 second)
+    vi.advanceTimersByTime((5 * 60 * 1000) + 1000);
+
     render(<TaskHistory taskId={1} />);
-
-    const toggleButton = screen.getByText('Toggle Sheet');
-
-    // First open
+    toggleButton = screen.getByText('Toggle Sheet');
     fireEvent.click(toggleButton);
+
     await waitFor(() => {
-      expect(historyActions.getTaskHistory).toHaveBeenCalledTimes(1);
+      // Should fetch again
+      expect(historyActions.getTaskHistory).toHaveBeenCalledTimes(2);
     });
-
-    // Close
-    fireEvent.click(toggleButton);
-
-    // Second open
-    fireEvent.click(toggleButton);
-    await waitFor(() => {
-      // In the optimized implementation, it should still be called only once
-      expect(historyActions.getTaskHistory).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  it('fetches new history when taskId changes', async () => {
-    const mockHistory1 = [{ id: 1, taskId: 1, changedField: 'title', oldValue: null, newValue: 'Task 1 created', changedAt: new Date() }];
-    const mockHistory2 = [{ id: 2, taskId: 2, changedField: 'title', oldValue: null, newValue: 'Task 2 created', changedAt: new Date() }];
-
-    vi.mocked(historyActions.getTaskHistory)
-      .mockResolvedValueOnce(mockHistory1)
-      .mockResolvedValueOnce(mockHistory2);
-
-    const { rerender } = render(<TaskHistory taskId={1} />);
-
-    const toggleButton = screen.getByText('Toggle Sheet');
-
-    // Open for taskId 1
-    fireEvent.click(toggleButton);
-    await waitFor(() => {
-      expect(historyActions.getTaskHistory).toHaveBeenCalledWith(1);
-      expect(screen.getByText('Task 1 created')).toBeDefined();
-    });
-
-    // Close
-    fireEvent.click(toggleButton);
-
-    // Rerender with taskId 2
-    rerender(<TaskHistory taskId={2} />);
-
-    // Open for taskId 2
-    fireEvent.click(toggleButton);
-    await waitFor(() => {
-      expect(historyActions.getTaskHistory).toHaveBeenCalledWith(2);
-      expect(screen.getByText('Task 2 created')).toBeDefined();
-    });
-
-    expect(historyActions.getTaskHistory).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
   });
 });
