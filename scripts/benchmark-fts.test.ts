@@ -39,7 +39,7 @@ describe('benchmark FTS5', () => {
           SELECT * FROM tasks
           WHERE id IN (
             SELECT rowid FROM tasks_fts
-            WHERE tasks_fts MATCH ${query + '*'}
+            WHERE tasks_fts MATCH '"' + query.replace(/"/g, '""') + '*"'
           )
           LIMIT 20
         `);
