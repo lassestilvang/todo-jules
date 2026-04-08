@@ -5,6 +5,6 @@ export default defineConfig({
   out: './drizzle',
   dialect: 'sqlite',
   dbCredentials: {
-    url: 'bench.db',
+    url: 'bench_search.db',
   },
 });
