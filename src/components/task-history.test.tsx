@@ -1,7 +1,7 @@
 /* @vitest-environment jsdom */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { TaskHistory } from './task-history';
+import { TaskHistory, clearHistoryCache } from './task-history';
 import * as historyActions from '@/app/actions/history';
 import React from 'react';
 
@@ -12,19 +12,25 @@ vi.mock('@/app/actions/history', () => ({
 
 // Mock the UI components from shadcn/ui to simplify testing
 vi.mock('@/components/ui/sheet', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Sheet: ({ children, open, onOpenChange }: any) => (
     <div data-testid="sheet" data-open={open}>
         {children}
         <button onClick={() => onOpenChange(!open)}>Toggle Sheet</button>
     </div>
   ),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SheetContent: ({ children }: any) => <div data-testid="sheet-content">{children}</div>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SheetHeader: ({ children }: any) => <div>{children}</div>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SheetTitle: ({ children }: any) => <div>{children}</div>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SheetTrigger: ({ children }: any) => <div>{children}</div>,
 }));
 
 vi.mock('@/components/ui/button', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Button: ({ children, onClick, ...props }: any) => (
     <button onClick={onClick} {...props}>
       {children}
@@ -35,6 +41,7 @@ vi.mock('@/components/ui/button', () => ({
 describe('TaskHistory Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    clearHistoryCache();
   });
 
   it('fetches history when opened', async () => {
@@ -85,8 +92,8 @@ describe('TaskHistory Component', () => {
   });
 
   it('fetches new history when taskId changes', async () => {
-    const mockHistory1 = [{ id: 1, taskId: 1, changedField: 'created', oldValue: null, newValue: 'Task 1 created', changedAt: new Date() }];
-    const mockHistory2 = [{ id: 2, taskId: 2, changedField: 'created', oldValue: null, newValue: 'Task 2 created', changedAt: new Date() }];
+    const mockHistory1 = [{ id: 1, taskId: 1, changedField: 'title', oldValue: null, newValue: 'Task 1 created', changedAt: new Date() }];
+    const mockHistory2 = [{ id: 2, taskId: 2, changedField: 'title', oldValue: null, newValue: 'Task 2 created', changedAt: new Date() }];
 
     vi.mocked(historyActions.getTaskHistory)
       .mockResolvedValueOnce(mockHistory1)
