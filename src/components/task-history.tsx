@@ -48,7 +48,7 @@ function getFromCache(taskId: number): HistoryItem[] | null {
 }
 
 function setToCache(taskId: number, data: HistoryItem[]) {
-  if (historyCache.size >= MAX_CACHE_SIZE) {
+  if (!historyCache.has(taskId) && historyCache.size >= MAX_CACHE_SIZE) {
     // Remove oldest entry
     const oldestKey = historyCache.keys().next().value;
     if (oldestKey !== undefined) {
