@@ -167,3 +167,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
 export function clearHistoryCache() {
   historyCache.clear();
 }
+
+export function invalidateTaskHistory(taskId: number) {
+  historyCache.delete(taskId);
+}
