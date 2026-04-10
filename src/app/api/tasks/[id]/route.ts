@@ -7,7 +7,7 @@ import {
   reminders,
   attachments,
 } from '@/lib/schema';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { updateTaskSchema } from '@/lib/validators';
 import { invalidateTaskCountCache } from '@/lib/cache';
 
@@ -61,10 +61,29 @@ export async function PUT(
         if (toInsert.length > 0) {
           await tx.insert(subtasks).values(toInsert);
         }
-        for (const st of toUpdate) {
+        const CHUNK_SIZE = 100;
+        for (let i = 0; i < toUpdate.length; i += CHUNK_SIZE) {
+          const chunk = toUpdate.slice(i, i + CHUNK_SIZE);
+
+          let nameSql = sql`CASE `;
+          let completedSql = sql`CASE `;
+
+          for (const st of chunk) {
+            nameSql = sql`${nameSql} WHEN ${subtasks.id} = ${st.id} THEN ${st.name} `;
+            completedSql = sql`${completedSql} WHEN ${subtasks.id} = ${st.id} THEN ${st.completed ? 1 : 0} `;
+          }
+
+          nameSql = sql`${nameSql} ELSE ${subtasks.name} END`;
+          completedSql = sql`${completedSql} ELSE ${subtasks.completed} END`;
+
           await tx.update(subtasks)
-            .set({ name: st.name, completed: st.completed })
-            .where(eq(subtasks.id, st.id!));
+            .set({
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              name: nameSql as any,
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              completed: completedSql as any
+            })
+            .where(inArray(subtasks.id, chunk.map(c => c.id!)));
         }
       }
 
