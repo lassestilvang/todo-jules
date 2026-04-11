@@ -30,16 +30,21 @@ const TaskComponent = ({ task }: TaskProps) => {
         <CardContent className="p-4 flex items-start gap-4">
           <div className="pt-1">
             <Checkbox
-                 checked={task.completed ?? false}
+                id={`task-${task.id}`}
+                checked={task.completed ?? false}
                 onCheckedChange={handleToggle}
+                aria-label={`Mark ${task.name} as ${task.completed ? 'incomplete' : 'complete'}`}
             />
           </div>
 
           <div className="flex-1 space-y-1">
             <div className="flex items-center justify-between">
-                <h3 className={`font-medium ${task.completed ? 'line-through text-muted-foreground' : ''}`}>
+                <label
+                    htmlFor={`task-${task.id}`}
+                    className={`font-medium cursor-pointer select-none transition-colors hover:text-primary ${task.completed ? 'line-through text-muted-foreground' : ''}`}
+                >
                     {task.name}
-                </h3>
+                </label>
                 <div className="flex items-center gap-2">
                     <TaskHistory taskId={task.id} />
                     {task.priority && task.priority !== 'None' && (
