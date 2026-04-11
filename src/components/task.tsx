@@ -97,4 +97,20 @@ const TaskComponent = ({ task }: TaskProps) => {
   );
 };
 
-export default TaskComponent;
+/**
+ * ⚡ Bolt Optimization: Wrap TaskComponent with React.memo()
+ *
+ * Why:
+ * During drag-and-drop operations in TaskList, the `optimisticTasks` array is reordered
+ * using `arrayMove()`. This causes a re-render of the parent `TaskList` component.
+ * Because `arrayMove` mutates the array order but preserves the exact object references
+ * of the tasks themselves, wrapping `TaskComponent` in `React.memo` ensures that
+ * only the tasks that actually had their props changed (which is none during a pure reorder)
+ * will re-render.
+ *
+ * Impact:
+ * Reduces unnecessary DOM operations and React component tree reconciliations by ~O(N)
+ * where N is the number of tasks in the list, significantly smoothing out drag animations
+ * for large lists.
+ */
+export default React.memo(TaskComponent);
