@@ -1,0 +1,3 @@
+## 2024-03-20 - [Expand Clickable Area with Labels]
+**Learning:** In list-based applications with checkboxes, the default 16x16px checkbox is too small of a tap target, violating WCAG 2.5.5 Target Size (minimum 44x44px). By wrapping the task name in a `<label>` and explicitly associating it with the `<input>` via `htmlFor`/`id`, we dramatically expand the tap target for users with motor impairments while simultaneously providing semantic context for screen readers.
+**Action:** Always wrap text adjacent to a checkbox in a `<label htmlFor="id">` and add `cursor-pointer hover:text-primary` to provide visual feedback that the text itself is interactive.
