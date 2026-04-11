@@ -70,6 +70,7 @@ export async function PUT(
         if (toInsert.length > 0) {
           await tx.insert(subtasks).values(toInsert);
         }
+
         if (toUpdate.length > 0) {
           const CHUNK_SIZE = 100;
           for (let i = 0; i < toUpdate.length; i += CHUNK_SIZE) {
