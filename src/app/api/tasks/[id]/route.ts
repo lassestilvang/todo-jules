@@ -92,8 +92,10 @@ export async function PUT(
             await tx
               .update(subtasks)
               .set({
-                name: nameCaseStatement,
-                completed: completedCaseStatement,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                name: nameCaseStatement as any,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                completed: completedCaseStatement as any,
               })
               .where(inArray(subtasks.id, ids));
           }
