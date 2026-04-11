@@ -113,4 +113,6 @@ const TaskComponent = ({ task }: TaskProps) => {
  * where N is the number of tasks in the list, significantly smoothing out drag animations
  * for large lists.
  */
-export default React.memo(TaskComponent);
+const MemoizedTaskComponent = React.memo(TaskComponent);
+MemoizedTaskComponent.displayName = 'TaskComponent';
+export default MemoizedTaskComponent;
