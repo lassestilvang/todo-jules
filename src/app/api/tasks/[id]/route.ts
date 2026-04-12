@@ -18,6 +18,9 @@ export async function PUT(
   try {
     const { id } = await params;
     const taskId = parseInt(id, 10);
+    if (isNaN(taskId)) {
+      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+    }
     const body = await request.json();
     const validatedBody = updateTaskSchema.parse(body);
 
@@ -164,6 +167,9 @@ export async function DELETE(
   try {
     const { id } = await params;
     const taskId = parseInt(id, 10);
+    if (isNaN(taskId)) {
+      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+    }
     await db.delete(tasks).where(eq(tasks.id, taskId));
 
     invalidateTaskCountCache();
