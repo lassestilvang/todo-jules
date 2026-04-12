@@ -114,7 +114,7 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
     return (
       <div className="text-center p-12 mt-8 border-2 border-dashed rounded-lg bg-card/50">
         <div className="flex justify-center mb-4 text-muted-foreground">
-          <ClipboardList className="h-12 w-12 opacity-20" />
+<ClipboardList className="h-12 w-12 opacity-20" aria-hidden="true" />
         </div>
         <h3 className="text-lg font-medium text-foreground">No tasks found</h3>
         <p className="text-sm text-muted-foreground mt-1">
