@@ -167,7 +167,7 @@ export async function DELETE(
   try {
     const { id } = await params;
     const taskId = parseInt(id, 10);
-    if (isNaN(taskId)) {
+    if (Number.isNaN(taskId) || String(taskId) !== id) {
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
     }
     await db.delete(tasks).where(eq(tasks.id, taskId));
