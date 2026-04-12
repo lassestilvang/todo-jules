@@ -7,7 +7,7 @@ import {
   reminders,
   attachments,
 } from '@/lib/schema';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, notInArray, sql, and } from 'drizzle-orm';
 import { updateTaskSchema } from '@/lib/validators';
 import { invalidateTaskCountCache } from '@/lib/cache';
 
@@ -18,6 +18,9 @@ export async function PUT(
   try {
     const { id } = await params;
     const taskId = parseInt(id, 10);
+    if (Number.isNaN(taskId) || String(taskId) !== id) {
+      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+    }
     const body = await request.json();
     const validatedBody = updateTaskSchema.parse(body);
 
@@ -42,7 +45,9 @@ export async function PUT(
 
       // Handle subtasks
       if (validatedBody.subtasks) {
-        const existingSubtasks = await tx.select().from(subtasks).where(eq(subtasks.taskId, taskId));
+        const incomingIds = validatedBody.subtasks
+          .map((st) => st.id)
+          .filter((id) => id !== undefined) as number[];
 
         const incomingIds = validatedBody.subtasks.map((st) => st.id).filter((id) => id !== undefined);
         const incomingIdsSet = new Set(incomingIds);
@@ -54,18 +59,59 @@ export async function PUT(
           completed: st.completed,
           taskId: taskId,
         }));
+        if (incomingIds.length > 0) {
+          await tx.delete(subtasks).where(
+            and(
+              eq(subtasks.taskId, taskId),
+              notInArray(subtasks.id, incomingIds)
+            )
+          );
+        } else {
+          await tx.delete(subtasks).where(eq(subtasks.taskId, taskId));
+        }
+
+        const toInsert = validatedBody.subtasks
+          .filter((st) => st.id === undefined)
+          .map((st) => ({
+            name: st.name,
+            completed: st.completed,
+            taskId: taskId,
+          }));
+
         const toUpdate = validatedBody.subtasks.filter((st) => st.id !== undefined);
 
-        if (toDeleteIds.length > 0) {
-          await tx.delete(subtasks).where(inArray(subtasks.id, toDeleteIds));
-        }
         if (toInsert.length > 0) {
           await tx.insert(subtasks).values(toInsert);
         }
-        for (const st of toUpdate) {
-          await tx.update(subtasks)
-            .set({ name: st.name, completed: st.completed })
-            .where(eq(subtasks.id, st.id!));
+
+        if (toUpdate.length > 0) {
+          const CHUNK_SIZE = 100;
+          for (let i = 0; i < toUpdate.length; i += CHUNK_SIZE) {
+            const chunk = toUpdate.slice(i, i + CHUNK_SIZE);
+
+            const nameChunks: import('drizzle-orm').SQL[] = [];
+            const completedChunks: import('drizzle-orm').SQL[] = [];
+            const ids: number[] = [];
+
+            for (const item of chunk) {
+              nameChunks.push(sql`when ${item.id} then ${item.name}`);
+              completedChunks.push(sql`when ${item.id} then ${item.completed ? 1 : 0}`);
+              ids.push(item.id!);
+            }
+
+            const nameCaseStatement = sql`case ${subtasks.id} ${sql.join(nameChunks, sql` `)} else ${subtasks.name} end`;
+            const completedCaseStatement = sql`case ${subtasks.id} ${sql.join(completedChunks, sql` `)} else ${subtasks.completed} end`;
+
+            await tx
+              .update(subtasks)
+              .set({
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                name: nameCaseStatement as any,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                completed: completedCaseStatement as any,
+              })
+              .where(inArray(subtasks.id, ids));
+          }
         }
       }
 
@@ -131,6 +177,9 @@ export async function DELETE(
   try {
     const { id } = await params;
     const taskId = parseInt(id, 10);
+    if (Number.isNaN(taskId) || String(taskId) !== id) {
+      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+    }
     await db.delete(tasks).where(eq(tasks.id, taskId));
 
     invalidateTaskCountCache();

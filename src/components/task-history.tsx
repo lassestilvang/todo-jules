@@ -28,6 +28,7 @@ interface HistoryItem {
 interface CacheEntry {
   data: HistoryItem[];
   timestamp: number;
+  promise?: Promise<HistoryItem[]>;
 }
 
 // Module-level cache to prevent redundant fetches
@@ -36,7 +37,7 @@ const historyCache = new Map<number, CacheEntry>();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const MAX_CACHE_SIZE = 100;
 
-function getFromCache(taskId: number): HistoryItem[] | null {
+function getFromCache(taskId: number): CacheEntry | null {
   const entry = historyCache.get(taskId);
   if (!entry) return null;
 
@@ -44,10 +45,10 @@ function getFromCache(taskId: number): HistoryItem[] | null {
     historyCache.delete(taskId);
     return null;
   }
-  return entry.data;
+  return entry;
 }
 
-function setToCache(taskId: number, data: HistoryItem[]) {
+function setToCache(taskId: number, data: HistoryItem[], promise?: Promise<HistoryItem[]>) {
   if (!historyCache.has(taskId) && historyCache.size >= MAX_CACHE_SIZE) {
     // Remove oldest entry
     const oldestKey = historyCache.keys().next().value;
@@ -55,63 +56,72 @@ function setToCache(taskId: number, data: HistoryItem[]) {
       historyCache.delete(oldestKey);
     }
   }
-  historyCache.set(taskId, { data, timestamp: Date.now() });
+  historyCache.set(taskId, { data, timestamp: Date.now(), promise });
 }
 
 export function TaskHistory({ taskId }: TaskHistoryProps) {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [hasFetched, setHasFetched] = useState(false);
 
-  // Reset state when taskId changes to prevent stale data
-  useEffect(() => {
-    // Check if we already have it in cache for the new taskId
-    const cachedData = getFromCache(taskId);
-    if (cachedData) {
-      setHistory(cachedData);
-      setHasFetched(true);
-    } else {
-      setHistory([]);
-      setHasFetched(false);
-    }
-  }, [taskId]);
-
+  // Initialize state on open
   useEffect(() => {
     let isMounted = true;
-    if (isOpen && (!hasFetched || !getFromCache(taskId))) {
-        const fetchData = async () => {
-            const cachedData = getFromCache(taskId);
-            if (cachedData) {
-                if (isMounted) {
-                    setHistory(cachedData);
-                    setHasFetched(true);
-                }
-                return;
-            }
 
+    if (!isOpen) return;
+
+    const fetchData = async () => {
+        const cachedEntry = getFromCache(taskId);
+
+        if (cachedEntry && cachedEntry.data && cachedEntry.data.length > 0) {
+            setHistory(cachedEntry.data);
+            return;
+        }
+
+        if (cachedEntry && cachedEntry.promise) {
             setLoading(true);
             try {
-                const data = await getTaskHistory(taskId);
+                const data = await cachedEntry.promise;
                 if (isMounted) {
-                    setToCache(taskId, data);
                     setHistory(data);
-                    setHasFetched(true);
                 }
             } catch (error) {
-                console.error("Failed to fetch history", error);
+                console.error("Failed to fetch history from promise", error);
             } finally {
-                if (isMounted) {
-                    setLoading(false);
-                }
+                if (isMounted) setLoading(false);
             }
-        };
-        fetchData();
-    }
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const fetchPromise = getTaskHistory(taskId);
+            setToCache(taskId, [], fetchPromise);
+
+            const data = await fetchPromise;
+
+            if (isMounted) {
+                setToCache(taskId, data);
+                setHistory(data);
+            } else {
+                setToCache(taskId, data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch history", error);
+            historyCache.delete(taskId);
+        } finally {
+            if (isMounted) {
+                setLoading(false);
+            }
+        }
+    };
+
+    fetchData();
+
     return () => {
         isMounted = false;
     }
-  }, [isOpen, taskId, hasFetched]);
+  }, [isOpen, taskId]);
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>

@@ -46,7 +46,7 @@ async function main() {
               const result = insertLabel.run(label.name, label.color, label.icon);
               labelId = result.lastInsertRowid;
             }
-            labelCache.set(label.name, labelId);
+            if (labelId !== undefined) { labelCache.set(label.name, labelId); }
           }
           insertTaskLabel.run(task.id, labelId);
         }

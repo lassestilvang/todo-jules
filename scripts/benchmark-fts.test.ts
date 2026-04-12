@@ -35,11 +35,12 @@ describe('benchmark FTS5', () => {
       for (let i = 0; i < iterations; i++) {
         const start = performance.now();
         // FTS5 MATCH
+        const ftsQuery = '"' + query.replace(/"/g, '""') + '*"';
         await db.all(sql`
           SELECT * FROM tasks
           WHERE id IN (
             SELECT rowid FROM tasks_fts
-            WHERE tasks_fts MATCH '"' + query.replace(/"/g, '""') + '*"'
+            WHERE tasks_fts MATCH ${ftsQuery}
           )
           LIMIT 20
         `);

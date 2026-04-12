@@ -1,0 +1,3 @@
+## 2026-04-11 - [Memoizing Drag and Drop Elements]
+**Learning:** When using `@dnd-kit/sortable` and `arrayMove` to manage list state optimistically during drag-and-drop operations, the object references of the items within the array are preserved, even though their positions change.
+**Action:** Always wrap complex list item components (e.g. `TaskComponent`) in `React.memo()` when they are part of a drag-and-drop reorder operation. Ensure that stable keys (e.g., `task.id`) are used in the list to allow React to correctly identify and reuse these memoized components. This prevents an O(N) re-render of untouched list items, avoiding massive CPU overhead and janky animations in large lists.
