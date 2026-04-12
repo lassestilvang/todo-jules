@@ -3,6 +3,7 @@
 import React, { useOptimistic, useTransition } from 'react';
 import { Task } from '@/lib/types';
 import TaskComponent from '../task';
+import { ClipboardList } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
@@ -62,7 +63,7 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
     initialTasks,
     (state, newOrder: Task[]) => newOrder
   );
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -94,7 +95,7 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
             });
           }
           return acc;
-        }, [] as { id: string; order: number }[]);
+        }, [] as { id: number; order: number }[]);
 
         try {
           const result = await reorderTasks(updates);
@@ -111,8 +112,14 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
 
   if (optimisticTasks.length === 0) {
     return (
-      <div className="text-center text-muted-foreground mt-8">
-        <p>No tasks found.</p>
+      <div className="text-center p-12 mt-8 border-2 border-dashed rounded-lg bg-card/50">
+        <div className="flex justify-center mb-4 text-muted-foreground">
+<ClipboardList className="h-12 w-12 opacity-20" aria-hidden="true" />
+        </div>
+        <h3 className="text-lg font-medium text-foreground">No tasks found</h3>
+        <p className="text-sm text-muted-foreground mt-1">
+          Get started by adding a new task below.
+        </p>
       </div>
     );
   }
