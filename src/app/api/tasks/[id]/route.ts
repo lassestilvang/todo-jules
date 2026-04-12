@@ -45,9 +45,10 @@ export async function PUT(
         const existingSubtasks = await tx.select().from(subtasks).where(eq(subtasks.taskId, taskId));
 
         const incomingIds = validatedBody.subtasks.map((st) => st.id).filter((id) => id !== undefined);
+        const incomingIdsSet = new Set(incomingIds);
         const existingIds = existingSubtasks.map((st) => st.id);
 
-        const toDeleteIds = existingIds.filter((id) => !incomingIds.includes(id));
+        const toDeleteIds = existingIds.filter((id) => !incomingIdsSet.has(id));
         const toInsert = validatedBody.subtasks.filter((st) => st.id === undefined).map((st) => ({
           name: st.name,
           completed: st.completed,
