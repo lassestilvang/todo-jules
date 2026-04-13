@@ -1,10 +1,9 @@
-💡 **What:** Expanded the tap target area for the task completion checkbox by wrapping the task name in an associated `<label>`.
+💡 **What**: The UX enhancement added a visual loading spinner (`Loader2` from `lucide-react`) to the primary submit buttons in the `AddTaskForm` and `AddListForm` components.
 
-🎯 **Why:** The default 16x16px checkbox is a very small tap target, which can be difficult for users with motor impairments to hit accurately on mobile and desktop (violates WCAG 2.5.5 minimum target size of 44x44px). Making the text itself clickable provides a much more forgiving and satisfying interaction.
+🎯 **Why**: Previously, when users submitted a form, the button only changed its text (e.g., from "Add Task" to "Adding..."). Adding a spinning icon provides immediate, clear visual feedback that the application is processing their request, reducing user uncertainty during network delays.
 
-📸 **Before/After:** No visual changes other than the cursor changing to a pointer on hover, but functionally it makes completing tasks vastly easier.
+📸 **Before/After**:
+*Before*: Text only: `Adding...`
+*After*: Spinner + Text: `[Spinner Icon] Adding...`
 
-♿ **Accessibility:**
-- Increased hit area for the completion toggle.
-- Added explicit `aria-label` to the Checkbox component for improved screen reader context.
-- Semantically linked the task name to its checkbox using `htmlFor` and `id`.
+♿ **Accessibility**: The buttons already utilized the `disabled` attribute during submission, preventing double-submissions and communicating the state to assistive technologies. The spinner is a purely visual enhancement that reinforces the disabled state for sighted users.

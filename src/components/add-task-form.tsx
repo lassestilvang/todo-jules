@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { DateTimePicker } from '@/components/date-time-picker';
 import { Label } from '@/components/ui/label';
+import { Loader2 } from 'lucide-react';
 
 interface AddTaskFormProps {
   onTaskAdded?: () => void;
@@ -120,7 +121,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
         disabled={isPending}
         className="w-full"
       >
-        {isPending ? 'Adding...' : 'Add Task'}
+        {isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...</> : 'Add Task'}
       </Button>
     </form>
   );
