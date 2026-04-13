@@ -1,3 +1,12 @@
+💡 **What**: The UX enhancement added a visual loading spinner (`Loader2` from `lucide-react`) to the primary submit buttons in the `AddTaskForm` and `AddListForm` components.
+
+🎯 **Why**: Previously, when users submitted a form, the button only changed its text (e.g., from "Add Task" to "Adding..."). Adding a spinning icon provides immediate, clear visual feedback that the application is processing their request, reducing user uncertainty during network delays.
+
+📸 **Before/After**:
+*Before*: Text only: `Adding...`
+*After*: Spinner + Text: `[Spinner Icon] Adding...`
+
+♿ **Accessibility**: The buttons already utilized the `disabled` attribute during submission, preventing double-submissions and communicating the state to assistive technologies. The spinner is a purely visual enhancement that reinforces the disabled state for sighted users.
 💡 What: Wrapped `SortableTaskItem` inside `src/components/lists/task-list.tsx` using `React.memo()`.
 
 🎯 Why: During drag-and-drop operations, the `optimisticTasks` array is reordered via `arrayMove()`. This causes a full re-render of the parent `TaskList` component. Without `React.memo()`, every single list item is forced to re-render, creating new DOM refs and unnecessarily executing the `useSortable` hook for every item, even though only the dragged item and the shifted items actually changed position. Because `arrayMove` preserves exact object references within the array, memoizing the item component allows React to skip rendering the unaffected items.
