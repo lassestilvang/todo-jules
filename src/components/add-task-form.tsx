@@ -121,7 +121,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
         disabled={isPending}
         className="w-full"
       >
-        {isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...</> : 'Add Task'}
+        {isPending ? <><Loader2 className="animate-spin" /> Adding...</> : 'Add Task'}
       </Button>
     </form>
   );
