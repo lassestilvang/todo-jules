@@ -32,7 +32,7 @@ interface SortableTaskItemProps {
     task: Task;
 }
 
-function SortableTaskItem({ task }: SortableTaskItemProps) {
+const SortableTaskItem = React.memo(function SortableTaskItemComponent({ task }: SortableTaskItemProps) {
     const {
         attributes,
         listeners,
@@ -55,7 +55,7 @@ function SortableTaskItem({ task }: SortableTaskItemProps) {
             <TaskComponent task={task} />
         </div>
     );
-}
+});
 
 
 export function TaskList({ tasks: initialTasks }: TaskListProps) {
