@@ -50,7 +50,7 @@ export async function PUT(
           .map((st) => st.id)
           .filter((id) => id !== undefined) as number[];
 
-                const existingSubtasks = await tx.select().from(subtasks).where(eq(subtasks.taskId, taskId));
+        const existingSubtasks = await tx.select().from(subtasks).where(eq(subtasks.taskId, taskId));
         const incomingIdsSet = new Set(incomingIds);
         const existingIds = existingSubtasks.map((st) => st.id);
 
