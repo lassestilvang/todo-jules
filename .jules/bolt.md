@@ -15,3 +15,6 @@
 ## 2026-04-12 - [Optimizing Object Creation during Map/Filter operations]
 **Learning:** Chaining `.map()` and `.filter()` operations on arrays, particularly during frequently executed loops or UI interaction updates (like drag-and-drop reordering), causes unnecessary intermediate array creations which increases memory allocation overhead and CPU time.
 **Action:** Replace sequential `.map()` and `.filter()` operations with a single `.reduce()` pass when calculating updates that involve transforming and conditionally filtering array items simultaneously. By using an accumulator, you avoid the intermediate array allocations and reduce the algorithmic time/space complexity, resulting in smoother interactive performance (measured >70% improvement for 1000 items).
+## 2026-04-14 - Redundant JS Filtering over DB Operations
+**Learning:** Performing data fetches just to filter arrays in JavaScript (`toDeleteIds` using `Set.has`) is entirely redundant when the database engine can perform the exact same filtering natively and much faster via `notInArray()`.
+**Action:** Always prefer relying on the database for bulk conditional operations like `DELETE WHERE NOT IN` instead of doing an extra `SELECT` roundtrip and processing memory-heavy lists of IDs in the Node.js layer.

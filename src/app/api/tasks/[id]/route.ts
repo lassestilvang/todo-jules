@@ -49,12 +49,10 @@ export async function PUT(
           .map((st) => st.id)
           .filter((id) => id !== undefined) as number[];
 
-                const existingSubtasks = await tx.select().from(subtasks).where(eq(subtasks.taskId, taskId));
-        const incomingIdsSet = new Set(incomingIds);
-        const existingIds = existingSubtasks.map((st) => st.id);
-
-        const toDeleteIds = existingIds.filter((id) => !incomingIdsSet.has(id));
-                if (incomingIds.length > 0) {
+        // ⚡ Bolt Optimization:
+        // We rely entirely on the DB's `notInArray` for targeted subtask deletion.
+        // This avoids an unnecessary `SELECT` roundtrip and O(N) filtering in JS memory.
+        if (incomingIds.length > 0) {
           await tx.delete(subtasks).where(
             and(
               eq(subtasks.taskId, taskId),
