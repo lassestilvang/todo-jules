@@ -42,7 +42,7 @@ export const updateTaskSchema = z.object({
     remindAt: z.date(),
   })).optional(),
   attachments: z.array(z.object({
-    url: z.string().url('Invalid URL').refine(val => val.startsWith('http://') || val.startsWith('https://'), { message: 'URL must start with http or https' }),
+    url: z.string().url('Invalid URL').regex(/^https?:\/\//i, 'URL must start with http:// or https://'),
   })).optional(),
 });
 
