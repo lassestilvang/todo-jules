@@ -1,21 +1,5 @@
-💡 **What**: The UX enhancement added a visual loading spinner (`Loader2` from `lucide-react`) to the primary submit buttons in the `AddTaskForm` and `AddListForm` components.
-
-🎯 **Why**: Previously, when users submitted a form, the button only changed its text (e.g., from "Add Task" to "Adding..."). Adding a spinning icon provides immediate, clear visual feedback that the application is processing their request, reducing user uncertainty during network delays.
-
-📸 **Before/After**:
-*Before*: Text only: `Adding...`
-*After*: Spinner + Text: `[Spinner Icon] Adding...`
-
-♿ **Accessibility**: The buttons already utilized the `disabled` attribute during submission, preventing double-submissions and communicating the state to assistive technologies. The spinner is a purely visual enhancement that reinforces the disabled state for sighted users.
-💡 What: Wrapped `SortableTaskItem` inside `src/components/lists/task-list.tsx` using `React.memo()`.
-
-🎯 Why: During drag-and-drop operations, the `optimisticTasks` array is reordered via `arrayMove()`. This causes a full re-render of the parent `TaskList` component. Without `React.memo()`, every single list item is forced to re-render, creating new DOM refs and unnecessarily executing the `useSortable` hook for every item, even though only the dragged item and the shifted items actually changed position. Because `arrayMove` preserves exact object references within the array, memoizing the item component allows React to skip rendering the unaffected items.
-
-📊 Impact: Reduces unnecessary React component tree reconciliations and DOM operations from O(N) to O(1) during drag-and-drop operations. This significantly smooths out drag animations and prevents main thread blocking, particularly noticeable for large task lists.
-
-🔬 Measurement: Use React Developer Tools Profiler. Record a drag-and-drop operation with >100 tasks. Observe that only the actively moved items are re-rendered, rather than the entire list.
-💡 **What:** Replaced the `.map()` and `.filter()` operations inside `src/components/lists/task-list.tsx` with a single `.reduce()` step.
-
-🎯 **Why:** Drag and drop tasks across a list runs multiple operations rapidly. A `.map()` and `.filter()` sequentially create intermediate arrays which adds garbage-collection overhead and extra latency. A single pass using `.reduce()` prevents intermediate array allocations, eliminating unnecessary overhead during smooth UI dragging animations.
-
-📊 **Measured Improvement:** Utilizing the built-in `benchmark-reorder.ts` payload structure against 1,000 array elements, the new logic decreases operational payload evaluation from `~450ms` down to `~130ms` per 10,000 iterations, yielding an approximate **~71%** CPU time performance improvement locally during sorting operations.
+🚨 Severity: HIGH
+💡 Vulnerability: Cross-Site Scripting (XSS) via `javascript:` or `data:` payloads in task attachment URLs. The validation for attachments relied simply on `z.string()`, missing proper URI safety checks.
+🎯 Impact: Attackers could submit a malicious URL as a task attachment. When rendered as a link in the UI and clicked by an unsuspecting user, arbitrary Javascript could execute in the context of the user's session.
+🔧 Fix: Updated Zod schemas for creating and updating tasks in `src/lib/validators.ts` to strictly validate `url: z.string().url()` and enforce `http://` or `https://` protocols via a custom `.refine()` block.
+✅ Verification: Ran testing validations using isolated tests against both schema endpoints with payloads containing valid and invalid schemes, confirming rejection of `javascript:` and non-URL payloads. Standard test suites and linter complete with no degradations.
