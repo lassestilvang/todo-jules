@@ -20,7 +20,7 @@ export const createTaskSchema = z.object({
     remindAt: z.date(),
   })).optional(),
   attachments: z.array(z.object({
-    url: z.string(),
+    url: z.string().url('Invalid URL').regex(/^https?:\/\//i, 'URL must start with http:// or https://'),
   })).optional(),
 });
 
@@ -42,7 +42,7 @@ export const updateTaskSchema = z.object({
     remindAt: z.date(),
   })).optional(),
   attachments: z.array(z.object({
-    url: z.string(),
+    url: z.string().url('Invalid URL').regex(/^https?:\/\//i, 'URL must start with http:// or https://'),
   })).optional(),
 });
 

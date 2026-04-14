@@ -1,3 +1,8 @@
+🚨 Severity: HIGH
+💡 Vulnerability: Cross-Site Scripting (XSS) via `javascript:` or `data:` payloads in task attachment URLs. The validation for attachments relied simply on `z.string()`, missing proper URI safety checks.
+🎯 Impact: Attackers could submit a malicious URL as a task attachment. When rendered as a link in the UI and clicked by an unsuspecting user, arbitrary Javascript could execute in the context of the user's session.
+🔧 Fix: Updated Zod schemas for creating and updating tasks in `src/lib/validators.ts` to strictly validate `url: z.string().url()` and enforce `http://` or `https://` protocols via a custom `.refine()` block.
+✅ Verification: Ran testing validations using isolated tests against both schema endpoints with payloads containing valid and invalid schemes, confirming rejection of `javascript:` and non-URL payloads. Standard test suites and linter complete with no degradations.
 💡 **What:**
 Removed a redundant `SELECT` query (`tx.select().from(subtasks)`) and its associated JavaScript Set/Array processing logic in `src/app/api/tasks/[id]/route.ts`.
 
