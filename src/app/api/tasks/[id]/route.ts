@@ -45,6 +45,7 @@ export async function PUT(
 
       // Handle subtasks
       if (validatedBody.subtasks) {
+        const existingSubtasks = await tx.select().from(subtasks).where(eq(subtasks.taskId, taskId));
         const incomingIds = validatedBody.subtasks
           .map((st) => st.id)
           .filter((id) => id !== undefined) as number[];
@@ -54,7 +55,7 @@ export async function PUT(
         const existingIds = existingSubtasks.map((st) => st.id);
 
         const toDeleteIds = existingIds.filter((id) => !incomingIdsSet.has(id));
-                if (incomingIds.length > 0) {
+        if (incomingIds.length > 0) {
           await tx.delete(subtasks).where(
             and(
               eq(subtasks.taskId, taskId),
