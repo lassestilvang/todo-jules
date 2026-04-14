@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AddListFormProps {
@@ -107,7 +107,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
             </div>
           </div>
           <Button type="submit" disabled={isPending} className="w-full">
-            {isPending ? 'Creating...' : 'Create List'}
+            {isPending ? <><Loader2 className="animate-spin" /> Creating...</> : 'Create List'}
           </Button>
         </form>
       </DialogContent>
