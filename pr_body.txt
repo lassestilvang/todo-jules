@@ -1,18 +1,4 @@
-🚨 Severity: HIGH
-💡 Vulnerability: Cross-Site Scripting (XSS) via `javascript:` or `data:` payloads in task attachment URLs. The validation for attachments relied simply on `z.string()`, missing proper URI safety checks.
-🎯 Impact: Attackers could submit a malicious URL as a task attachment. When rendered as a link in the UI and clicked by an unsuspecting user, arbitrary Javascript could execute in the context of the user's session.
-🔧 Fix: Updated Zod schemas for creating and updating tasks in `src/lib/validators.ts` to strictly validate `url: z.string().url()` and enforce `http://` or `https://` protocols via a custom `.refine()` block.
-✅ Verification: Ran testing validations using isolated tests against both schema endpoints with payloads containing valid and invalid schemes, confirming rejection of `javascript:` and non-URL payloads. Standard test suites and linter complete with no degradations.
-💡 **What:**
-Removed a redundant `SELECT` query (`tx.select().from(subtasks)`) and its associated JavaScript Set/Array processing logic in `src/app/api/tasks/[id]/route.ts`.
-
-🎯 **Why:**
-During a task update (PUT endpoint), the application was fetching all existing subtasks into Node.js memory just to calculate a set of `toDeleteIds` using `Set.has()`. However, this `toDeleteIds` array was never actually used in the subsequent deletion query. The deletion query already efficiently uses `notInArray(subtasks.id, incomingIds)` natively within SQLite. The JS-level filtering and the entire `SELECT` query were completely dead code.
-
-📊 **Impact:**
-- Eliminates 1 unnecessary database round-trip per task update.
-- Eliminates O(N) memory allocations and CPU cycles spent filtering subtask IDs in Node.js.
-- Cleaned up the API route logic.
-
-🔬 **Measurement:**
-- Run `pnpm test` to verify the task update test suite continues to pass with 100% correctness without the removed logic.
+💡 What: Removed unused database fetch `existingSubtasks` and memory-bound Array comparison logic.
+🎯 Why: The variables (`existingSubtasks`, `existingIds`, `toDeleteIds`) were completely unused because the subtask deletion operation is executed flawlessly using purely database-native `notInArray()` expressions in Drizzle ORM.
+📊 Impact: Eliminates unnecessary `SELECT` network round trips and heavy intermediate array allocations in JS, reducing memory overhead and API latency during bulk subtask updates.
+🔬 Measurement: Verified the removal of unused variables, and that test suite runs completely flawlessly over the database deletion API constraints.
