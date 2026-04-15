@@ -140,7 +140,7 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
     return { success: false, error: validation.error.flatten().fieldErrors };
   }
 
-  const validatedData = validation.data;
+  const { subtasks, labels, reminders, attachments, ...validatedData } = validation.data;
 
   try {
     const currentTask = await db.query.tasks.findFirst({
