@@ -27,3 +27,8 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-04-14 - Redundant JS Filtering over DB Operations
 **Learning:** Performing data fetches just to filter arrays in JavaScript (`toDeleteIds` using `Set.has`) is entirely redundant when the database engine can perform the exact same filtering natively and much faster via `notInArray()`.
 **Action:** Always prefer relying on the database for bulk conditional operations like `DELETE WHERE NOT IN` instead of doing an extra `SELECT` roundtrip and processing memory-heavy lists of IDs in the Node.js layer.
+## 2024-04-15 - Unnecessary Arrays from Drizzle Selects
+
+**Learning:** When using `db.transaction()` and managing relation operations (like updating subtasks inside a task), fetching the existing entities solely to determine what to delete using `Array.filter` and `.includes` can be an unnecessary bottleneck. It's often more performant to simply use Drizzle's `.where(notInArray())` entirely at the database query layer to delete obsolete subtasks instead of fetching existing records into JavaScript memory first.
+
+**Action:** Before writing JS-side array diffing logic (`existingIds.filter(...)`), check if the filtering constraint can simply be expressed directly in SQL/Drizzle constraints (like `notInArray`). Removing the JS iteration entirely speeds up processing.

@@ -1,0 +1,4 @@
+💡 What: Removed unused database fetch `existingSubtasks` and memory-bound Array comparison logic.
+🎯 Why: The variables (`existingSubtasks`, `existingIds`, `toDeleteIds`) were completely unused because the subtask deletion operation is executed flawlessly using purely database-native `notInArray()` expressions in Drizzle ORM.
+📊 Impact: Eliminates unnecessary `SELECT` network round trips and heavy intermediate array allocations in JS, reducing memory overhead and API latency during bulk subtask updates.
+🔬 Measurement: Verified the removal of unused variables, and that test suite runs completely flawlessly over the database deletion API constraints.
