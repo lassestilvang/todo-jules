@@ -140,7 +140,7 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
     return { success: false, error: validation.error.flatten().fieldErrors };
   }
 
-  const { subtasks, labels, reminders, attachments, ...validatedData } = validation.data;
+  const validatedData = validation.data;
 
   try {
     const currentTask = await db.query.tasks.findFirst({
@@ -149,7 +149,7 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
 
     if (!currentTask) return { success: false, error: 'Task not found' };
 
-    const result = await db.update(tasks).set(validatedData).where(eq(tasks.id, id)).returning();
+    const result = await db.update(tasks).set(validatedData as Partial<typeof tasks.$inferInsert>).where(eq(tasks.id, id)).returning();
     const updatedTask = result[0];
 
     // Log history for changed fields
