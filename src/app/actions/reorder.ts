@@ -6,6 +6,16 @@ import { sql, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 export async function reorderTasks(items: { id: number; order: number }[]) {
+  if (!Array.isArray(items)) {
+    return { success: false, error: 'Invalid items array' };
+  }
+
+  for (const item of items) {
+    if (!item || typeof item.id !== 'number' || isNaN(item.id) || typeof item.order !== 'number' || isNaN(item.order)) {
+      return { success: false, error: 'Invalid item data' };
+    }
+  }
+
   try {
     if (items.length === 0) return { success: true };
 

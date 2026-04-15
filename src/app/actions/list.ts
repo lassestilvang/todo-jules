@@ -25,6 +25,10 @@ export async function createList(name: string, color: string, emoji: string) {
 }
 
 export async function deleteList(id: number) {
+  if (typeof id !== 'number' || isNaN(id)) {
+    return { success: false, error: 'Invalid List ID' };
+  }
+
   try {
     await db.delete(lists).where(eq(lists.id, id));
     revalidatePath('/', 'layout');

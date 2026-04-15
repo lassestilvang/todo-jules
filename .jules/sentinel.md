@@ -7,3 +7,7 @@
 **Vulnerability:** Missing Input Validation on `[id]` Path Parameters.
 **Learning:** `parseInt` can return `NaN` when provided non-numeric strings. Passing `NaN` directly to Drizzle queries (`eq(tasks.id, NaN)`) can result in undefined behavior, skipped database operations without throwing errors, or database type errors.
 **Prevention:** Always immediately follow `parseInt` with an `isNaN()` check on path parameters and return a 400 Bad Request to fail securely.
+## 2025-05-18 - Missing Input Validation in Server Actions (Mass Assignment)
+**Vulnerability:** Server Actions in Next.js (`use server`) are publicly accessible API endpoints. Functions like `updateTask` were implicitly trusting `Partial<typeof tasks.$inferInsert>` and blindly passing it to database `update().set(data)` calls. This allows an attacker to bypass TypeScript types, inject unauthorized fields (e.g., arbitrarily overriding `id`, `listId`, or `createdAt`), and potentially cause internal 500 errors by sending invalid data types.
+**Learning:** TypeScript types are erased at runtime and provide zero security for network boundaries. In Next.js App Router, every exported function in a `use server` file must be treated with the same suspicion as a REST endpoint.
+**Prevention:** Always validate all incoming data to Server Actions using strict runtime schemas (like Zod) to strip unauthorized fields, and validate all ID parameters before processing.
