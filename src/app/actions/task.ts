@@ -6,7 +6,7 @@ import { eq, isNull, and, gte, lte, asc, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { after } from 'next/server';
 import { logTaskHistory } from '@/lib/history';
-import { createTaskSchema } from '@/lib/validators';
+import { createTaskSchema, updateTaskSchema } from '@/lib/validators';
 import { z } from 'zod';
 import { invalidateTaskCountCache } from '@/lib/cache';
 
@@ -131,6 +131,17 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
 }
 
 export async function updateTask(id: number, data: Partial<typeof tasks.$inferInsert>) {
+  if (typeof id !== 'number' || isNaN(id)) {
+    return { success: false, error: 'Invalid Task ID' };
+  }
+
+  const validation = updateTaskSchema.safeParse(data);
+  if (!validation.success) {
+    return { success: false, error: validation.error.flatten().fieldErrors };
+  }
+
+  const validatedData = validation.data;
+
   try {
     const currentTask = await db.query.tasks.findFirst({
       where: eq(tasks.id, id),
@@ -138,14 +149,14 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
 
     if (!currentTask) return { success: false, error: 'Task not found' };
 
-    const result = await db.update(tasks).set(data).where(eq(tasks.id, id)).returning();
+    const result = await db.update(tasks).set(validatedData as Partial<typeof tasks.$inferInsert>).where(eq(tasks.id, id)).returning();
     const updatedTask = result[0];
 
     // Log history for changed fields
     const historyLogs: HistoryLog[] = [];
-    const keys = Object.keys(data) as (keyof typeof data)[];
+    const keys = Object.keys(validatedData) as (keyof typeof validatedData)[];
     for (const key of keys) {
-      const newValue = data[key];
+      const newValue = validatedData[key];
       const oldValue = currentTask[key as keyof typeof currentTask];
 
       if (newValue !== oldValue) {
@@ -171,6 +182,10 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
 }
 
 export async function deleteTask(id: number) {
+  if (typeof id !== 'number' || isNaN(id)) {
+    return { success: false, error: 'Invalid Task ID' };
+  }
+
   try {
     await db.delete(tasks).where(eq(tasks.id, id));
     invalidateTaskCountCache();
@@ -183,5 +198,11 @@ export async function deleteTask(id: number) {
 }
 
 export async function toggleTaskCompletion(id: number, completed: boolean) {
+    if (typeof id !== 'number' || isNaN(id)) {
+        return { success: false, error: 'Invalid Task ID' };
+    }
+    if (typeof completed !== 'boolean') {
+        return { success: false, error: 'Invalid completion status' };
+    }
     return updateTask(id, { completed });
 }
