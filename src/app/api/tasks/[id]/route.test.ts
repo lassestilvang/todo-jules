@@ -62,8 +62,7 @@ describe('DELETE /api/tasks/[id]', () => {
     });
 
     const deleteMock = { where: vi.fn().mockResolvedValue(undefined) };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(db.delete).mockReturnValue(deleteMock as any);
+    vi.mocked(db.delete).mockReturnValue(deleteMock as unknown as ReturnType<typeof db.delete>);
 
     const response = await DELETE(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
