@@ -1,0 +1,25 @@
+--- src/components/lists/task-list.tsx
++++ src/components/lists/task-list.tsx
+@@ -85,15 +85,13 @@
+         setOptimisticTasks(newItems);
+
+         // Optimization: Only update tasks that have actually changed their position
+-        const updates = newItems.reduce((acc, task, index) => {
+-          if (task.id !== optimisticTasks[index].id) {
+-            acc.push({
+-              id: task.id,
+-              order: index
+-            });
+-          }
+-          return acc;
+-        }, [] as { id: number; order: number }[]);
++        const updates = newItems
++          .map((task, index) => ({
++            id: task.id,
++            order: index
++          }))
++          .filter((update, index) => update.id !== optimisticTasks[index].id);
++
+
+         try {
+           const result = await reorderTasks(updates);
