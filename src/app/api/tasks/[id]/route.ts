@@ -79,9 +79,9 @@ export async function PUT(
           for (let i = 0; i < toUpdate.length; i += CHUNK_SIZE) {
             const chunk = toUpdate.slice(i, i + CHUNK_SIZE);
 
-            const nameChunks: import('drizzle-orm').SQL[] = [];
-            const completedChunks: import('drizzle-orm').SQL[] = [];
-            const ids: number[] = [];
+            const nameChunks = [];
+            const completedChunks = [];
+            const ids = [];
 
             for (const item of chunk) {
               nameChunks.push(sql`when ${item.id} then ${item.name}`);
