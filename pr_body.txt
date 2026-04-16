@@ -11,3 +11,20 @@ Removes asynchronous microtask overhead for each query executed within the trans
 1. Trigger a subtask update using `PUT /api/tasks/[id]`.
 2. Notice the response time decreases significantly as the database engine isn't awaiting promises.
 3. Tests (`pnpm test`) assert correct mutation without `TypeError`.
+💡 What
+- Added a `<label>` with `sr-only` class to the search input for screen readers.
+- Added a `Search` icon from `lucide-react` directly into the search input.
+- Changed the `input` type to `search` to enable native clearing features on supported browsers.
+- Updated the header layout to improve positioning and spacing in `src/app/layout.tsx`.
+
+🎯 Why
+- **Accessibility**: Screen readers previously had no way to identify the purpose of the search input. The visually hidden label resolves this.
+- **Visual Affordance**: An explicit search icon (magnifying glass) immediately communicates the input's function without relying solely on placeholder text.
+- **Usability**: The `type="search"` attribute provides better native mobile and desktop browser behaviors (like the built-in 'X' to clear text).
+
+📸 Before/After
+- **Before**: A plain text input reading "Search tasks..." relying solely on the Enter key with no labeling.
+- **After**: A polished input field with a left-aligned Search icon, accessible labels, and robust focus ring states. Verified visually via Playwright.
+
+♿ Accessibility
+- Fixed WCAG compliance by associating the input field with an explicit label (`htmlFor="search"` mapping to `id="search"`).

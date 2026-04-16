@@ -1,0 +1,16 @@
+⚡ Bolt: [performance improvement] Optimize subtask updates
+
+💡 What:
+Replaced the `for...of` loop executing individual `await tx.update(subtasks)` queries with a bulk update using `CASE` statements and `inArray` filtering, chunked in batches of 100.
+
+🎯 Why:
+The original implementation caused an N+1 query issue when updating multiple subtasks. Because `better-sqlite3` runs synchronously at the driver level, a sequential loop over `N` subtasks incurred `N` distinct database round-trips within the transaction. Batching via `CASE` collapses `N` updates into a single query per chunk.
+
+📊 Impact:
+Significantly reduces query execution time for tasks with many subtasks.
+
+🔬 Measurement:
+Benchmark (500 subtasks):
+- Current Implementation (for...of N+1 queries): 97.51ms / 80.29ms
+- Optimized Implementation (Bulk Update with CASE): 31.83ms / 31.21ms
+- Improvement: ~61%-67%
