@@ -21,22 +21,27 @@ describe('PUT /api/tasks/[id]', () => {
       body: JSON.stringify({ name: 'Updated Task' }),
     });
 
-    vi.mocked(db.transaction).mockImplementation(async (callback) => {
+    vi.mocked(db.transaction).mockImplementation((callback) => {
       const tx = {
         update: vi.fn().mockReturnThis(),
         set: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
+        where: vi.fn().mockReturnValue({ run: vi.fn() }),
         returning: vi.fn().mockResolvedValue([updatedTask]),
         delete: vi.fn().mockReturnThis(),
         insert: vi.fn().mockReturnThis(),
-        values: vi.fn(),
+        values: vi.fn().mockReturnValue({ run: vi.fn() }),
         select: vi.fn().mockReturnThis(),
-        from: vi.fn().mockReturnValue({ where: vi.fn().mockResolvedValue([updatedTask]) }),
+        from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+                all: vi.fn().mockReturnValue([updatedTask]),
+                [Symbol.iterator]: function* () { yield updatedTask; }
+            })
+        }),
       };
-      return await callback(tx);
+      return callback(tx);
     });
 
-    const response = await PUT(request, { params: { id: '1' } });
+    const response = await PUT(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -57,9 +62,9 @@ describe('DELETE /api/tasks/[id]', () => {
     });
 
     const deleteMock = { where: vi.fn().mockResolvedValue(undefined) };
-    vi.mocked(db.delete).mockReturnValue(deleteMock as any);
+    vi.mocked(db.delete).mockReturnValue(deleteMock as unknown as ReturnType<typeof db.delete>);
 
-    const response = await DELETE(request, { params: { id: '1' } });
+    const response = await DELETE(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
 
     expect(response.status).toBe(200);

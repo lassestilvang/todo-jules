@@ -32,3 +32,7 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 **Learning:** When using `db.transaction()` and managing relation operations (like updating subtasks inside a task), fetching the existing entities solely to determine what to delete using `Array.filter` and `.includes` can be an unnecessary bottleneck. It's often more performant to simply use Drizzle's `.where(notInArray())` entirely at the database query layer to delete obsolete subtasks instead of fetching existing records into JavaScript memory first.
 
 **Action:** Before writing JS-side array diffing logic (`existingIds.filter(...)`), check if the filtering constraint can simply be expressed directly in SQL/Drizzle constraints (like `notInArray`). Removing the JS iteration entirely speeds up processing.
+
+## 2026-04-16 - better-sqlite3 transactions must be synchronous
+**Learning:** In Drizzle ORM with `better-sqlite3`, transactions (`db.transaction`) must be strictly synchronous. Passing an `async` callback and using `await` inside the transaction block throws `TypeError: Transaction function cannot return a promise` (or runs queries unpredictably outside the transaction bounds).
+**Action:** Always write `db.transaction` blocks synchronously when using `better-sqlite3`. Remove all `await` keywords inside the callback and use synchronous execution methods like `.run()`, `.all()`, or `.get()` instead of relying on default Promise-based resolution.

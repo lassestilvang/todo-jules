@@ -30,7 +30,7 @@ export async function reorderTasks(items: { id: number; order: number }[]) {
       for (let i = 0; i < items.length; i += CHUNK_SIZE) {
         const chunk = items.slice(i, i + CHUNK_SIZE);
 
-        const sqlChunks: any[] = [];
+        const sqlChunks: import('drizzle-orm').SQL[] = [];
         const ids: number[] = [];
 
         for (const item of chunk) {
