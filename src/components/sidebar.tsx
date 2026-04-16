@@ -92,7 +92,7 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="opacity-0 group-hover:opacity-100 focus:opacity-100 group-focus-within:opacity-100 h-8 w-8 text-muted-foreground hover:text-destructive"
+                                className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 h-8 w-8 text-muted-foreground hover:text-destructive"
                                 onClick={(e) => handleDeleteList(e, list.id)}
                                 aria-label={`Delete list ${list.name}`}
                             >
