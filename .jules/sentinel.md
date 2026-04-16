@@ -12,7 +12,7 @@
 **Learning:** TypeScript types are erased at runtime and provide zero security for network boundaries. In Next.js App Router, every exported function in a `use server` file must be treated with the same suspicion as a REST endpoint.
 **Prevention:** Always validate all incoming data to Server Actions using strict runtime schemas (like Zod) to strip unauthorized fields, and validate all ID parameters before processing.
 
-## 2024-05-18 - [Add Permissions-Policy Security Header]
+## 2024-05-18 - Add Permissions-Policy Security Header
 **Vulnerability:** The application was missing a `Permissions-Policy` header in the Next.js config, leaving powerful browser APIs (camera, microphone, geolocation) accessible to the origin.
 **Learning:** Adding standard defense-in-depth security headers is crucial to restrict access to unused APIs, even if no direct exploit is present, to adhere to the principle of least privilege.
 **Prevention:** Include a comprehensive set of security headers (like `Permissions-Policy`, `Strict-Transport-Security`, etc.) in the `next.config.ts` from the start of the project.
