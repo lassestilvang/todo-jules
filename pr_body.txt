@@ -10,3 +10,8 @@ After: The fields now read "Task Name *" with the asterisk styled in red (`text-
 
 ♿ Accessibility
 Added `aria-hidden="true"` to the newly introduced visual indicator `<span>` elements. This ensures screen readers do not awkwardly announce the word "star" when reading the label text, relying on the native HTML `required` attribute present on the inputs for semantic meaning.
+🚨 Severity: MEDIUM
+💡 Vulnerability: Zod schemas for task creation and updates were missing `.max()` constraints on strings (like descriptions) and arrays (like subtasks, attachments, labels, and reminders). This allowed for potentially unbounded payload sizes.
+🎯 Impact: An attacker or buggy client could submit massive strings or deeply nested arrays, leading to memory exhaustion (OOM), slow processing times, or application crashes resulting in a Denial of Service (DoS).
+🔧 Fix: Appended reasonable `.max()` boundaries (e.g., 10000 chars for descriptions, 100 elements for arrays) to all unbounded Zod properties in `src/lib/validators.ts`.
+✅ Verification: Tested the application logic using `pnpm test`, `pnpm lint`, and `pnpm build` to ensure validation works properly without breaking intended features.

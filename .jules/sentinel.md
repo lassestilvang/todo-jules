@@ -16,3 +16,7 @@
 **Vulnerability:** The application was missing a `Permissions-Policy` header in the Next.js config, leaving powerful browser APIs (camera, microphone, geolocation) accessible to the origin.
 **Learning:** Adding standard defense-in-depth security headers is crucial to restrict access to unused APIs, even if no direct exploit is present, to adhere to the principle of least privilege.
 **Prevention:** Include a comprehensive set of security headers (like `Permissions-Policy`, `Strict-Transport-Security`, etc.) in the `next.config.ts` from the start of the project.
+## 2026-04-17 - [MEDIUM] Add Input Length Limits to Prevent DoS
+**Vulnerability:** Input fields (like descriptions and arrays of subtasks) in Zod schemas lacked maximum length boundaries, exposing the application to payload-based Denial of Service (DoS) attacks.
+**Learning:** Even internal or single-user applications can suffer from memory exhaustion or database crashes if untrusted input sizes are not properly bounded before reaching ORM operations.
+**Prevention:** Always append explicit `.max()` constraints to all `z.string()` and `z.array()` properties in validation schemas, unless there is a specific, well-justified reason to allow unbounded data.
