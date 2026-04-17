@@ -1,30 +1,5 @@
-💡 What:
-Refactored the `PUT /api/tasks/[id]` endpoint to use synchronous operations within the `better-sqlite3` database transaction.
-
-🎯 Why:
-In Drizzle ORM with `better-sqlite3`, transactions (`db.transaction`) must be strictly synchronous. The previous implementation passed an `async` callback and used `await` inside the transaction block, which breaks transaction bounds and leads to sequential microtask execution overhead (or `TypeError: Transaction function cannot return a promise` errors in strict environments).
-
-📊 Impact:
-Removes asynchronous microtask overhead for each query executed within the transaction loop, executing them synchronously at the native C++ add-on speed of SQLite, drastically improving the throughput of bulk subtask updates.
-
-🔬 Measurement:
-1. Trigger a subtask update using `PUT /api/tasks/[id]`.
-2. Notice the response time decreases significantly as the database engine isn't awaiting promises.
-3. Tests (`pnpm test`) assert correct mutation without `TypeError`.
-💡 What
-- Added a `<label>` with `sr-only` class to the search input for screen readers.
-- Added a `Search` icon from `lucide-react` directly into the search input.
-- Changed the `input` type to `search` to enable native clearing features on supported browsers.
-- Updated the header layout to improve positioning and spacing in `src/app/layout.tsx`.
-
-🎯 Why
-- **Accessibility**: Screen readers previously had no way to identify the purpose of the search input. The visually hidden label resolves this.
-- **Visual Affordance**: An explicit search icon (magnifying glass) immediately communicates the input's function without relying solely on placeholder text.
-- **Usability**: The `type="search"` attribute provides better native mobile and desktop browser behaviors (like the built-in 'X' to clear text).
-
-📸 Before/After
-- **Before**: A plain text input reading "Search tasks..." relying solely on the Enter key with no labeling.
-- **After**: A polished input field with a left-aligned Search icon, accessible labels, and robust focus ring states. Verified visually via Playwright.
-
-♿ Accessibility
-- Fixed WCAG compliance by associating the input field with an explicit label (`htmlFor="search"` mapping to `id="search"`).
+🚨 Severity: MEDIUM
+💡 Vulnerability: Zod schemas for task creation and updates were missing `.max()` constraints on strings (like descriptions) and arrays (like subtasks, attachments, labels, and reminders). This allowed for potentially unbounded payload sizes.
+🎯 Impact: An attacker or buggy client could submit massive strings or deeply nested arrays, leading to memory exhaustion (OOM), slow processing times, or application crashes resulting in a Denial of Service (DoS).
+🔧 Fix: Appended reasonable `.max()` boundaries (e.g., 10000 chars for descriptions, 100 elements for arrays) to all unbounded Zod properties in `src/lib/validators.ts`.
+✅ Verification: Tested the application logic using `pnpm test`, `pnpm lint`, and `pnpm build` to ensure validation works properly without breaking intended features.
