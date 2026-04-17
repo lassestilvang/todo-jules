@@ -24,9 +24,10 @@ export async function PUT(
     const body = await request.json();
     const validatedBody = updateTaskSchema.parse(body);
 
-    const updatedTask = await db.transaction(async (tx) => {
+    const updatedTask = db.transaction((tx) => {
+      let updated;
       if (Object.keys(validatedBody).length > 0) {
-        await tx
+        const [result] = tx
           .update(tasks)
           .set({
             ...validatedBody,
@@ -35,13 +36,19 @@ export async function PUT(
               ? new Date(validatedBody.deadline)
               : undefined,
           })
-          .where(eq(tasks.id, taskId));
+          .where(eq(tasks.id, taskId))
+          .returning()
+          .all();
+        updated = result;
       }
 
-      const [updated] = await tx
-        .select()
-        .from(tasks)
-        .where(eq(tasks.id, taskId));
+      if (!updated) {
+        updated = tx
+          .select()
+          .from(tasks)
+          .where(eq(tasks.id, taskId))
+          .get();
+      }
 
       // Handle subtasks
       if (validatedBody.subtasks) {
@@ -50,14 +57,16 @@ export async function PUT(
           .filter((id) => id !== undefined) as number[];
 
         if (incomingIds.length > 0) {
-          await tx.delete(subtasks).where(
-            and(
-              eq(subtasks.taskId, taskId),
-              notInArray(subtasks.id, incomingIds)
+          tx.delete(subtasks)
+            .where(
+              and(
+                eq(subtasks.taskId, taskId),
+                notInArray(subtasks.id, incomingIds)
+              )
             )
-          );
+            .run();
         } else {
-          await tx.delete(subtasks).where(eq(subtasks.taskId, taskId));
+          tx.delete(subtasks).where(eq(subtasks.taskId, taskId)).run();
         }
 
         const toInsert = validatedBody.subtasks
@@ -71,7 +80,7 @@ export async function PUT(
         const toUpdate = validatedBody.subtasks.filter((st) => st.id !== undefined);
 
         if (toInsert.length > 0) {
-          await tx.insert(subtasks).values(toInsert);
+          tx.insert(subtasks).values(toInsert).run();
         }
 
         if (toUpdate.length > 0) {
@@ -92,55 +101,61 @@ export async function PUT(
             const nameCaseStatement = sql`case ${subtasks.id} ${sql.join(nameChunks, sql` `)} else ${subtasks.name} end`;
             const completedCaseStatement = sql`case ${subtasks.id} ${sql.join(completedChunks, sql` `)} else ${subtasks.completed} end`;
 
-            await tx
-              .update(subtasks)
+            tx.update(subtasks)
               .set({
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 name: nameCaseStatement as any,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 completed: completedCaseStatement as any,
               })
-              .where(inArray(subtasks.id, ids));
+              .where(inArray(subtasks.id, ids))
+              .run();
           }
         }
       }
 
       // Handle labels
       if (validatedBody.labels) {
-        await tx.delete(taskLabels).where(eq(taskLabels.taskId, taskId));
+        tx.delete(taskLabels).where(eq(taskLabels.taskId, taskId)).run();
         if (validatedBody.labels.length > 0) {
-          await tx.insert(taskLabels).values(
-            validatedBody.labels.map((labelId) => ({
-              taskId: taskId,
-              labelId,
-            }))
-          );
+          tx.insert(taskLabels)
+            .values(
+              validatedBody.labels.map((labelId) => ({
+                taskId: taskId,
+                labelId,
+              }))
+            )
+            .run();
         }
       }
 
       // Handle reminders
       if (validatedBody.reminders) {
-        await tx.delete(reminders).where(eq(reminders.taskId, taskId));
+        tx.delete(reminders).where(eq(reminders.taskId, taskId)).run();
         if (validatedBody.reminders.length > 0) {
-          await tx.insert(reminders).values(
-            validatedBody.reminders.map((reminder) => ({
-              ...reminder,
-              taskId: taskId,
-            }))
-          );
+          tx.insert(reminders)
+            .values(
+              validatedBody.reminders.map((reminder) => ({
+                ...reminder,
+                taskId: taskId,
+              }))
+            )
+            .run();
         }
       }
 
       // Handle attachments
       if (validatedBody.attachments) {
-        await tx.delete(attachments).where(eq(attachments.taskId, taskId));
+        tx.delete(attachments).where(eq(attachments.taskId, taskId)).run();
         if (validatedBody.attachments.length > 0) {
-          await tx.insert(attachments).values(
-            validatedBody.attachments.map((attachment) => ({
-              ...attachment,
-              taskId: taskId,
-            }))
-          );
+          tx.insert(attachments)
+            .values(
+              validatedBody.attachments.map((attachment) => ({
+                ...attachment,
+                taskId: taskId,
+              }))
+            )
+            .run();
         }
       }
 
