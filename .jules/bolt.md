@@ -36,3 +36,7 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-04-16 - better-sqlite3 transactions must be synchronous
 **Learning:** In Drizzle ORM with `better-sqlite3`, transactions (`db.transaction`) must be strictly synchronous. Passing an `async` callback and using `await` inside the transaction block throws `TypeError: Transaction function cannot return a promise` (or runs queries unpredictably outside the transaction bounds).
 **Action:** Always write `db.transaction` blocks synchronously when using `better-sqlite3`. Remove all `await` keywords inside the callback and use synchronous execution methods like `.run()`, `.all()`, or `.get()` instead of relying on default Promise-based resolution.
+
+## 2026-04-17
+
+- **Optimization Strategy**: In Drizzle ORM with `better-sqlite3`, transactions (`db.transaction`) must be strictly synchronous. Using an `async` callback or `await` inside the transaction block introduces significant microtask overhead and can break transaction guarantees. Converting these to synchronous operations with `.run()`, `.all()`, or `.get()` maximizes performance by leveraging the native speed of SQLite.
