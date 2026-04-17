@@ -65,7 +65,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-1">
-              Name
+              Name <span className="text-red-500" aria-hidden="true">*</span>
             </label>
             <Input
               id="name"
@@ -73,12 +73,13 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
               onChange={(e) => setName(e.target.value)}
               placeholder="List name"
               required
+              aria-required="true"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="color" className="block text-sm font-medium mb-1">
-                Color
+                Color <span className="text-red-500" aria-hidden="true">*</span>
               </label>
               <div className="flex items-center gap-2">
                 <Input
@@ -93,7 +94,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
             </div>
             <div>
               <label htmlFor="emoji" className="block text-sm font-medium mb-1">
-                Emoji
+                Emoji <span className="text-red-500" aria-hidden="true">*</span>
               </label>
               <Input
                 type="text"
@@ -103,6 +104,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
                 maxLength={2}
                 className="w-full"
                 required
+                aria-required="true"
               />
             </div>
           </div>

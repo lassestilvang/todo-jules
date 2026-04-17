@@ -67,7 +67,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
     <form onSubmit={handleSubmit} className="space-y-4 bg-card p-6 rounded-lg border">
       <div>
         <Label htmlFor="task-name" className="mb-1 block">
-          Task Name
+          Task Name <span className="text-red-500" aria-hidden="true">*</span>
         </Label>
         <Input
           type="text"
@@ -76,6 +76,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
           onChange={(e) => setName(e.target.value)}
           placeholder="What needs to be done?"
           required
+          aria-required="true"
         />
       </div>
       <div>
