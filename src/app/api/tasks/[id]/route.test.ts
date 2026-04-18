@@ -25,20 +25,31 @@ describe('PUT /api/tasks/[id]', () => {
       const tx = {
         update: vi.fn().mockReturnThis(),
         set: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnValue({ run: vi.fn() }),
-        returning: vi.fn().mockResolvedValue([updatedTask]),
+        where: vi.fn().mockReturnValue({
+            all: vi.fn().mockReturnValue([updatedTask]),
+            returning: vi.fn().mockReturnValue({
+                all: vi.fn().mockReturnValue([updatedTask])
+            })
+        }),
+        returning: vi.fn().mockReturnValue({
+            all: vi.fn().mockReturnValue([updatedTask])
+        }),
         delete: vi.fn().mockReturnThis(),
         insert: vi.fn().mockReturnThis(),
-        values: vi.fn().mockReturnValue({ run: vi.fn() }),
+        values: vi.fn().mockReturnValue({
+            all: vi.fn().mockReturnValue([updatedTask]),
+            run: vi.fn()
+        }),
         select: vi.fn().mockReturnThis(),
         from: vi.fn().mockReturnValue({
             where: vi.fn().mockReturnValue({
                 all: vi.fn().mockReturnValue([updatedTask]),
-                [Symbol.iterator]: function* () { yield updatedTask; }
+                get: vi.fn().mockReturnValue(updatedTask)
             })
         }),
       };
-      return callback(tx);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return callback(tx as any);
     });
 
     const response = await PUT(request, { params: Promise.resolve({ id: '1' }) });
@@ -61,7 +72,7 @@ describe('DELETE /api/tasks/[id]', () => {
       method: 'DELETE',
     });
 
-    const deleteMock = { where: vi.fn().mockResolvedValue(undefined) };
+    const deleteMock = { where: vi.fn().mockReturnValue(undefined) };
     vi.mocked(db.delete).mockReturnValue(deleteMock as unknown as ReturnType<typeof db.delete>);
 
     const response = await DELETE(request, { params: Promise.resolve({ id: '1' }) });

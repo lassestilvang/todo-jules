@@ -8,9 +8,9 @@ import { notFound } from 'next/navigation';
 
 export default async function ListPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const listId = parseInt(id);
+  const listId = parseInt(id, 10);
 
-  if (isNaN(listId)) {
+  if (isNaN(listId) || String(listId) !== id) {
     notFound();
   }
 
