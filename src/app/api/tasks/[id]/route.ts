@@ -52,9 +52,26 @@ export async function PUT(
 
       // Handle subtasks
       if (validatedBody.subtasks) {
-        const incomingIds = validatedBody.subtasks
-          .map((st) => st.id)
-          .filter((id) => id !== undefined) as number[];
+        const { incomingIds, toInsert, toUpdate } = validatedBody.subtasks.reduce(
+          (acc, st) => {
+            if (st.id !== undefined) {
+              acc.incomingIds.push(st.id);
+              acc.toUpdate.push(st);
+            } else {
+              acc.toInsert.push({
+                name: st.name,
+                completed: st.completed ?? false,
+                taskId: taskId,
+              });
+            }
+            return acc;
+          },
+          {
+            incomingIds: [] as number[],
+            toInsert: [] as { name: string; completed: boolean; taskId: number }[],
+            toUpdate: [] as NonNullable<typeof validatedBody.subtasks>,
+          }
+        );
 
         if (incomingIds.length > 0) {
           tx.delete(subtasks)
@@ -68,16 +85,6 @@ export async function PUT(
         } else {
           tx.delete(subtasks).where(eq(subtasks.taskId, taskId)).run();
         }
-
-        const toInsert = validatedBody.subtasks
-          .filter((st) => st.id === undefined)
-          .map((st) => ({
-            name: st.name,
-            completed: st.completed,
-            taskId: taskId,
-          }));
-
-        const toUpdate = validatedBody.subtasks.filter((st) => st.id !== undefined);
 
         if (toInsert.length > 0) {
           tx.insert(subtasks).values(toInsert).run();
