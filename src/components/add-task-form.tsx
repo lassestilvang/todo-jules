@@ -68,6 +68,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
       <div>
         <Label htmlFor="task-name" className="mb-1 block">
           Task Name
+          <span className="text-destructive" aria-hidden="true">*</span>
         </Label>
         <Input
           type="text"
