@@ -66,6 +66,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-1">
               Name
+              <span className="text-destructive ml-1" aria-hidden="true">*</span>
             </label>
             <Input
               id="name"
@@ -94,6 +95,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
             <div>
               <label htmlFor="emoji" className="block text-sm font-medium mb-1">
                 Emoji
+                <span className="text-destructive ml-1" aria-hidden="true">*</span>
               </label>
               <Input
                 type="text"
