@@ -60,7 +60,7 @@ export async function PUT(
             } else {
               acc.toInsert.push({
                 name: st.name,
-                completed: st.completed,
+                completed: st.completed ?? false,
                 taskId: taskId,
               });
             }
@@ -69,7 +69,7 @@ export async function PUT(
           {
             incomingIds: [] as number[],
             toInsert: [] as { name: string; completed: boolean; taskId: number }[],
-            toUpdate: [] as typeof validatedBody.subtasks,
+            toUpdate: [] as NonNullable<typeof validatedBody.subtasks>,
           }
         );
 
