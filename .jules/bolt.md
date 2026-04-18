@@ -40,3 +40,6 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-04-17
 
 - **Optimization Strategy**: In Drizzle ORM with `better-sqlite3`, transactions (`db.transaction`) must be strictly synchronous. Using an `async` callback or `await` inside the transaction block introduces significant microtask overhead and can break transaction guarantees. Converting these to synchronous operations with `.run()`, `.all()`, or `.get()` maximizes performance by leveraging the native speed of SQLite.
+## 2026-04-18 - Single reduce over chained map/filter for categorizing array elements
+**Learning:** When processing a payload array (like `validatedBody.subtasks`) to categorize items into different buckets (e.g., `toInsert`, `toUpdate`, `incomingIds`), using chained `.filter().map()` calls forces multiple iterations over the same data and creates unnecessary intermediate arrays, increasing GC overhead and CPU cycles.
+**Action:** Always use a single `.reduce()` pass when you need to iterate over an array and distribute its elements into multiple different arrays simultaneously. This optimizes the operation to O(N) instead of O(3N) and avoids intermediate allocations.
