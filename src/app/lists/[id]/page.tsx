@@ -10,7 +10,7 @@ export default async function ListPage({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const listId = parseInt(id, 10);
 
-  if (isNaN(listId) || String(listId) !== id) {
+  if (!/^\d+$/.test(id)) {
     notFound();
   }
 
