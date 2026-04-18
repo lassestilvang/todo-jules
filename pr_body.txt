@@ -10,3 +10,7 @@ After: These fields now feature a red `*` next to their label. See `add_list_mod
 
 ♿ Accessibility
 The visual indicator (`*`) is wrapped in a `span` with `aria-hidden="true"`. Because the underlying `Input` components already utilize the native HTML5 `required` attribute (which screen readers handle automatically), this approach correctly provides a visual cue for sighted users without duplicating announcements ("required star required") for screen reader users.
+💡 What: Replaced multiple `.map()` and `.filter()` iterations on `validatedBody.subtasks` with a single `.reduce()` pass in the `PUT /api/tasks/[id]` handler.
+🎯 Why: Chained map/filter operations cause unnecessary iterations (O(3N)) and allocate intermediate arrays, increasing GC pressure and CPU overhead during task updates.
+📊 Impact: Reduces array iteration from O(3N) to O(N) when updating subtasks, avoiding intermediate memory allocations and slightly improving the endpoint's execution time for tasks with multiple subtasks.
+🔬 Measurement: Verify by executing the test suite (`pnpm test`), which runs the route handlers, or by observing memory/CPU metrics during heavy subtask update loads. The test suite verifies no functional regressions occurred.

@@ -25,7 +25,7 @@ describe('PUT /api/tasks/[id]', () => {
       const tx = {
         update: vi.fn().mockReturnThis(),
         set: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnValue({ run: vi.fn() }),
+        where: vi.fn().mockReturnValue({ run: vi.fn(), returning: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue([updatedTask]) }) }),
         returning: vi.fn().mockResolvedValue([updatedTask]),
         delete: vi.fn().mockReturnThis(),
         insert: vi.fn().mockReturnThis(),
