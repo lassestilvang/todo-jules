@@ -95,7 +95,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
             <div>
               <label htmlFor="emoji" className="block text-sm font-medium mb-1">
                 Emoji
-                <span className="text-destructive ml-1" aria-hidden="true">*</span>
+                <span className="text-destructive" aria-hidden="true">*</span>
               </label>
               <Input
                 type="text"
