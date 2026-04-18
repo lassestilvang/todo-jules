@@ -1,5 +1,16 @@
-🚨 Severity: MEDIUM
-💡 Vulnerability: Zod schemas for task creation and updates were missing `.max()` constraints on strings (like descriptions) and arrays (like subtasks, attachments, labels, and reminders). This allowed for potentially unbounded payload sizes.
-🎯 Impact: An attacker or buggy client could submit massive strings or deeply nested arrays, leading to memory exhaustion (OOM), slow processing times, or application crashes resulting in a Denial of Service (DoS).
-🔧 Fix: Appended reasonable `.max()` boundaries (e.g., 10000 chars for descriptions, 100 elements for arrays) to all unbounded Zod properties in `src/lib/validators.ts`.
-✅ Verification: Tested the application logic using `pnpm test`, `pnpm lint`, and `pnpm build` to ensure validation works properly without breaking intended features.
+💡 What
+Added a red asterisk (`*`) to the label of required fields in the "Add Task" and "Create new list" forms.
+
+🎯 Why
+This micro-interaction gives users immediate visual feedback on which fields must be filled out before submitting the form, preventing validation errors on submit and reducing frustration.
+
+📸 Before/After
+Before: The "Task Name", "List Name", and "Emoji" fields had no visual indication that they were mandatory.
+After: These fields now feature a red `*` next to their label. See `add_list_modal.png` and `add_task_form.png` screenshots inside `/home/jules/verification/screenshots`.
+
+♿ Accessibility
+The visual indicator (`*`) is wrapped in a `span` with `aria-hidden="true"`. Because the underlying `Input` components already utilize the native HTML5 `required` attribute (which screen readers handle automatically), this approach correctly provides a visual cue for sighted users without duplicating announcements ("required star required") for screen reader users.
+💡 What: Replaced multiple `.map()` and `.filter()` iterations on `validatedBody.subtasks` with a single `.reduce()` pass in the `PUT /api/tasks/[id]` handler.
+🎯 Why: Chained map/filter operations cause unnecessary iterations (O(3N)) and allocate intermediate arrays, increasing GC pressure and CPU overhead during task updates.
+📊 Impact: Reduces array iteration from O(3N) to O(N) when updating subtasks, avoiding intermediate memory allocations and slightly improving the endpoint's execution time for tasks with multiple subtasks.
+🔬 Measurement: Verify by executing the test suite (`pnpm test`), which runs the route handlers, or by observing memory/CPU metrics during heavy subtask update loads. The test suite verifies no functional regressions occurred.
