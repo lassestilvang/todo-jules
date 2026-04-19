@@ -43,3 +43,6 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-04-18 - Single reduce over chained map/filter for categorizing array elements
 **Learning:** When processing a payload array (like `validatedBody.subtasks`) to categorize items into different buckets (e.g., `toInsert`, `toUpdate`, `incomingIds`), using chained `.filter().map()` calls forces multiple iterations over the same data and creates unnecessary intermediate arrays, increasing GC overhead and CPU cycles.
 **Action:** Always use a single `.reduce()` pass when you need to iterate over an array and distribute its elements into multiple different arrays simultaneously. This optimizes the operation to O(N) instead of O(3N) and avoids intermediate allocations.
+## 2026-04-19 - Optimization Strategy: Node.js Synchronous better-sqlite3 Execution
+**Learning:** In Node.js with `better-sqlite3`, database operations are inherently synchronous and block the event loop. Using `Promise.all` does not provide parallel execution for database queries (even outside transactions); it only adds unnecessary microtask array allocation and resolution overhead.
+**Action:** Always write database operations as sequential `await` calls when using `better-sqlite3` instead of attempting to parallelize them with `Promise.all`.
