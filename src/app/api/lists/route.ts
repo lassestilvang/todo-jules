@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { lists } from '@/lib/schema';
-import { z } from 'zod';
 
-const createListSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }),
-  color: z.string().min(1, { message: 'Color is required' }),
-  emoji: z.string().min(1, { message: 'Emoji is required' }),
-});
+import { createListSchema } from '@/lib/validators';
 
 /**
  * @swagger

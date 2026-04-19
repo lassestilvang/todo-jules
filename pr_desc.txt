@@ -1,0 +1,5 @@
+🚨 Severity: MEDIUM
+💡 Vulnerability: The API routes `POST /api/lists` and `PUT /api/lists/[id]` used locally defined Zod schemas without any length constraints (`.max()`). This allows attackers to send excessively large payloads for the list `name`, `color`, or `emoji` fields, potentially causing memory exhaustion and Denial of Service (DoS).
+🎯 Impact: An attacker could craft a malicious HTTP request with gigabytes of string data in the JSON body, forcing the Next.js server and Zod parsing engine to allocate massive amounts of memory, potentially crashing the node process or database instance.
+🔧 Fix: Removed the unconstrained local schemas. Defined a strict `updateListSchema` in the centralized `src/lib/validators.ts` with explicit `.max()` lengths and a strict regex for hex colors. Imported and applied the centralized `createListSchema` and `updateListSchema` into the respective API routes. Updated the unit tests to pass the new, stricter color validation (requiring `#000000` instead of `#000`).
+✅ Verification: Ran `pnpm test` and `pnpm build` to verify the schemas correctly reject invalid inputs and that tests pass.

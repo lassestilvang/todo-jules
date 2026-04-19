@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { PUT, DELETE } from './route';
 import { db } from '@/lib/db';
 import { lists } from '@/lib/schema';
@@ -8,34 +8,40 @@ vi.mock('@/lib/db', () => ({
     update: vi.fn().mockReturnThis(),
     set: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
-    returning: vi.fn().mockResolvedValue([{ id: 1, name: 'Updated List', color: '#000', emoji: '✨' }]),
+    returning: vi.fn(),
     delete: vi.fn().mockReturnThis(),
   },
 }));
 
 describe('PUT /api/lists/{id}', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should return a 200 status code and the updated list', async () => {
+    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: 1, name: 'Updated List', color: '#000000', emoji: '✨' }]) });
+
     const request = new Request('http://localhost/api/lists/1', {
       method: 'PUT',
-      body: JSON.stringify({ name: 'Updated List', color: '#000', emoji: '✨' }),
+      body: JSON.stringify({ name: 'Updated List', color: '#000000', emoji: '✨' }),
     });
 
-    const response = await PUT(request, { params: { id: '1' } });
+    const response = await PUT(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data).toEqual({ id: 1, name: 'Updated List', color: '#000', emoji: '✨' });
+    expect(data).toEqual({ id: 1, name: 'Updated List', color: '#000000', emoji: '✨' });
   });
 
   it('should return a 404 status code if the list is not found', async () => {
-    vi.spyOn(db, 'returning').mockResolvedValueOnce([]);
+    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
 
     const request = new Request('http://localhost/api/lists/999', {
       method: 'PUT',
       body: JSON.stringify({ name: 'Updated List' }),
     });
 
-    const response = await PUT(request, { params: { id: '999' } });
+    const response = await PUT(request, { params: Promise.resolve({ id: '999' }) });
     const data = await response.json();
 
     expect(response.status).toBe(404);
@@ -44,24 +50,28 @@ describe('PUT /api/lists/{id}', () => {
 });
 
 describe('DELETE /api/lists/{id}', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should return a 204 status code', async () => {
-    vi.spyOn(db, 'returning').mockResolvedValueOnce([{ id: 1 }]);
+    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: 1 }]) });
     const request = new Request('http://localhost/api/lists/1', {
       method: 'DELETE',
     });
 
-    const response = await DELETE(request, { params: { id: '1' } });
+    const response = await DELETE(request, { params: Promise.resolve({ id: '1' }) });
 
     expect(response.status).toBe(204);
   });
 
   it('should return a 404 status code if the list is not found', async () => {
-    vi.spyOn(db, 'returning').mockResolvedValueOnce([]);
+    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
     const request = new Request('http://localhost/api/lists/999', {
       method: 'DELETE',
     });
 
-    const response = await DELETE(request, { params: { id: '999' } });
+    const response = await DELETE(request, { params: Promise.resolve({ id: '999' }) });
     const data = await response.json();
 
     expect(response.status).toBe(404);
