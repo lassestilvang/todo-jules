@@ -2,13 +2,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { lists } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
-import { z } from 'zod';
 
-const updateListSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }).optional(),
-  color: z.string().min(1, { message: 'Color is required' }).optional(),
-  emoji: z.string().min(1, { message: 'Emoji is required' }).optional(),
-});
+import { updateListSchema } from '@/lib/validators';
 
 /**
  * @swagger

@@ -20,3 +20,7 @@
 **Vulnerability:** Input fields (like descriptions and arrays of subtasks) in Zod schemas lacked maximum length boundaries, exposing the application to payload-based Denial of Service (DoS) attacks.
 **Learning:** Even internal or single-user applications can suffer from memory exhaustion or database crashes if untrusted input sizes are not properly bounded before reaching ORM operations.
 **Prevention:** Always append explicit `.max()` constraints to all `z.string()` and `z.array()` properties in validation schemas, unless there is a specific, well-justified reason to allow unbounded data.
+## 2025-04-19 - [MEDIUM] Fix DoS risk in List API routes
+**Vulnerability:** The API routes \`POST /api/lists\` and \`PUT /api/lists/[id]\` used locally defined Zod schemas without any length constraints (\`.max()\`). This could allow attackers to send excessively large payloads for list \`name\`, \`color\`, or \`emoji\` fields, potentially causing a Denial of Service (DoS) or memory exhaustion.
+**Learning:** Developers sometimes duplicate simple schemas locally within API routes for convenience, but they often forget to apply strict validation rules like max limits that are centrally enforced. In Next.js, exported server actions or routes acts as public APIs and should always use strict centralized schemas.
+**Prevention:** Always define validation schemas centrally (e.g. in \`src/lib/validators.ts\`) and import them into API routes. Ensure all string inputs have explicit \`.max()\` length constraints to bound payloads.
