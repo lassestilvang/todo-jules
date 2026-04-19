@@ -54,6 +54,6 @@ export const createListSchema = z.object({
 
 export const updateListSchema = z.object({
   name: z.string().min(1, 'List name is required').max(50).optional(),
-  color: z.string().regex(/^#[0-9A-F]{6}$/i, 'Invalid color hex code').optional(),
+  color: z.string().regex(/^#([0-9A-F]{3}){1,2}$/i, 'Invalid color hex code').optional(),
   emoji: z.string().min(1, 'Emoji is required').max(2).optional(),
 });
