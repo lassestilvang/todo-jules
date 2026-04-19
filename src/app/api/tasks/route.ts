@@ -24,23 +24,25 @@ export async function GET(request: Request) {
 
     const offset = (page - 1) * limit;
 
-    const [total, allTasks] = await Promise.all([
-      getTaskCount(),
-      db.query.tasks.findMany({
-        limit: limit,
-        offset: offset,
-        with: {
-          subtasks: true,
-          labels: {
-            with: {
-              label: true,
-            },
+    // ⚡ Bolt Optimization: Replace Promise.all with sequential awaits
+    // better-sqlite3 is inherently synchronous and blocks the event loop.
+    // Using Promise.all here does not provide parallel execution but adds
+    // microtask overhead and array allocation.
+    const total = await getTaskCount();
+    const allTasks = await db.query.tasks.findMany({
+      limit: limit,
+      offset: offset,
+      with: {
+        subtasks: true,
+        labels: {
+          with: {
+            label: true,
           },
-          reminders: true,
-          attachments: true,
         },
-      }),
-    ]);
+        reminders: true,
+        attachments: true,
+      },
+    });
 
     return NextResponse.json({
       data: allTasks,
