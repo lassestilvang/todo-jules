@@ -65,7 +65,13 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const validatedBody = createTaskSchema.parse(body);
+    const validation = createTaskSchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.format() }, { status: 400 });
+    }
+
+    const validatedBody = validation.data;
 
     // better-sqlite3 requires synchronous transactions.
     const createdTask = db.transaction((tx) => {

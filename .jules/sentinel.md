@@ -24,3 +24,8 @@
 **Vulnerability:** The API routes \`POST /api/lists\` and \`PUT /api/lists/[id]\` used locally defined Zod schemas without any length constraints (\`.max()\`). This could allow attackers to send excessively large payloads for list \`name\`, \`color\`, or \`emoji\` fields, potentially causing a Denial of Service (DoS) or memory exhaustion.
 **Learning:** Developers sometimes duplicate simple schemas locally within API routes for convenience, but they often forget to apply strict validation rules like max limits that are centrally enforced. In Next.js, exported server actions or routes acts as public APIs and should always use strict centralized schemas.
 **Prevention:** Always define validation schemas centrally (e.g. in \`src/lib/validators.ts\`) and import them into API routes. Ensure all string inputs have explicit \`.max()\` length constraints to bound payloads.
+
+## 2024-04-20 - [MEDIUM] Unhandled Zod Validation Errors
+**Vulnerability:** Next.js API endpoints (`src/app/api/tasks/route.ts` and `src/app/api/tasks/[id]/route.ts`) were using `schema.parse(body)` directly. When invalid data was submitted, it threw an unhandled Promise rejection, resulting in a 500 Internal Server Error.
+**Learning:** While unhandled promise rejections are technically DoS vectors or can leak information in the default error response depending on environment configurations, using `schema.parse(body)` in a public Next.js API route completely bypasses graceful error handling for expected client input validation failures.
+**Prevention:** Always use `schema.safeParse(body)` in Next.js API route handlers to gracefully handle validation failures and return a 400 Bad Request with a controlled, formatted error response instead of throwing unhandled exceptions.
