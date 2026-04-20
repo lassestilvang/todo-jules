@@ -22,7 +22,13 @@ export async function PUT(
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
     }
     const body = await request.json();
-    const validatedBody = updateTaskSchema.parse(body);
+    const validation = updateTaskSchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.format() }, { status: 400 });
+    }
+
+    const validatedBody = validation.data;
 
     const updatedTask = db.transaction((tx) => {
       let updated;
