@@ -36,8 +36,8 @@ export type Task = {
   estimate: number | null;
   actualTime: number | null;
   recurring: string | null;
-  subtasks: Subtask[];
+  subtasks?: Subtask[];
   labels: TaskLabel[];
-  reminders: Reminder[];
-  attachments: Attachment[];
+  reminders?: Reminder[];
+  attachments?: Attachment[];
 };

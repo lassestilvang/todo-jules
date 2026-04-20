@@ -46,3 +46,6 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-04-19 - Optimization Strategy: Node.js Synchronous better-sqlite3 Execution
 **Learning:** In Node.js with `better-sqlite3`, database operations are inherently synchronous and block the event loop. Using `Promise.all` does not provide parallel execution for database queries (even outside transactions); it only adds unnecessary microtask array allocation and resolution overhead.
 **Action:** Always write database operations as sequential `await` calls when using `better-sqlite3` instead of attempting to parallelize them with `Promise.all`.
+## 2026-04-20 - Pruning Drizzle relations requires type verification
+**Learning:** Attempting to optimize Drizzle queries by removing unused relations from the `with` clause (e.g., `subtasks`, `reminders`, `attachments`) can cause TypeScript compilation errors if the shared `Task` interface explicitly requires those properties.
+**Action:** Always inspect the target interfaces (e.g., in `src/lib/types/index.ts`) before pruning `with` relations to ensure the optimization doesn't break type safety, and optionally mark unused relations as optional `?` in the interface.
