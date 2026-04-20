@@ -31,14 +31,11 @@ export async function getTasksForInbox() {
     where: isNull(tasks.listId),
     limit: 50,
     with: {
-      subtasks: true,
       labels: {
         with: {
           label: true
         }
       },
-      reminders: true,
-      attachments: true,
     },
     orderBy: [desc(tasks.createdAt)],
   });
@@ -49,14 +46,11 @@ export async function getTasksForToday() {
   return db.query.tasks.findMany({
     where: and(gte(tasks.date, start), lte(tasks.date, end)),
     with: {
-      subtasks: true,
       labels: {
         with: {
           label: true
         }
       },
-      reminders: true,
-      attachments: true,
     },
     orderBy: [asc(tasks.date)],
   });
@@ -67,14 +61,11 @@ export async function getTasksForUpcoming() {
   return db.query.tasks.findMany({
     where: gte(tasks.date, end),
     with: {
-      subtasks: true,
       labels: {
         with: {
           label: true
         }
       },
-      reminders: true,
-      attachments: true,
     },
     orderBy: [asc(tasks.date)],
   });
@@ -85,14 +76,11 @@ export async function getTasksForNext7Days() {
   return db.query.tasks.findMany({
     where: and(gte(tasks.date, start), lte(tasks.date, end)),
     with: {
-      subtasks: true,
       labels: {
         with: {
           label: true
         }
       },
-      reminders: true,
-      attachments: true,
     },
     orderBy: [asc(tasks.date)],
   });

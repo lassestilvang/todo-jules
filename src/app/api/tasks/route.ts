@@ -33,14 +33,11 @@ export async function GET(request: Request) {
       limit: limit,
       offset: offset,
       with: {
-        subtasks: true,
         labels: {
           with: {
             label: true,
           },
         },
-        reminders: true,
-        attachments: true,
       },
     });
 
