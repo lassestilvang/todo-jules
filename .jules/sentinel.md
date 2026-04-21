@@ -29,3 +29,18 @@
 **Vulnerability:** Next.js API endpoints (`src/app/api/tasks/route.ts` and `src/app/api/tasks/[id]/route.ts`) were using `schema.parse(body)` directly. When invalid data was submitted, it threw an unhandled Promise rejection, resulting in a 500 Internal Server Error.
 **Learning:** While unhandled promise rejections are technically DoS vectors or can leak information in the default error response depending on environment configurations, using `schema.parse(body)` in a public Next.js API route completely bypasses graceful error handling for expected client input validation failures.
 **Prevention:** Always use `schema.safeParse(body)` in Next.js API route handlers to gracefully handle validation failures and return a 400 Bad Request with a controlled, formatted error response instead of throwing unhandled exceptions.
+
+## 2026-04-21 - Validate parameters manually in server actions
+**Vulnerability:** Next.js server actions are public API endpoints but TypeScript types like `taskId: number` are erased at runtime.
+**Learning:** Trusting TypeScript types in server actions without runtime validation allows attackers to send arbitrary types.
+**Prevention:** Always use runtime checks (like `typeof id !== 'number' || isNaN(id)`) or Zod schema validation for all parameters.
+
+## 2026-04-21 - Prevent silent string truncation in URL searchParams
+**Vulnerability:** URL `searchParams.get()` returning string with trailing garbage (e.g. "123foo") is silently truncated by `parseInt()`.
+**Learning:** Relying solely on `parseInt()` for URL parameter parsing can inadvertently process malformed requests silently.
+**Prevention:** Compare the string representation of the parsed integer against the original string parameter (e.g., `String(parsed) !== originalParam`).
+
+## 2026-04-21 - Prevent payload DoS from raw database queries
+**Vulnerability:** Raw FTS match queries processing large user strings can cause long regex replacements and database event loop blocking.
+**Learning:** Unconstrained query strings passed into database operations via API endpoints open the service up to Denial of Service (DoS) attacks.
+**Prevention:** Apply a maximum character limit check on incoming query strings directly at the API edge.

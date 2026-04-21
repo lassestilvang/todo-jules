@@ -14,12 +14,14 @@ import { getTaskCount, invalidateTaskCountCache } from '../../../lib/cache';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    let page = parseInt(searchParams.get('page') || '1');
-    let limit = parseInt(searchParams.get('limit') || '20');
+    const pageParam = searchParams.get('page') || '1';
+    const limitParam = searchParams.get('limit') || '20';
+    let page = parseInt(pageParam, 10);
+    let limit = parseInt(limitParam, 10);
 
-    // Validate and sanitize parameters
-    if (isNaN(page) || page < 1) page = 1;
-    if (isNaN(limit) || limit < 1) limit = 20;
+    // Validate and sanitize parameters strictly
+    if (isNaN(page) || String(page) !== pageParam || page < 1) page = 1;
+    if (isNaN(limit) || String(limit) !== limitParam || limit < 1) limit = 20;
     if (limit > 100) limit = 100; // Cap limit for safety
 
     const offset = (page - 1) * limit;
