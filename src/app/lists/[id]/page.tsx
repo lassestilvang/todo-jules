@@ -22,17 +22,19 @@ export default async function ListPage({ params }: { params: Promise<{ id: strin
     notFound();
   }
 
+  // ⚡ Bolt Optimization: Prune unused relations (subtasks, reminders, attachments)
+  // from Drizzle fetch on list pages since the TaskList and TaskComponent
+  // UI does not render them.
+  // Impact: Removes expensive LEFT JOINs from the SQLite query layer,
+  // reducing execution time and data payload size.
   const listTasks = await db.query.tasks.findMany({
     where: eq(tasks.listId, listId),
     with: {
-      subtasks: true,
       labels: {
         with: {
           label: true
         }
       },
-      reminders: true,
-      attachments: true,
     },
   });
 
