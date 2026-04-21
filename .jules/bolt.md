@@ -49,3 +49,6 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-04-20 - Pruning Drizzle relations requires type verification
 **Learning:** Attempting to optimize Drizzle queries by removing unused relations from the `with` clause (e.g., `subtasks`, `reminders`, `attachments`) can cause TypeScript compilation errors if the shared `Task` interface explicitly requires those properties.
 **Action:** Always inspect the target interfaces (e.g., in `src/lib/types/index.ts`) before pruning `with` relations to ensure the optimization doesn't break type safety, and optionally mark unused relations as optional `?` in the interface.
+## 2026-04-21 - Prune unused Drizzle relations to eliminate LEFT JOINs
+**Learning:** Over-fetching relations in Drizzle ORM queries using the `with:` clause (e.g., `subtasks: true`, `reminders: true`) directly translates to expensive `LEFT JOIN` operations at the database level.
+**Action:** Always proactively prune unused relations from `with:` clauses if the downstream UI components (like `TaskList` or `TaskComponent`) do not render or consume that data. This reduces execution time and payload size without requiring complex structural changes.
