@@ -22,6 +22,17 @@ describe('GET /api/search', () => {
     expect(db.select).not.toHaveBeenCalled();
   });
 
+  it('should return 400 Bad Request if query is longer than 100 characters', async () => {
+    const longQuery = 'a'.repeat(101);
+    const request = new Request(`http://localhost/api/search?query=${longQuery}`);
+    const response = await GET(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.error).toBe('Query too long');
+    expect(db.select).not.toHaveBeenCalled();
+  });
+
   it('should return search results', async () => {
     const mockTasks = [
       { id: 1, name: 'Search Result', description: 'Description' },

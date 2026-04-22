@@ -12,6 +12,11 @@ export async function GET(request: Request) {
       return NextResponse.json([]);
     }
 
+    // 🛡️ Sentinel: Enforce maximum query length to prevent DoS via large inputs
+    if (query.length > 100) {
+      return NextResponse.json({ error: 'Query too long' }, { status: 400 });
+    }
+
     const results = await db
       .select()
       .from(tasks)
