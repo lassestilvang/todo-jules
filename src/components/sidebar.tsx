@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutList, Calendar, CalendarDays, Inbox, Trash2 } from 'lucide-react';
+import { LayoutList, Calendar, CalendarDays, Inbox, Trash2, Loader2 } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 import AddListForm from './add-list-form';
 import { deleteList } from '@/app/actions/list';
@@ -16,6 +16,7 @@ interface SidebarProps {
 
 const Sidebar = ({ initialLists = [] }: SidebarProps) => {
   const pathname = usePathname();
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const links = [
     { href: '/', label: 'Inbox', icon: Inbox },
@@ -28,7 +29,12 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
     e.preventDefault();
     e.stopPropagation();
     if(confirm('Are you sure you want to delete this list?')) {
-        await deleteList(id);
+        setDeletingId(id);
+        try {
+            await deleteList(id);
+        } finally {
+            setDeletingId(null);
+        }
     }
   }
 
@@ -92,11 +98,21 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 h-8 w-8 text-muted-foreground hover:text-destructive"
+                                className={cn(
+                                    "h-8 w-8 text-muted-foreground hover:text-destructive transition-opacity",
+                                    deletingId === list.id
+                                        ? "opacity-100"
+                                        : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+                                )}
                                 onClick={(e) => handleDeleteList(e, list.id)}
                                 aria-label={`Delete list ${list.name}`}
+                                disabled={deletingId === list.id}
                             >
-                                <Trash2 className="h-3 w-3" />
+                                {deletingId === list.id ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                    <Trash2 className="h-3 w-3" />
+                                )}
                             </Button>
                         </li>
                     )
