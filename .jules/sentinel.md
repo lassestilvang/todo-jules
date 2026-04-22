@@ -44,3 +44,7 @@
 **Vulnerability:** Raw FTS match queries processing large user strings can cause long regex replacements and database event loop blocking.
 **Learning:** Unconstrained query strings passed into database operations via API endpoints open the service up to Denial of Service (DoS) attacks.
 **Prevention:** Apply a maximum character limit check on incoming query strings directly at the API edge.
+## 2026-04-22 - [MEDIUM] Prevent payload DoS from raw database queries
+**Vulnerability:** Unconstrained query strings passed into database operations via API endpoints open the service up to Denial of Service (DoS) attacks.
+**Learning:** The `GET /api/search` endpoint accepted an arbitrarily long `query` parameter from the URL and passed it directly to an SQLite FTS5 `MATCH` query. Maliciously long queries could block the Node.js event loop due to regex replacements and exhaust database resources.
+**Prevention:** Apply a strict maximum character limit check on incoming query strings directly at the API edge, immediately returning a 400 Bad Request if the limit is exceeded.
