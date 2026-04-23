@@ -4,3 +4,6 @@
 ## 2024-04-18 - Required Indicators on Forms
 **Learning:** Adding semantic visual indicators (like an asterisk) to `<Label>` components directly mapping to underlying `<Input required />` elements improves basic form UX and validates without breaking ARIA.
 **Action:** When the HTML5 `required` attribute is present on an input, always add a visually distinct indicator with `aria-hidden="true"` to the associated label to provide upfront guidance without duplicate screen reader announcements.
+## 2024-05-19 - Destructive Actions and Hover States
+**Learning:** Adding a destructive action (like a delete button) to a list item improves UX significantly but requires careful balancing. Hiding the button behind a hover/focus state keeps the UI clean, while native confirmation dialogues and loading spinners provide critical safety against accidental clicks and double submissions. Additionally, making sure the loading state remains visible (by overriding the hover opacity when active) prevents the button from disappearing mid-operation if the user moves their mouse.
+**Action:** When adding inline destructive actions to list items, always use a combination of hover/focus reveal, `aria-label`, native confirmation (e.g., `window.confirm`), and a loading state that forces the element to remain visible during the async operation.
