@@ -38,10 +38,10 @@ describe('GET /api/tasks', () => {
   });
 
   it('should return a paginated list of tasks', async () => {
-    vi.mocked(cache.getTaskCount).mockResolvedValue(10);
+    vi.mocked(cache.getTaskCount).mockReturnValue(10);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
     // Mock getTaskCount
-    vi.mocked(cache.getTaskCount).mockResolvedValue(10);
+    vi.mocked(cache.getTaskCount).mockReturnValue(10);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
 
     const request = new Request('http://localhost/api/tasks?page=1&limit=10');
@@ -66,9 +66,9 @@ describe('GET /api/tasks', () => {
   });
 
   it('should handle pagination parameters correctly', async () => {
-    vi.mocked(cache.getTaskCount).mockResolvedValue(50);
+    vi.mocked(cache.getTaskCount).mockReturnValue(50);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
-    vi.mocked(cache.getTaskCount).mockResolvedValue(50);
+    vi.mocked(cache.getTaskCount).mockReturnValue(50);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
@@ -90,9 +90,9 @@ describe('GET /api/tasks', () => {
   });
 
   it('should use default values for invalid parameters', async () => {
-    vi.mocked(cache.getTaskCount).mockResolvedValue(10);
+    vi.mocked(cache.getTaskCount).mockReturnValue(10);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
-    vi.mocked(cache.getTaskCount).mockResolvedValue(10);
+    vi.mocked(cache.getTaskCount).mockReturnValue(10);
     vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
 
     // Test with invalid page and limit
