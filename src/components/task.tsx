@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Trash2, Loader2 } from 'lucide-react';
 import { TaskHistory } from '@/components/task-history';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface TaskProps {
   task: Task;
