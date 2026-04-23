@@ -1,22 +1,39 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Task } from '@/lib/types';
-import { toggleTaskCompletion } from '@/app/actions/task';
+import { toggleTaskCompletion, deleteTask } from '@/app/actions/task';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, Trash2, Loader2 } from 'lucide-react';
 import { TaskHistory } from '@/components/task-history';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface TaskProps {
   task: Task;
 }
 
 const TaskComponent = ({ task }: TaskProps) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleToggle = async (checked: boolean) => {
     await toggleTaskCompletion(task.id, checked);
+  };
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      setIsDeleting(true);
+      try {
+        await deleteTask(task.id);
+      } finally {
+        setIsDeleting(false);
+      }
+    }
   };
 
   return (
@@ -25,6 +42,7 @@ const TaskComponent = ({ task }: TaskProps) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.2 }}
+      className="group"
     >
       <Card className={`mb-3 transition-colors hover:shadow-md ${task.completed ? 'opacity-60 bg-muted/50' : 'bg-card'}`}>
         <CardContent className="p-4 flex items-start gap-4">
@@ -55,6 +73,21 @@ const TaskComponent = ({ task }: TaskProps) => {
                         {task.priority}
                     </Badge>
                     )}
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive transition-opacity opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+                        onClick={handleDelete}
+                        aria-label={`Delete task ${task.name}`}
+                        disabled={isDeleting}
+                        style={{ opacity: isDeleting ? 1 : undefined }}
+                    >
+                        {isDeleting ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <Trash2 className="h-4 w-4" />
+                        )}
+                    </Button>
                 </div>
             </div>
 
