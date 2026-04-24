@@ -1,5 +1,0 @@
-🚨 Severity: MEDIUM
-💡 Vulnerability: Next.js API endpoints (`src/app/api/tasks/route.ts` and `src/app/api/tasks/[id]/route.ts`) were using `schema.parse(body)` directly. When invalid data was submitted, it threw an unhandled Promise rejection, resulting in a 500 Internal Server Error.
-🎯 Impact: While unhandled promise rejections are typically DoS vectors or can leak internal stack trace information depending on the environment, using `.parse(body)` in a public API route completely bypasses graceful error handling and proper HTTP 400 status codes for expected client validation failures.
-🔧 Fix: Replaced `schema.parse(body)` with `schema.safeParse(body)` in the affected API routes. The routes now check `!validation.success` and return a controlled 400 Bad Request with formatted validation errors (`validation.error.format()`) instead of crashing the endpoint.
-✅ Verification: Ran the full test suite via `pnpm test` successfully (all 21 tests pass). Manual verification of the API endpoints can confirm that invalid payloads now return a 400 status with JSON error details rather than a 500 server error.
