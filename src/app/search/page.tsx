@@ -12,6 +12,8 @@ import { Search as SearchIcon, Loader2 } from 'lucide-react';
 const SearchContent = () => {
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
   const searchParams = useSearchParams();
   const query = searchParams.get('query') || '';
   const debouncedQuery = useDebounce(query, 300);
