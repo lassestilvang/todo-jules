@@ -55,3 +55,7 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-04-22 - Avoid microtask overhead in Drizzle queries outside transactions
 **Learning:** While `better-sqlite3` natively executes queries synchronously, using Drizzle's Promise-based `await` API introduces unnecessary microtask allocations and event loop blocking, even outside transactions.
 **Action:** When refactoring Drizzle ORM queries with `better-sqlite3` from asynchronous (`await db...`) to synchronous (`.get()`, `.all()`), update the corresponding Vitest mocks to use `.mockReturnValue()` instead of `.mockResolvedValue()` to match the synchronous execution.
+## 2026-04-24 - Synchronous startTransition for Optimistic Updates
+
+**Learning:** React's `startTransition` expects a synchronous callback for immediate state updates. When combining optimistic UI updates with asynchronous server actions, any state updates after an `await` lose the transition context and may be delayed.
+**Action:** Split the logic into two distinct `startTransition` calls: a synchronous one for `setOptimisticState` to ensure the UI reacts instantly, and a separate asynchronous one for the server call to maintain the pending state and track the action duration.
