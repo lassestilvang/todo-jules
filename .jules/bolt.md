@@ -52,3 +52,6 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-04-21 - Prune unused Drizzle relations to eliminate LEFT JOINs
 **Learning:** Over-fetching relations in Drizzle ORM queries using the `with:` clause (e.g., `subtasks: true`, `reminders: true`) directly translates to expensive `LEFT JOIN` operations at the database level.
 **Action:** Always proactively prune unused relations from `with:` clauses if the downstream UI components (like `TaskList` or `TaskComponent`) do not render or consume that data. This reduces execution time and payload size without requiring complex structural changes.
+## 2026-04-22 - Avoid microtask overhead in Drizzle queries outside transactions
+**Learning:** While `better-sqlite3` natively executes queries synchronously, using Drizzle's Promise-based `await` API introduces unnecessary microtask allocations and event loop blocking, even outside transactions.
+**Action:** When refactoring Drizzle ORM queries with `better-sqlite3` from asynchronous (`await db...`) to synchronous (`.get()`, `.all()`), update the corresponding Vitest mocks to use `.mockReturnValue()` instead of `.mockResolvedValue()` to match the synchronous execution.

@@ -30,7 +30,7 @@ export async function GET(request: Request) {
     // better-sqlite3 is inherently synchronous and blocks the event loop.
     // Using Promise.all here does not provide parallel execution but adds
     // microtask overhead and array allocation.
-    const total = await getTaskCount();
+    const total = getTaskCount();
     const allTasks = await db.query.tasks.findMany({
       limit: limit,
       offset: offset,

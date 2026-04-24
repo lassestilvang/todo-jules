@@ -14,7 +14,7 @@ const TTL = process.env.TASK_COUNT_CACHE_TTL
  * Gets the total task count, using a cached value if it's fresh.
  * Optimized to use task_counts table (O(1)) instead of COUNT(*) (O(N)).
  */
-export async function getTaskCount(): Promise<number> {
+export function getTaskCount(): number {
   const now = Date.now();
   if (cachedTaskCount !== null && (now - lastFetch < TTL)) {
     return cachedTaskCount;
@@ -22,7 +22,7 @@ export async function getTaskCount(): Promise<number> {
 
   // Optimization: Read directly from task_counts table
   // This assumes task_counts table is guaranteed to exist by setup-triggers.ts
-  const [countResult] = await db.select().from(taskCounts).where(eq(taskCounts.id, 1));
+  const countResult = db.select().from(taskCounts).where(eq(taskCounts.id, 1)).get();
 
   if (countResult) {
     cachedTaskCount = countResult.count;
@@ -31,8 +31,8 @@ export async function getTaskCount(): Promise<number> {
   }
 
   // Fallback to slow count(*) if for some reason the row doesn't exist (e.g. empty table)
-  const [totalResult] = await db.select({ count: count() }).from(tasks);
-  cachedTaskCount = totalResult.count;
+  const totalResult = db.select({ count: count() }).from(tasks).get();
+  cachedTaskCount = totalResult?.count || 0;
   lastFetch = now;
   return cachedTaskCount;
 }
