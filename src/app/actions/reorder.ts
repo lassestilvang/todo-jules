@@ -10,6 +10,11 @@ export async function reorderTasks(items: { id: number; order: number }[]) {
     return { success: false, error: 'Invalid items array' };
   }
 
+  // 🛡️ Sentinel: Enforce maximum items length to prevent payload DoS
+  if (items.length > 1000) {
+    return { success: false, error: 'Too many items to reorder' };
+  }
+
   for (const item of items) {
     if (!item || typeof item.id !== 'number' || isNaN(item.id) || typeof item.order !== 'number' || isNaN(item.order)) {
       return { success: false, error: 'Invalid item data' };
