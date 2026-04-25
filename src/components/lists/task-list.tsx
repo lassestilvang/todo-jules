@@ -72,7 +72,7 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
     })
   );
 
-  const handleDragEnd = async (event: DragEndEvent) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (active.id !== over?.id) {
@@ -83,21 +83,27 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
 
       const newItems = arrayMove(optimisticTasks, oldIndex, newIndex);
 
-      startTransition(async () => {
+      // Optimization: Only update tasks that have actually changed their position.
+      // We calculate this outside the transition to keep the transition lean.
+      const updates = newItems.reduce((acc, task, index) => {
+        if (task.id !== optimisticTasks[index].id) {
+          acc.push({
+            id: task.id,
+            order: index
+          });
+        }
+        return acc;
+      }, [] as { id: number; order: number }[]);
+
+      // Step 1: Update the UI synchronously using a transition.
+      // This ensures the optimistic update is processed immediately.
+      startTransition(() => {
         setOptimisticTasks(newItems);
+      });
 
-        // Optimization: Only update tasks that have actually changed their position
-        const updates = newItems.reduce((acc, task, index) => {
-          if (task.id !== optimisticTasks[index].id) {
-            acc.push({
-              id: task.id,
-              order: index
-            });
-          }
-          return acc;
-        }, [] as { id: number; order: number }[]);
-
-
+      // Step 2: Perform the server update. We use another transition to
+      // ensure it's handled as an Action, allowing React to track its pending state.
+      startTransition(async () => {
         try {
           const result = await reorderTasks(updates);
           if (!result.success) {
