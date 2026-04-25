@@ -39,7 +39,7 @@ const Header = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <kbd className="absolute right-2.5 hidden h-5 select-none items-center gap-1 rounded border border-gray-600 bg-gray-700 px-1.5 font-mono text-[10px] font-medium text-gray-400 opacity-100 sm:flex">
+          <kbd className="absolute right-2.5 hidden h-5 select-none items-center gap-1 rounded border border-gray-600 bg-gray-700 px-1.5 font-mono text-[10px] font-medium text-gray-400 sm:flex group-focus-within:opacity-0 transition-opacity">
             <span className="text-xs">/</span>
           </kbd>
         </div>
