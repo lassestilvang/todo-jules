@@ -5,7 +5,7 @@ import { taskHistory } from '@/lib/schema';
 import { eq, desc } from 'drizzle-orm';
 
 export async function getTaskHistory(taskId: number) {
-  if (!Number.isSafeInteger(taskId)) {
+  if (typeof taskId !== 'number' || isNaN(taskId)) {
     return [];
   }
 
