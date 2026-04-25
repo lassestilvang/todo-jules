@@ -5,6 +5,10 @@ import { taskHistory } from '@/lib/schema';
 import { eq, desc } from 'drizzle-orm';
 
 export async function getTaskHistory(taskId: number) {
+  if (!Number.isSafeInteger(taskId)) {
+    return [];
+  }
+
   try {
     const history = await db.query.taskHistory.findMany({
       where: eq(taskHistory.taskId, taskId),
