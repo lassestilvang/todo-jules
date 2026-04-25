@@ -95,7 +95,10 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
   }
 
   try {
-    const result = await db.insert(tasks).values(validation.data).returning();
+    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+    // Replaced `await db.insert(...).returning()` with `db.insert(...).returning().all()`
+    // to eliminate microtask overhead and event loop blocking.
+    const result = db.insert(tasks).values(validation.data).returning().all();
 
     const newTask = result[0];
     after(async () => {
@@ -137,7 +140,10 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
 
     if (!currentTask) return { success: false, error: 'Task not found' };
 
-    const result = await db.update(tasks).set(validatedData as Partial<typeof tasks.$inferInsert>).where(eq(tasks.id, id)).returning();
+    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+    // Replaced `await db.update(...).returning()` with `.returning().all()`
+    // to eliminate microtask overhead and event loop blocking.
+    const result = db.update(tasks).set(validatedData as Partial<typeof tasks.$inferInsert>).where(eq(tasks.id, id)).returning().all();
     const updatedTask = result[0];
 
     // Log history for changed fields
@@ -175,7 +181,10 @@ export async function deleteTask(id: number) {
   }
 
   try {
-    await db.delete(tasks).where(eq(tasks.id, id));
+    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+    // Replaced `await db.delete(...)` with `.run()` to eliminate
+    // microtask overhead and event loop blocking.
+    db.delete(tasks).where(eq(tasks.id, id)).run();
     invalidateTaskCountCache();
     revalidatePath('/', 'layout');
     return { success: true };

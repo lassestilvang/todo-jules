@@ -6,10 +6,10 @@ import { lists } from '../../../lib/schema';
 vi.mock('../../../lib/db', () => ({
   db: {
     select: vi.fn().mockReturnThis(),
-    from: vi.fn().mockResolvedValue([{ id: 1, name: 'Test List', color: '#ffffff', emoji: '🎉' }]),
+    from: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue([{ id: 1, name: 'Test List', color: '#ffffff', emoji: '🎉' }]) }),
     insert: vi.fn().mockReturnThis(),
     values: vi.fn().mockReturnThis(),
-    returning: vi.fn().mockResolvedValue([{ id: 1, name: 'Test List', color: '#ffffff', emoji: '🎉' }]),
+    returning: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue([{ id: 1, name: 'Test List', color: '#ffffff', emoji: '🎉' }]) }),
   },
 }));
 

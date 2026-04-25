@@ -57,11 +57,14 @@ export async function PUT(
 
     const { name, color, emoji } = validation.data;
 
-    const [updatedList] = await db
+    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+    // Replaced `await db.update(...)` with `.all()` to eliminate microtask overhead.
+    const [updatedList] = db
       .update(lists)
       .set({ name, color, emoji })
       .where(eq(lists.id, id))
-      .returning();
+      .returning()
+      .all();
 
     if (!updatedList) {
       return NextResponse.json({ error: 'List not found' }, { status: 404 });
@@ -108,7 +111,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
     }
 
-    const [deletedList] = await db.delete(lists).where(eq(lists.id, id)).returning();
+    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+    // Replaced `await db.delete(...)` with `.all()` to eliminate microtask overhead.
+    const [deletedList] = db.delete(lists).where(eq(lists.id, id)).returning().all();
 
     if (!deletedList) {
         return NextResponse.json({ error: 'List not found' }, { status: 404 });
