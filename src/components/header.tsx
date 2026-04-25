@@ -1,13 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 const Header = () => {
   const [query, setQuery] = useState('');
   const router = useRouter();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useHotkeys('/', (e) => {
+    e.preventDefault();
+    inputRef.current?.focus();
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,20 +24,24 @@ const Header = () => {
   return (
     <header className="bg-gray-800 text-white p-4 flex justify-between items-center">
       <h1 className="text-xl font-bold">Daily Task Planner</h1>
-      <form onSubmit={handleSearch} className="relative w-full max-w-sm">
+      <form onSubmit={handleSearch} className="relative w-full max-w-sm group">
         <label htmlFor="header-search-input" className="sr-only">
           Search tasks
         </label>
-        <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+        <div className="relative flex items-center">
+          <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <Input
+            ref={inputRef}
             id="header-search-input"
             type="search"
             placeholder="Search tasks..."
-            className="w-full pl-9 bg-gray-700 border-none text-white placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-white"
+            className="w-full pl-9 pr-8 bg-gray-700 border-none text-white placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-white"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
+          <kbd className="absolute right-2.5 hidden h-5 select-none items-center gap-1 rounded border border-gray-600 bg-gray-700 px-1.5 font-mono text-[10px] font-medium text-gray-400 sm:flex group-focus-within:opacity-0 transition-opacity">
+            <span className="text-xs">/</span>
+          </kbd>
         </div>
       </form>
     </header>
