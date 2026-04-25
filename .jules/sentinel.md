@@ -52,4 +52,4 @@
 ## 2026-04-22 - [MEDIUM] Missing Runtime Validation on primitive argument in server actions
 **Vulnerability:** Next.js server actions are public API endpoints but TypeScript types like `taskId: number` or primitive array boundaries are erased at runtime.
 **Learning:** Functions like `reorderTasks(items: ...)` and `getTaskHistory(taskId: number)` were implicitly trusting the array bounds and type of arguments respectively. An attacker could potentially cause memory exhaustion passing massive arrays to `reorderTasks` or crash the backend with an incorrect type in `getTaskHistory`.
-**Prevention:** Always use runtime checks (like `typeof taskId !== 'number' || isNaN(taskId)`) and explicit length bounds (like `items.length > 1000`) for arguments directly inside Next.js server actions.
+**Prevention:** Always use runtime checks (like `!Number.isSafeInteger(taskId)`) and explicit length bounds (like `items.length > 1000`) for arguments directly inside Next.js server actions.
