@@ -72,7 +72,7 @@ describe('DELETE /api/tasks/[id]', () => {
       method: 'DELETE',
     });
 
-    const deleteMock = { where: vi.fn().mockReturnThis(), returning: vi.fn().mockResolvedValue([{}]) };
+    const deleteMock = { where: vi.fn().mockReturnValue({ run: vi.fn() }) };
     vi.mocked(db.delete).mockReturnValue(deleteMock as unknown as ReturnType<typeof db.delete>);
 
     const response = await DELETE(request, { params: Promise.resolve({ id: '1' }) });

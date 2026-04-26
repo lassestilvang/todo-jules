@@ -39,10 +39,13 @@ export async function POST(request: Request) {
 
     const { name, color, emoji } = validation.data;
 
-    const [newList] = await db
+    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+    // Replaced `await db.insert(...)` with `.all()` to eliminate microtask overhead.
+    const [newList] = db
       .insert(lists)
       .values({ name, color, emoji })
-      .returning();
+      .returning()
+      .all();
 
     return NextResponse.json(newList, { status: 201 });
   } catch (error) {
@@ -71,7 +74,9 @@ export async function POST(request: Request) {
  */
 export async function GET() {
   try {
-    const allLists = await db.select().from(lists);
+    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+    // Replaced `await db.select(...)` with `.all()` to eliminate microtask overhead.
+    const allLists = db.select().from(lists).all();
     return NextResponse.json(allLists);
   } catch (error) {
     console.error('Error fetching lists:', error);

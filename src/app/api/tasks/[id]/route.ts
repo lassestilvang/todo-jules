@@ -198,7 +198,10 @@ export async function DELETE(
     if (Number.isNaN(taskId) || String(taskId) !== id) {
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
     }
-    await db.delete(tasks).where(eq(tasks.id, taskId));
+
+    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+    // Replaced `await db.delete(...)` with `.run()` to eliminate microtask overhead.
+    db.delete(tasks).where(eq(tasks.id, taskId)).run();
 
     invalidateTaskCountCache();
 

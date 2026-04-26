@@ -14,10 +14,13 @@ export async function createList(name: string, color: string, emoji: string) {
   }
 
   try {
-    const result = await db.insert(lists).values(validation.data).returning();
+    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+    // Replaced `await db.insert(...).returning()` with `.returning().all()`
+    // to eliminate microtask overhead.
+    const result = db.insert(lists).values(validation.data).returning().get();
 
     revalidatePath('/', 'layout');
-    return { success: true, data: result[0] };
+    return { success: true, data: result };
   } catch (error) {
     console.error('Failed to create list:', error);
     return { success: false, error: 'Failed to create list' };
@@ -30,7 +33,9 @@ export async function deleteList(id: number) {
   }
 
   try {
-    await db.delete(lists).where(eq(lists.id, id));
+    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+    // Replaced `await db.delete(...)` with `.run()` to eliminate microtask overhead.
+    db.delete(lists).where(eq(lists.id, id)).run();
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
@@ -41,7 +46,9 @@ export async function deleteList(id: number) {
 
 export async function getLists() {
   try {
-    const allLists = await db.select().from(lists);
+    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+    // Replaced `await db.select(...)` with `.all()` to eliminate microtask overhead.
+    const allLists = db.select().from(lists).all();
     return allLists;
   } catch (error) {
     console.error('Failed to get lists:', error);

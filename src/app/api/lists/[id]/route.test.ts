@@ -19,7 +19,7 @@ describe('PUT /api/lists/{id}', () => {
   });
 
   it('should return a 200 status code and the updated list', async () => {
-    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: 1, name: 'Updated List', color: '#000000', emoji: '✨' }]) });
+    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue([{ id: 1, name: 'Updated List', color: '#000000', emoji: '✨' }]) }) });
 
     const request = new Request('http://localhost/api/lists/1', {
       method: 'PUT',
@@ -34,7 +34,7 @@ describe('PUT /api/lists/{id}', () => {
   });
 
   it('should return a 404 status code if the list is not found', async () => {
-    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
+    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue([]) }) });
 
     const request = new Request('http://localhost/api/lists/999', {
       method: 'PUT',
@@ -55,7 +55,7 @@ describe('DELETE /api/lists/{id}', () => {
   });
 
   it('should return a 204 status code', async () => {
-    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([{ id: 1 }]) });
+    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue([{ id: 1 }]) }) });
     const request = new Request('http://localhost/api/lists/1', {
       method: 'DELETE',
     });
@@ -66,7 +66,7 @@ describe('DELETE /api/lists/{id}', () => {
   });
 
   it('should return a 404 status code if the list is not found', async () => {
-    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockResolvedValue([]) });
+    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue([]) }) });
     const request = new Request('http://localhost/api/lists/999', {
       method: 'DELETE',
     });
