@@ -58,3 +58,7 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-04-23 - Relational API is fundamentally asynchronous
 **Learning:** In Drizzle ORM, the Relational API (`db.query.*.findFirst` or `.findMany`) always returns a Promise and does not natively expose synchronous terminal methods like `.all()` or `.get()`. Conversely, the core Query Builder API (`db.select().from(...)`, `db.insert()`, `db.update()`, `db.delete()`) does support these synchronous execution methods when used with `better-sqlite3`.
 **Action:** When refactoring for performance to eliminate Node.js microtask overhead, focus on replacing `await` calls on Drizzle's core Query Builder operations with synchronous `.all()`, `.get()`, or `.run()` methods, particularly inside transaction blocks or frequently hit API endpoints. Ensure that test mocks are updated to return the correct chained interface (e.g., `.mockReturnValue({ all: vi.fn().mockReturnValue([...]) })`).
+## 2026-04-24 - Synchronous startTransition for Optimistic Updates
+
+**Learning:** React's `startTransition` expects a synchronous callback for immediate state updates. When combining optimistic UI updates with asynchronous server actions, any state updates after an `await` lose the transition context and may be delayed.
+**Action:** Split the logic into two distinct `startTransition` calls: a synchronous one for `setOptimisticState` to ensure the UI reacts instantly, and a separate asynchronous one for the server call to maintain the pending state and track the action duration.
