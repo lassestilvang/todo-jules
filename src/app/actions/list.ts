@@ -17,10 +17,10 @@ export async function createList(name: string, color: string, emoji: string) {
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.insert(...).returning()` with `.returning().all()`
     // to eliminate microtask overhead.
-    const result = db.insert(lists).values(validation.data).returning().all();
+    const result = db.insert(lists).values(validation.data).returning().get();
 
     revalidatePath('/', 'layout');
-    return { success: true, data: result[0] };
+    return { success: true, data: result };
   } catch (error) {
     console.error('Failed to create list:', error);
     return { success: false, error: 'Failed to create list' };
