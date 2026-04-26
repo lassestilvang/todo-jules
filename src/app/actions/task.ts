@@ -98,9 +98,7 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.insert(...).returning()` with `db.insert(...).returning().all()`
     // to eliminate microtask overhead and event loop blocking.
-    const result = db.insert(tasks).values(validation.data).returning().all();
-
-    const newTask = result[0];
+    const newTask = db.insert(tasks).values(validation.data).returning().get();
     after(async () => {
         await logTaskHistory([
           {
