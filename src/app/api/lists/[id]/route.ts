@@ -113,7 +113,7 @@ export async function DELETE(
 
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.delete(...)` with `.all()` to eliminate microtask overhead.
-    const [deletedList] = db.delete(lists).where(eq(lists.id, id)).returning().all();
+    const deletedList = db.delete(lists).where(eq(lists.id, id)).returning().get();
 
     if (!deletedList) {
         return NextResponse.json({ error: 'List not found' }, { status: 404 });
