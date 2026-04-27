@@ -93,12 +93,12 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-            <Label className="mb-1 block">Date</Label>
-            <DateTimePicker date={date} setDate={setDate} label="Pick a date" />
+            <Label htmlFor="task-date" className="mb-1 block">Date</Label>
+            <DateTimePicker id="task-date" date={date} setDate={setDate} label="Pick a date" />
         </div>
         <div>
-            <Label className="mb-1 block">Deadline</Label>
-            <DateTimePicker date={deadline} setDate={setDeadline} label="Set deadline" />
+            <Label htmlFor="task-deadline" className="mb-1 block">Deadline</Label>
+            <DateTimePicker id="task-deadline" date={deadline} setDate={setDeadline} label="Set deadline" />
         </div>
         <div>
             <Label htmlFor="priority" className="mb-1 block">

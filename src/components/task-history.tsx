@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { History } from 'lucide-react';
+import { History, Loader2, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface TaskHistoryProps {
@@ -137,9 +137,19 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
         </SheetHeader>
         <div className="mt-6 space-y-4">
           {loading ? (
-            <p className="text-sm text-muted-foreground">Loading...</p>
+            <div className="flex justify-center p-12">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
           ) : history.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No history recorded.</p>
+            <div className="text-center p-12 border-2 border-dashed rounded-lg bg-card/50">
+              <div className="flex justify-center mb-4 text-muted-foreground">
+                <ClipboardList className="h-12 w-12 opacity-20" aria-hidden="true" />
+              </div>
+              <h3 className="text-lg font-medium text-foreground">No history recorded</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Any changes made to this task will appear here.
+              </p>
+            </div>
           ) : (
             <ul className="space-y-4">
               {history.map((item) => (

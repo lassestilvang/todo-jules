@@ -18,20 +18,22 @@ interface DateTimePickerProps {
     date: Date | undefined;
     setDate: (date: Date | undefined) => void;
     label?: string;
+    id?: string;
 }
 
-export function DateTimePicker({ date, setDate, label }: DateTimePickerProps) {
+export function DateTimePicker({ date, setDate, label, id }: DateTimePickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button
+          id={id}
           variant={"outline"}
           className={cn(
             "w-full justify-start text-left font-normal",
             !date && "text-muted-foreground"
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+          <CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
           {date ? format(date, "PPP p") : <span>{label || "Pick a date"}</span>}
         </Button>
       </PopoverTrigger>
