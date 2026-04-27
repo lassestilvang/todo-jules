@@ -103,7 +103,6 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
                 maxLength={2}
                 className="w-full"
                 required
-                aria-required="true"
               />
             </div>
           </div>
