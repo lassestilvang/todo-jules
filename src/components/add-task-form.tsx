@@ -76,7 +76,6 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
           onChange={(e) => setName(e.target.value)}
           placeholder="What needs to be done?"
           required
-          aria-required="true"
         />
       </div>
       <div>
