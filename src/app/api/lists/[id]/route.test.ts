@@ -55,7 +55,7 @@ describe('DELETE /api/lists/{id}', () => {
   });
 
   it('should return a 204 status code', async () => {
-    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue([{ id: 1 }]) }) });
+    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockReturnValue({ get: vi.fn().mockReturnValue({ id: 1 }) }) });
     const request = new Request('http://localhost/api/lists/1', {
       method: 'DELETE',
     });
@@ -66,7 +66,7 @@ describe('DELETE /api/lists/{id}', () => {
   });
 
   it('should return a 404 status code if the list is not found', async () => {
-    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue([]) }) });
+    db.where = vi.fn().mockReturnValue({ returning: vi.fn().mockReturnValue({ get: vi.fn().mockReturnValue(undefined) }) });
     const request = new Request('http://localhost/api/lists/999', {
       method: 'DELETE',
     });
