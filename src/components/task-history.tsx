@@ -126,8 +126,8 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="sm" title="View History">
-          <History className="h-4 w-4 mr-1" />
+        <Button variant="ghost" size="sm" aria-label="View task history">
+          <History className="h-4 w-4 mr-1" aria-hidden="true" />
           History
         </Button>
       </SheetTrigger>
