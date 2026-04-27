@@ -73,7 +73,6 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
               onChange={(e) => setName(e.target.value)}
               placeholder="List name"
               required
-              aria-required="true"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
