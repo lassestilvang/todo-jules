@@ -12,7 +12,15 @@ vi.mock('../../../lib/db', () => ({
       },
     },
     transaction: vi.fn(),
-    select: vi.fn(),
+    select: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+            limit: vi.fn().mockReturnValue({
+                offset: vi.fn().mockReturnValue({
+                    all: vi.fn().mockReturnValue([])
+                })
+            })
+        })
+    }),
   },
 }));
 
@@ -39,10 +47,23 @@ describe('GET /api/tasks', () => {
 
   it('should return a paginated list of tasks', async () => {
     vi.mocked(cache.getTaskCount).mockReturnValue(10);
-    vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
-    // Mock getTaskCount
-    vi.mocked(cache.getTaskCount).mockReturnValue(10);
-    vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
+
+    const mockSelectChain = {
+        from: vi.fn().mockReturnValue({
+            limit: vi.fn().mockReturnValue({
+                offset: vi.fn().mockReturnValue({
+                    all: vi.fn().mockReturnValue([mockTask])
+                })
+            }),
+            innerJoin: vi.fn().mockReturnValue({
+                where: vi.fn().mockReturnValue({
+                    all: vi.fn().mockReturnValue([])
+                })
+            })
+        })
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(db.select).mockReturnValue(mockSelectChain as any);
 
     const request = new Request('http://localhost/api/tasks?page=1&limit=10');
     const response = await GET(request);
@@ -56,20 +77,22 @@ describe('GET /api/tasks', () => {
       limit: 10,
       totalPages: 1
     });
-    expect(db.query.tasks.findMany).toHaveBeenCalledTimes(1);
-    expect(db.query.tasks.findMany).toHaveBeenCalledWith({
-      limit: 10,
-      offset: 0,
-      with: expect.any(Object)
-    });
+    expect(db.select).toHaveBeenCalled();
     expect(cache.getTaskCount).toHaveBeenCalledTimes(1);
   });
 
   it('should handle pagination parameters correctly', async () => {
     vi.mocked(cache.getTaskCount).mockReturnValue(50);
-    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
-    vi.mocked(cache.getTaskCount).mockReturnValue(50);
-    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
+
+    const mockOffset = vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue([]) });
+    const mockLimit = vi.fn().mockReturnValue({ offset: mockOffset });
+    const mockSelectChain = {
+        from: vi.fn().mockReturnValue({
+            limit: mockLimit,
+        })
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(db.select).mockReturnValue(mockSelectChain as any);
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
     const response = await GET(request);
@@ -82,18 +105,22 @@ describe('GET /api/tasks', () => {
       limit: 5,
       totalPages: 10
     });
-    expect(db.query.tasks.findMany).toHaveBeenCalledWith({
-        limit: 5,
-        offset: 10, // (3-1) * 5
-        with: expect.any(Object)
-    });
+    expect(mockLimit).toHaveBeenCalledWith(5);
+    expect(mockOffset).toHaveBeenCalledWith(10);
   });
 
   it('should use default values for invalid parameters', async () => {
     vi.mocked(cache.getTaskCount).mockReturnValue(10);
-    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
-    vi.mocked(cache.getTaskCount).mockReturnValue(10);
-    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
+
+    const mockOffset = vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue([]) });
+    const mockLimit = vi.fn().mockReturnValue({ offset: mockOffset });
+    const mockSelectChain = {
+        from: vi.fn().mockReturnValue({
+            limit: mockLimit,
+        })
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(db.select).mockReturnValue(mockSelectChain as any);
 
     // Test with invalid page and limit
     const request = new Request('http://localhost/api/tasks?page=abc&limit=-5');

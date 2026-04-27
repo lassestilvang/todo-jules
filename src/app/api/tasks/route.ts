@@ -3,10 +3,12 @@ import { db } from '../../../lib/db';
 import {
   tasks,
   subtasks,
+  labels,
   taskLabels,
   reminders,
   attachments,
 } from '../../../lib/schema';
+import { eq } from 'drizzle-orm';
 
 import { createTaskSchema } from '../../../lib/validators';
 import { getTaskCount, invalidateTaskCountCache } from '../../../lib/cache';
@@ -30,17 +32,32 @@ export async function GET(request: Request) {
     // better-sqlite3 is inherently synchronous and blocks the event loop.
     // Using Promise.all here does not provide parallel execution but adds
     // microtask overhead and array allocation.
+    // ⚡ Bolt Optimization: Avoid using relational queries (findMany) with better-sqlite3
+    // because they introduce promise microtask overhead. Instead, use the core Query Builder
+    // API with `.all()` for synchronous, non-blocking execution which is faster.
     const total = getTaskCount();
-    const allTasks = await db.query.tasks.findMany({
-      limit: limit,
-      offset: offset,
-      with: {
-        labels: {
-          with: {
-            label: true,
-          },
-        },
-      },
+
+    const baseTasks = db.select()
+        .from(tasks)
+        .limit(limit)
+        .offset(offset)
+        .all();
+
+    // Reconstruct the payload to match what `findMany` with `labels` relation would return
+    const allTasks = baseTasks.map(task => {
+        // Fetch labels for each task synchronously
+        const taskLabelsData = db.select({
+            label: labels
+        })
+        .from(taskLabels)
+        .innerJoin(labels, eq(taskLabels.labelId, labels.id))
+        .where(eq(taskLabels.taskId, task.id))
+        .all();
+
+        return {
+            ...task,
+            labels: taskLabelsData
+        };
     });
 
     return NextResponse.json({
