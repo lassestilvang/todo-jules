@@ -59,3 +59,7 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 
 **Learning:** React's `startTransition` expects a synchronous callback for immediate state updates. When combining optimistic UI updates with asynchronous server actions, any state updates after an `await` lose the transition context and may be delayed.
 **Action:** Split the logic into two distinct `startTransition` calls: a synchronous one for `setOptimisticState` to ensure the UI reacts instantly, and a separate asynchronous one for the server call to maintain the pending state and track the action duration.
+
+## 2024-04-24 - Avoid microtask overhead in Drizzle queries outside transactions
+**Learning:** In Drizzle ORM with `better-sqlite3`, the relational API (`db.query.*.findMany`) always returns a promise, introducing microtask overhead. Using the core Query Builder API (`db.select().from(...).all()`) avoids this overhead and executes synchronously, which is significantly faster.
+**Action:** When possible, use `db.select().from(...).all()` to optimize read queries when using `better-sqlite3`, particularly for endpoints that do not require complex relation mappings.
