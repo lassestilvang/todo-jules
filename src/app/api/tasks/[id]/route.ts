@@ -121,7 +121,12 @@ export async function PUT(
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 completed: completedCaseStatement as any,
               })
-              .where(inArray(subtasks.id, ids))
+              .where(
+                and(
+                  eq(subtasks.taskId, taskId),
+                  inArray(subtasks.id, ids)
+                )
+              )
               .run();
           }
         }
