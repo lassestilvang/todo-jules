@@ -61,7 +61,7 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                     isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
                   )}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-4 w-4" aria-hidden="true" />
                   {link.label}
                 </Link>
               </li>
