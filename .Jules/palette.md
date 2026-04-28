@@ -21,4 +21,4 @@
 **Action:** Always add `aria-hidden="true"` to decorative SVGs/icons within buttons or links, and evaluate if an `aria-label` would provide clearer intent than the visible text alone.
 ## 2024-05-24 - Added aria-hidden to decorative Sidebar icons
 **Learning:** Decorative icons placed next to descriptive text within interactive elements (like navigation links in a sidebar) should be explicitly hidden from screen readers. This prevents redundant or confusing announcements, keeping the navigation experience clean and focused on the actual text label.
-**Action:** Always add `aria-hidden="true"` to decorative SVGs/icons within buttons or links when the text itself provides sufficient context.
+**Action:** Ensure all decorative icons in the sidebar (including navigation links, list emojis, and action buttons) are hidden from screen readers.
