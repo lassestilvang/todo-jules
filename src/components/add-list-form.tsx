@@ -65,8 +65,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-1">
-              Name
-              <span className="text-destructive" aria-hidden="true">*</span>
+              Name <span className="text-destructive" aria-hidden="true">*</span>
             </label>
             <Input
               id="name"
@@ -94,8 +93,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
             </div>
             <div>
               <label htmlFor="emoji" className="block text-sm font-medium mb-1">
-                Emoji
-                <span className="text-destructive" aria-hidden="true">*</span>
+                Emoji <span className="text-destructive" aria-hidden="true">*</span>
               </label>
               <Input
                 type="text"
