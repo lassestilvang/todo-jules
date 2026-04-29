@@ -54,8 +54,9 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
         <button
             className="text-muted-foreground hover:text-foreground"
             aria-label="Create new list"
+            title="Create new list"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
         </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -109,7 +110,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
             </div>
           </div>
           <Button type="submit" disabled={isPending} className="w-full">
-            {isPending ? <><Loader2 className="animate-spin" /> Creating...</> : 'Create List'}
+            {isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" /> Creating...</> : 'Create List'}
           </Button>
         </form>
       </DialogContent>
