@@ -66,3 +66,7 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2024-04-24 - Avoid microtask overhead in Drizzle queries outside transactions
 **Learning:** In Drizzle ORM with `better-sqlite3`, the relational API (`db.query.*.findMany`) always returns a promise, introducing microtask overhead. Using the core Query Builder API (`db.select().from(...).all()`) avoids this overhead and executes synchronously, which is significantly faster.
 **Action:** When possible, use `db.select().from(...).all()` to optimize read queries when using `better-sqlite3`, particularly for endpoints that do not require complex relation mappings.
+
+## 2026-04-25 - Bulk fetch with inArray to eliminate N+1 loop queries
+**Learning:** Developers often accidentally introduce N+1 query problems when trying to manually unroll ORM relationship queries (`findMany` with `with:`) into sequential database calls for performance, particularly when looping over arrays (e.g., executing `db.select()` inside `.map()`).
+**Action:** To resolve N+1 query performance bottlenecks in Drizzle ORM, extract all required IDs, fetch the related records in a single bulk query using `inArray()`, and group the results in memory using an O(n) hash map lookup.
