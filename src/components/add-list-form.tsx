@@ -78,7 +78,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="color" className="block text-sm font-medium mb-1">
-                Color <span className="text-red-500" aria-hidden="true">*</span>
+                Color
               </label>
               <div className="flex items-center gap-2">
                 <Input
