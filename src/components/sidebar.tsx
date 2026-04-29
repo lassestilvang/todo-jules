@@ -92,7 +92,7 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                                     isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
                                 )}
                             >
-                                <span className="text-base">{list.emoji}</span>
+                                <span className="text-base" aria-hidden="true">{list.emoji}</span>
                                 <span className="truncate">{list.name}</span>
                             </Link>
                             <Button
@@ -106,12 +106,13 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                                 )}
                                 onClick={(e) => handleDeleteList(e, list.id)}
                                 aria-label={`Delete list ${list.name}`}
+                                title="Delete list"
                                 disabled={deletingId === list.id}
                             >
                                 {deletingId === list.id ? (
-                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
                                 ) : (
-                                    <Trash2 className="h-3 w-3" />
+                                    <Trash2 className="h-3 w-3" aria-hidden="true" />
                                 )}
                             </Button>
                         </li>
