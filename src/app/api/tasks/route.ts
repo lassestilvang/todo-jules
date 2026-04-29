@@ -8,7 +8,7 @@ import {
   reminders,
   attachments,
 } from '../../../lib/schema';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 
 import { createTaskSchema } from '../../../lib/validators';
 import { getTaskCount, invalidateTaskCountCache } from '../../../lib/cache';
@@ -43,22 +43,34 @@ export async function GET(request: Request) {
         .offset(offset)
         .all();
 
-    // Reconstruct the payload to match what `findMany` with `labels` relation would return
-    const allTasks = baseTasks.map(task => {
-        // Fetch labels for each task synchronously
-        const taskLabelsData = db.select({
+    // Reconstruct the payload using O(n) hash map to avoid N+1 query
+    const taskIds = baseTasks.map(t => t.id);
+    let allTasks = baseTasks.map(t => ({ ...t, labels: [] as { label: typeof labels.$inferSelect }[] }));
+
+    if (taskIds.length > 0) {
+        const allLabelsData = db.select({
+            taskId: taskLabels.taskId,
             label: labels
         })
         .from(taskLabels)
         .innerJoin(labels, eq(taskLabels.labelId, labels.id))
-        .where(eq(taskLabels.taskId, task.id))
+        .where(inArray(taskLabels.taskId, taskIds))
         .all();
 
-        return {
+        const labelsByTaskId = allLabelsData.reduce((acc, row) => {
+            if (!acc[row.taskId]) {
+                acc[row.taskId] = [];
+            }
+            // Keep the nested object structure { taskId: number, label: object } to maintain existing payload shape
+            acc[row.taskId].push(row);
+            return acc;
+        }, {} as Record<number, typeof allLabelsData>);
+
+        allTasks = baseTasks.map(task => ({
             ...task,
-            labels: taskLabelsData
-        };
-    });
+            labels: labelsByTaskId[task.id] || []
+        }));
+    }
 
     return NextResponse.json({
       data: allTasks,
