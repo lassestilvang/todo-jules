@@ -93,7 +93,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
             </div>
             <div>
               <label htmlFor="emoji" className="block text-sm font-medium mb-1">
-                Emoji <span className="text-red-500" aria-hidden="true">*</span>
+                Emoji <span className="text-destructive" aria-hidden="true">*</span>
               </label>
               <Input
                 type="text"
