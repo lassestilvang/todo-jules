@@ -43,36 +43,33 @@ export async function GET(request: Request) {
         .offset(offset)
         .all();
 
-    // ⚡ Bolt Optimization: Fix N+1 Query Problem
-    // Instead of querying labels inside a map loop (which causes an N+1 performance bottleneck),
-    // we fetch all related labels in a single bulk query using `inArray`, and group them
-    // in memory using an O(n) hash map lookup.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let allTasks = baseTasks.map(task => ({ ...task, labels: [] as any[] }));
-    if (baseTasks.length > 0) {
-      const taskIds = baseTasks.map(t => t.id);
+    // Reconstruct the payload using O(n) hash map to avoid N+1 query
+    const taskIds = baseTasks.map(t => t.id);
+    let allTasks = baseTasks.map(t => ({ ...t, labels: [] as { label: typeof labels.$inferSelect }[] }));
 
-      const allLabels = db.select({
-        taskId: taskLabels.taskId,
-        label: labels
-      })
-      .from(taskLabels)
-      .innerJoin(labels, eq(taskLabels.labelId, labels.id))
-      .where(inArray(taskLabels.taskId, taskIds))
-      .all();
+    if (taskIds.length > 0) {
+        const allLabelsData = db.select({
+            taskId: taskLabels.taskId,
+            label: labels
+        })
+        .from(taskLabels)
+        .innerJoin(labels, eq(taskLabels.labelId, labels.id))
+        .where(inArray(taskLabels.taskId, taskIds))
+        .all();
 
-      const labelsByTaskId = allLabels.reduce((acc, row) => {
-        if (!acc[row.taskId!]) {
-          acc[row.taskId!] = [];
-        }
-        acc[row.taskId!].push({ label: row.label });
-        return acc;
-      }, {} as Record<number, { label: typeof labels.$inferSelect }[]>);
+        const labelsByTaskId = allLabelsData.reduce((acc, row) => {
+            if (!acc[row.taskId]) {
+                acc[row.taskId] = [];
+            }
+            // Keep the nested object structure { taskId: number, label: object } to maintain existing payload shape
+            acc[row.taskId].push(row);
+            return acc;
+        }, {} as Record<number, typeof allLabelsData>);
 
-      allTasks = baseTasks.map(task => ({
-        ...task,
-        labels: labelsByTaskId[task.id] || []
-      }));
+        allTasks = baseTasks.map(task => ({
+            ...task,
+            labels: labelsByTaskId[task.id] || []
+        }));
     }
 
     return NextResponse.json({

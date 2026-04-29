@@ -67,6 +67,9 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 **Learning:** In Drizzle ORM with `better-sqlite3`, the relational API (`db.query.*.findMany`) always returns a promise, introducing microtask overhead. Using the core Query Builder API (`db.select().from(...).all()`) avoids this overhead and executes synchronously, which is significantly faster.
 **Action:** When possible, use `db.select().from(...).all()` to optimize read queries when using `better-sqlite3`, particularly for endpoints that do not require complex relation mappings.
 
+## 2026-05-18 - Resolving N+1 database queries inside mapping loops
+**Learning:** Performing a database query inside a `.map()` loop (e.g., iterating through `baseTasks` to fetch `labels`) triggers an N+1 query problem, severely degrading performance as it blocks the event loop repeatedly and scales linearly with task count (observed drop from ~17.5ms to ~2.2ms for 100 queries when fixed).
+**Action:** Always extract the necessary parent entity IDs, use a single bulk query with `.where(inArray(...))` to fetch all related records, and group the results in an O(n) hash map lookup for memory mapping.
 ## 2026-04-25 - Bulk fetch with inArray to eliminate N+1 loop queries
 **Learning:** Developers often accidentally introduce N+1 query problems when trying to manually unroll ORM relationship queries (`findMany` with `with:`) into sequential database calls for performance, particularly when looping over arrays (e.g., executing `db.select()` inside `.map()`).
 **Action:** To resolve N+1 query performance bottlenecks in Drizzle ORM, extract all required IDs, fetch the related records in a single bulk query using `inArray()`, and group the results in memory using an O(n) hash map lookup.
