@@ -19,6 +19,11 @@
 ## 2026-04-26 - Added ARIA attributes to Task History button
 **Learning:** When using icons alongside text in interactive elements like buttons (e.g., `<Button><History /> History</Button>`), it is critical to explicitly mark the icon with `aria-hidden="true"` to prevent redundant or confusing screen reader announcements. Additionally, providing a clear `aria-label` (e.g., `aria-label="View task history"`) provides better context than relying solely on the visual text or `title` attribute, especially for buttons that might be ambiguous out of context.
 **Action:** Always add `aria-hidden="true"` to decorative SVGs/icons within buttons or links, and evaluate if an `aria-label` would provide clearer intent than the visible text alone.
+## 2026-04-28
+- Added required red asterisk indicators (`*`) to the task name, list name, list color, and list emoji form fields to properly signal required fields for users.
 ## 2024-05-24 - Added aria-hidden to decorative Sidebar icons
 **Learning:** Decorative icons placed next to descriptive text within interactive elements (like navigation links in a sidebar) should be explicitly hidden from screen readers. This prevents redundant or confusing announcements, keeping the navigation experience clean and focused on the actual text label.
 **Action:** Ensure all decorative icons in the sidebar (including navigation links, list emojis, and action buttons) are hidden from screen readers.
+## 2024-04-29 - Title Attributes and ARIA-hidden for Actions
+**Learning:** For icon-only action buttons, relying solely on `aria-label` leaves sighted users without a clear tooltip on hover. Adding a native `title` attribute provides an immediate, helpful tooltip. Furthermore, failing to add `aria-hidden="true"` to the internal SVGs (including the loading spinners) can result in redundant or confusing screen reader announcements.
+**Action:** When creating or modifying icon-only buttons, always ensure they have an `aria-label` for screen readers, a `title` attribute for visual hover tooltips, and `aria-hidden="true"` on all interior icons or loading indicators.

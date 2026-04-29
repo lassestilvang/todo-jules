@@ -79,13 +79,14 @@ const TaskComponent = ({ task }: TaskProps) => {
                         className="h-8 w-8 text-muted-foreground hover:text-destructive transition-opacity opacity-0 group-hover:opacity-100 focus-within:opacity-100"
                         onClick={handleDelete}
                         aria-label={`Delete task ${task.name}`}
+                        title="Delete task"
                         disabled={isDeleting}
                         style={{ opacity: isDeleting ? 1 : undefined }}
                     >
                         {isDeleting ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                         ) : (
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" aria-hidden="true" />
                         )}
                     </Button>
                 </div>
@@ -98,13 +99,13 @@ const TaskComponent = ({ task }: TaskProps) => {
             <div className="flex flex-wrap gap-2 mt-2">
                 {task.date && (
                     <div className="flex items-center text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3 mr-1" />
+                        <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
                         {new Date(task.date).toLocaleDateString()}
                     </div>
                 )}
                  {task.deadline && (
                     <div className="flex items-center text-xs text-red-400">
-                        <Clock className="h-3 w-3 mr-1" />
+                        <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
                         {new Date(task.deadline).toLocaleDateString()}
                     </div>
                 )}
@@ -122,7 +123,7 @@ const TaskComponent = ({ task }: TaskProps) => {
                         color: label.color || undefined
                     }}
                   >
-                    {label.icon && <span className="mr-1">{label.icon}</span>}
+                    {label.icon && <span className="mr-1" aria-hidden="true">{label.icon}</span>}
                     {label.name}
                   </Badge>
                 ))}

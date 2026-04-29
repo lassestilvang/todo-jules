@@ -54,8 +54,9 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
         <button
             className="text-muted-foreground hover:text-foreground"
             aria-label="Create new list"
+            title="Create new list"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-4 w-4" aria-hidden="true" />
         </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -65,8 +66,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-1">
-              Name
-              <span className="text-destructive" aria-hidden="true">*</span>
+              Name <span className="text-destructive" aria-hidden="true">*</span>
             </label>
             <Input
               id="name"
@@ -94,8 +94,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
             </div>
             <div>
               <label htmlFor="emoji" className="block text-sm font-medium mb-1">
-                Emoji
-                <span className="text-destructive" aria-hidden="true">*</span>
+                Emoji <span className="text-destructive" aria-hidden="true">*</span>
               </label>
               <Input
                 type="text"
@@ -109,7 +108,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
             </div>
           </div>
           <Button type="submit" disabled={isPending} className="w-full">
-            {isPending ? <><Loader2 className="animate-spin" /> Creating...</> : 'Create List'}
+            {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Creating...</> : 'Create List'}
           </Button>
         </form>
       </DialogContent>
