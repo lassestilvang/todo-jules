@@ -8,7 +8,7 @@ import {
   reminders,
   attachments,
 } from '../../../lib/schema';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 
 import { createTaskSchema } from '../../../lib/validators';
 import { getTaskCount, invalidateTaskCountCache } from '../../../lib/cache';
@@ -43,22 +43,37 @@ export async function GET(request: Request) {
         .offset(offset)
         .all();
 
-    // Reconstruct the payload to match what `findMany` with `labels` relation would return
-    const allTasks = baseTasks.map(task => {
-        // Fetch labels for each task synchronously
-        const taskLabelsData = db.select({
-            label: labels
-        })
-        .from(taskLabels)
-        .innerJoin(labels, eq(taskLabels.labelId, labels.id))
-        .where(eq(taskLabels.taskId, task.id))
-        .all();
+    // ⚡ Bolt Optimization: Fix N+1 Query Problem
+    // Instead of querying labels inside a map loop (which causes an N+1 performance bottleneck),
+    // we fetch all related labels in a single bulk query using `inArray`, and group them
+    // in memory using an O(n) hash map lookup.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let allTasks = baseTasks.map(task => ({ ...task, labels: [] as any[] }));
+    if (baseTasks.length > 0) {
+      const taskIds = baseTasks.map(t => t.id);
 
-        return {
-            ...task,
-            labels: taskLabelsData
-        };
-    });
+      const allLabels = db.select({
+        taskId: taskLabels.taskId,
+        label: labels
+      })
+      .from(taskLabels)
+      .innerJoin(labels, eq(taskLabels.labelId, labels.id))
+      .where(inArray(taskLabels.taskId, taskIds))
+      .all();
+
+      const labelsByTaskId = allLabels.reduce((acc, row) => {
+        if (!acc[row.taskId!]) {
+          acc[row.taskId!] = [];
+        }
+        acc[row.taskId!].push({ label: row.label });
+        return acc;
+      }, {} as Record<number, { label: typeof labels.$inferSelect }[]>);
+
+      allTasks = baseTasks.map(task => ({
+        ...task,
+        labels: labelsByTaskId[task.id] || []
+      }));
+    }
 
     return NextResponse.json({
       data: allTasks,
