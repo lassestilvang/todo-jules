@@ -65,7 +65,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-1">
-              Name <span className="text-red-500" aria-hidden="true">*</span>
+              Name <span className="text-destructive" aria-hidden="true">*</span>
             </label>
             <Input
               id="name"
