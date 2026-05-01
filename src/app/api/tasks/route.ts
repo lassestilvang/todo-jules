@@ -45,7 +45,8 @@ export async function GET(request: Request) {
 
     // Reconstruct the payload using O(n) hash map to avoid N+1 query
     const taskIds = baseTasks.map(t => t.id);
-    let allTasks = baseTasks.map(t => ({ ...t, labels: [] as { label: typeof labels.$inferSelect }[] }));
+
+    let labelsByTaskId: Record<number, { taskId: number; label: typeof labels.$inferSelect }[]> = {};
 
     if (taskIds.length > 0) {
         const allLabelsData = db.select({
@@ -57,7 +58,7 @@ export async function GET(request: Request) {
         .where(inArray(taskLabels.taskId, taskIds))
         .all();
 
-        const labelsByTaskId = allLabelsData.reduce((acc, row) => {
+        labelsByTaskId = allLabelsData.reduce((acc, row) => {
             if (!acc[row.taskId]) {
                 acc[row.taskId] = [];
             }
@@ -65,12 +66,12 @@ export async function GET(request: Request) {
             acc[row.taskId].push(row);
             return acc;
         }, {} as Record<number, typeof allLabelsData>);
-
-        allTasks = baseTasks.map(task => ({
-            ...task,
-            labels: labelsByTaskId[task.id] || []
-        }));
     }
+
+    const allTasks = baseTasks.map(task => ({
+        ...task,
+        labels: labelsByTaskId[task.id] || []
+    }));
 
     return NextResponse.json({
       data: allTasks,
