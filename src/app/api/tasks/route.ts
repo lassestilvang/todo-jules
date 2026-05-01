@@ -58,14 +58,14 @@ export async function GET(request: Request) {
         .where(inArray(taskLabels.taskId, taskIds))
         .all();
 
-        labelsByTaskId = allLabelsData.reduce((acc, row) => {
-            if (!acc[row.taskId]) {
-                acc[row.taskId] = [];
+        for (const row of allLabelsData) {
+            const taskId = row.taskId!;
+            if (!labelsByTaskId[taskId]) {
+                labelsByTaskId[taskId] = [];
             }
             // Keep the nested object structure { taskId: number, label: object } to maintain existing payload shape
-            acc[row.taskId].push(row);
-            return acc;
-        }, {} as Record<number, typeof allLabelsData>);
+            labelsByTaskId[taskId].push(row as { taskId: number; label: typeof labels.$inferSelect });
+        }
     }
 
     const allTasks = baseTasks.map(task => ({
