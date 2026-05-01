@@ -73,3 +73,6 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-04-25 - Bulk fetch with inArray to eliminate N+1 loop queries
 **Learning:** Developers often accidentally introduce N+1 query problems when trying to manually unroll ORM relationship queries (`findMany` with `with:`) into sequential database calls for performance, particularly when looping over arrays (e.g., executing `db.select()` inside `.map()`).
 **Action:** To resolve N+1 query performance bottlenecks in Drizzle ORM, extract all required IDs, fetch the related records in a single bulk query using `inArray()`, and group the results in memory using an O(n) hash map lookup.
+## 2026-05-19 - Bulk fetch with inArray to eliminate N+1 loop queries in Server Actions
+**Learning:** Developers often accidentally introduce N+1 query problems when relying on Drizzle's relational API (`findMany` with `with:`) for complex nested relations. In server actions like `getTasksForToday`, this translates to significant performance degradation.
+**Action:** To resolve N+1 query performance bottlenecks in Drizzle ORM, extract all required parent IDs, fetch the related records in a single bulk query using `inArray()`, and group the results in memory using an O(n) hash map lookup.
