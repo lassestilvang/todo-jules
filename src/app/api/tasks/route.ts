@@ -46,7 +46,7 @@ export async function GET(request: Request) {
     // Reconstruct the payload using O(n) hash map to avoid N+1 query
     const taskIds = baseTasks.map(t => t.id);
 
-    let labelsByTaskId: Record<number, { taskId: number; label: typeof labels.$inferSelect }[]> = {};
+    const labelsByTaskId: Record<number, { taskId: number; label: typeof labels.$inferSelect }[]> = {};
 
     if (taskIds.length > 0) {
         const allLabelsData = db.select({
