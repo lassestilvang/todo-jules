@@ -57,3 +57,7 @@
 **Vulnerability:** Next.js server actions are public API endpoints but TypeScript types like `taskId: number` or primitive array boundaries are erased at runtime.
 **Learning:** Functions like `reorderTasks(items: ...)` and `getTaskHistory(taskId: number)` were implicitly trusting the array bounds and type of arguments respectively. An attacker could potentially cause memory exhaustion passing massive arrays to `reorderTasks` or crash the backend with an incorrect type in `getTaskHistory`.
 **Prevention:** Always use runtime checks (like `!Number.isSafeInteger(taskId)`) and explicit length bounds (like `items.length > 1000`) for arguments directly inside Next.js server actions.
+## 2024-05-01 - Dependency Audit Overrides
+**Vulnerability:** Found 3 moderate vulnerabilities in `esbuild` and `postcss` development dependencies during `pnpm audit`.
+**Learning:** For resolving dependency issues via overrides in `pnpm`, it is necessary to use `"pnpm": { "overrides": { ... } }` in the root `package.json`. Avoid using `pnpm-workspace.yaml` as it is not processed for overrides by pnpm natively on mono-root setups without specific configurations, and never manually modify the auto-generated `pnpm-lock.yaml`.
+**Prevention:** In the future, use `pnpm audit --fix` to inject overrides automatically into `package.json`, or manually add the `"pnpm": { "overrides": {} }` object in `package.json` to manage vulnerable deep dependencies cleanly.
