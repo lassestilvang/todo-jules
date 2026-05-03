@@ -61,10 +61,18 @@ const SearchContent = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold">Search Results for &quot;{query}&quot;</h1>
+      <h1 className="text-2xl font-bold">
+        {query ? `Search Results for "${query}"` : "Search Tasks"}
+      </h1>
 
       <div className="mt-6">
-        {isLoading ? (
+        {!query ? (
+          <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg bg-card/50 text-muted-foreground">
+            <SearchIcon className="h-12 w-12 opacity-20 mb-4" aria-hidden="true" />
+            <h3 className="text-lg font-medium text-foreground">Search Tasks</h3>
+            <p className="text-sm mt-1">Enter a keyword in the search bar above to find tasks.</p>
+          </div>
+        ) : isLoading ? (
           <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg bg-card/50 text-muted-foreground">
             <Loader2 className="h-10 w-10 animate-spin mb-4 text-primary" aria-hidden="true" />
             <p className="text-sm">Searching tasks...</p>
