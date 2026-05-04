@@ -76,3 +76,8 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-05-19 - Bulk fetch with inArray to eliminate N+1 loop queries in Server Actions
 **Learning:** Developers often accidentally introduce N+1 query problems when relying on Drizzle's relational API (`findMany` with `with:`) for complex nested relations. In server actions like `getTasksForToday`, this translates to significant performance degradation.
 **Action:** To resolve N+1 query performance bottlenecks in Drizzle ORM, extract all required parent IDs, fetch the related records in a single bulk query using `inArray()`, and group the results in memory using an O(n) hash map lookup.
+## 2026-06-03 - Retain await with synchronous-like ORM methods
+
+**Learning:** When refactoring Drizzle ORM queries to optimize performance (such as switching from `db.query.*.findMany()` to `db.select()...all()`), it is critical to retain the `await` keyword, even if the underlying database driver (like `better-sqlite3`) executes synchronously. If the driver is asynchronous or swapped in the future (e.g., `@libsql/client`), the `.all()` method will return a `Promise`. Missing the `await` keyword leads to iterating or mapping over a `Promise` instead of an array, causing fatal `TypeError`s at runtime.
+
+**Action:** Always include `await` for top-level database query resolutions outside of strict synchronous transaction blocks (e.g., `const results = await db.select().all();`), ensuring the result is properly unwrapped.

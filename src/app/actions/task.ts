@@ -9,6 +9,7 @@ import { logTaskHistory } from '@/lib/history';
 import { createTaskSchema, updateTaskSchema } from '@/lib/validators';
 import { z } from 'zod';
 import { invalidateTaskCountCache } from '@/lib/cache';
+import { attachLabelsToTasks } from '@/lib/task-utils';
 
 // Helper to get today's start and end timestamps
 const getTodayRange = () => {
@@ -27,63 +28,47 @@ const getNext7DaysRange = () => {
 };
 
 export async function getTasksForInbox() {
-  return db.query.tasks.findMany({
-    where: isNull(tasks.listId),
-    limit: 50,
-    with: {
-      labels: {
-        with: {
-          label: true
-        }
-      },
-    },
-    orderBy: [desc(tasks.createdAt)],
-  });
+  const baseTasks = await db.select()
+    .from(tasks)
+    .where(isNull(tasks.listId))
+    .limit(50)
+    .orderBy(desc(tasks.createdAt))
+    .all();
+
+  return await attachLabelsToTasks(baseTasks);
 }
 
 export async function getTasksForToday() {
   const { start, end } = getTodayRange();
-  return db.query.tasks.findMany({
-    where: and(gte(tasks.date, start), lte(tasks.date, end)),
-    with: {
-      labels: {
-        with: {
-          label: true
-        }
-      },
-    },
-    orderBy: [asc(tasks.date)],
-  });
+  const baseTasks = await db.select()
+    .from(tasks)
+    .where(and(gte(tasks.date, start), lte(tasks.date, end)))
+    .orderBy(asc(tasks.date))
+    .all();
+
+  return await attachLabelsToTasks(baseTasks);
 }
 
 export async function getTasksForUpcoming() {
   const { end } = getTodayRange(); // Tasks after today
-  return db.query.tasks.findMany({
-    where: gte(tasks.date, end),
-    with: {
-      labels: {
-        with: {
-          label: true
-        }
-      },
-    },
-    orderBy: [asc(tasks.date)],
-  });
+  const baseTasks = await db.select()
+    .from(tasks)
+    .where(gte(tasks.date, end))
+    .orderBy(asc(tasks.date))
+    .all();
+
+  return await attachLabelsToTasks(baseTasks);
 }
 
 export async function getTasksForNext7Days() {
   const { start, end } = getNext7DaysRange();
-  return db.query.tasks.findMany({
-    where: and(gte(tasks.date, start), lte(tasks.date, end)),
-    with: {
-      labels: {
-        with: {
-          label: true
-        }
-      },
-    },
-    orderBy: [asc(tasks.date)],
-  });
+  const baseTasks = await db.select()
+    .from(tasks)
+    .where(and(gte(tasks.date, start), lte(tasks.date, end)))
+    .orderBy(asc(tasks.date))
+    .all();
+
+  return await attachLabelsToTasks(baseTasks);
 }
 
 import { HistoryLog } from '@/lib/history';

@@ -10,10 +10,11 @@ export async function getTaskHistory(taskId: number) {
   }
 
   try {
-    const history = await db.query.taskHistory.findMany({
-      where: eq(taskHistory.taskId, taskId),
-      orderBy: [desc(taskHistory.changedAt)],
-    });
+    const history = await db.select()
+      .from(taskHistory)
+      .where(eq(taskHistory.taskId, taskId))
+      .orderBy(desc(taskHistory.changedAt))
+      .all();
     return history;
   } catch (error) {
     console.error('Failed to get task history:', error);
