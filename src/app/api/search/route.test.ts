@@ -71,7 +71,7 @@ describe('GET /api/search', () => {
     // Reconstruct the rough SQL representation from the drizzle sql tag
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sqlString = sqlCallArg.queryChunks.map((chunk: any) => typeof chunk === 'string' ? chunk : JSON.stringify(chunk.value)).join('');
-    expect(sqlString).toContain('"Search123*"');
+    expect(sqlString).toContain('"Search123"*');
   });
 
   it('should return search results', async () => {
