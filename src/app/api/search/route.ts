@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 
     // 🛡️ Sentinel: Sanitize user input to prevent FTS5 syntax errors and potential injection
     // Keep only alphanumeric characters and spaces
-    const sanitizedQuery = query.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+    const sanitizedQuery = query.replace(/[^\p{L}\p{N}\s]/gu, '').trim();
 
     if (!sanitizedQuery) {
       return NextResponse.json([]);
