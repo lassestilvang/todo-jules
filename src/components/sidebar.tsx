@@ -60,6 +60,7 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                     "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                     isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
                   )}
+                  aria-current={isActive ? "page" : undefined}
                 >
                   <Icon className="h-4 w-4" aria-hidden="true" />
                   {link.label}
@@ -91,6 +92,7 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                                     "flex-1 flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
                                     isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
                                 )}
+                                aria-current={isActive ? "page" : undefined}
                             >
                                 <span className="text-base" aria-hidden="true">{list.emoji}</span>
                                 <span className="truncate">{list.name}</span>
