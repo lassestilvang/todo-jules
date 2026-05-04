@@ -36,7 +36,7 @@ export function DateTimePicker({ date, setDate, label, id }: DateTimePickerProps
             )}
           >
             <CalendarIcon className="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="truncate">
+            <span className="flex-1 truncate text-left">
               {date ? format(date, "PPP p") : label || "Pick a date"}
             </span>
           </Button>
