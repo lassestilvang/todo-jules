@@ -61,3 +61,7 @@
 **Vulnerability:** Found 3 moderate vulnerabilities in `esbuild` and `postcss` development dependencies during `pnpm audit`.
 **Learning:** For resolving dependency issues via overrides in `pnpm`, it is necessary to use `"pnpm": { "overrides": { ... } }` in the root `package.json`. Avoid using `pnpm-workspace.yaml` as it is not processed for overrides by pnpm natively on mono-root setups without specific configurations, and never manually modify the auto-generated `pnpm-lock.yaml`.
 **Prevention:** In the future, use `pnpm audit --fix` to inject overrides automatically into `package.json`, or manually add the `"pnpm": { "overrides": {} }` object in `package.json` to manage vulnerable deep dependencies cleanly.
+## 2026-05-04 - [Content Security Policy]
+**Vulnerability:** Missing Content Security Policy (CSP) headers, which help prevent Cross-Site Scripting (XSS), clickjacking, and other code injection attacks.
+**Learning:** CSP is an important defense-in-depth mechanism that is missing by default in Next.js applications unless explicitly added in next.config.ts headers.
+**Prevention:** Always ensure a baseline CSP is configured in Next.js via next.config.ts headers to restrict executable scripts and other resources.
