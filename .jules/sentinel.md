@@ -64,7 +64,7 @@
 ## 2026-05-04 - [Content Security Policy]
 **Vulnerability:** Missing Content Security Policy (CSP) headers, which help prevent Cross-Site Scripting (XSS), clickjacking, and other code injection attacks.
 **Learning:** CSP is an important defense-in-depth mechanism that is missing by default in Next.js applications unless explicitly added in next.config.ts headers.
-**Prevention:** Always ensure a baseline CSP is configured in Next.js via next.config.ts headers to restrict executable scripts and other resources.
+**Prevention:** Always ensure a baseline CSP is configured in Next.js via next.config.ts headers, and aim to harden it by removing 'unsafe-inline' and 'unsafe-eval' as the application matures.
 ## 2024-05-04 - [Fix SQLite FTS5 MATCH Syntax Error/DoS]
 **Vulnerability:** The `/api/search` route passed un-sanitized user input directly into an SQLite FTS5 `MATCH` query using the Drizzle `sql` tag. While Drizzle's `sql` tag parameterized the value to prevent traditional SQL injection, it did not prevent FTS5 syntax errors. Inputs containing special characters like `-`, `^`, or unclosed quotes could cause the FTS engine to throw an error, leading to a 500 Internal Server Error and potential Denial of Service (DoS) if repeatedly triggered.
 **Learning:** Parameterization prevents SQL injection but does not protect against domain-specific syntax errors (like FTS5 `MATCH` expressions) that are evaluated within the database engine itself. FTS input must be treated as a domain-specific language and sanitized accordingly. Additionally, checking for empty strings after sanitization is necessary to prevent invalid empty `MATCH` queries.
