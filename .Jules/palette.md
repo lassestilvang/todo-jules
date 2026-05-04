@@ -27,3 +27,12 @@
 ## 2024-04-29 - Title Attributes and ARIA-hidden for Actions
 **Learning:** For icon-only action buttons, relying solely on `aria-label` leaves sighted users without a clear tooltip on hover. Adding a native `title` attribute provides an immediate, helpful tooltip. Furthermore, failing to add `aria-hidden="true"` to the internal SVGs (including the loading spinners) can result in redundant or confusing screen reader announcements.
 **Action:** When creating or modifying icon-only buttons, always ensure they have an `aria-label` for screen readers, a `title` attribute for visual hover tooltips, and `aria-hidden="true"` on all interior icons or loading indicators.
+## 2026-05-04 - Clearing Selected Dates in Pickers
+**Learning:** Adding a functional 'clear' button inside or visually alongside a Radix UI `PopoverTrigger` (e.g. a DatePicker) can be tricky due to nesting interactive elements or text overlap.
+**Action:** Wrap the `Popover` in a `relative` container. Position the clear button absolutely as a sibling to the `Popover`. Conditionally add padding (e.g. `pr-10`) to the main trigger button when a value is selected to prevent text overlap, and ensure the clear button stops propagation if necessary.
+## 2026-05-03 - Initial Empty State for Search
+**Learning:** Rendering a completely blank page when a user navigates to a search view without a query (e.g., `/search`) creates a confusing experience. Users might think the page is broken or still loading. Providing a structured "initial" empty state with a clear icon and instructional text (e.g., "Enter a keyword in the search bar above to find tasks") guides the user and provides immediate context for the page's purpose.
+**Action:** When creating search pages or views that depend on user input to fetch data, always include an initial empty state (when the query is empty) that instructs the user on what to do next, rather than showing a blank page or a generic "0 results" message.
+## 2024-05-04 - Screen Reader Context for Metadata
+**Learning:** Found that isolated metadata values (like dates or priority levels) in the `Task` component were missing contextual labels for screen readers, leading to confusing announcements.
+**Action:** Always prepend standalone metadata displays with descriptive screen-reader-only text (e.g., `<span className="sr-only">Priority: </span>`) to provide necessary context without altering the visual design.
