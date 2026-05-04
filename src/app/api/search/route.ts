@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     const results = await db
       .select()
       .from(tasks)
-      .where(sql`id IN (SELECT rowid FROM tasks_fts WHERE tasks_fts MATCH ${'"' + sanitizedQuery + '*"'})`)
+      .where(sql`id IN (SELECT rowid FROM tasks_fts WHERE tasks_fts MATCH ${'"' + sanitizedQuery + '"*'})`)
       .limit(20);
 
     return NextResponse.json(results);
