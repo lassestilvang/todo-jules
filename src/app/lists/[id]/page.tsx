@@ -5,6 +5,10 @@ import { eq } from 'drizzle-orm';
 import { TaskList } from '@/components/lists/task-list';
 import AddTaskForm from '@/components/add-task-form';
 import { notFound } from 'next/navigation';
+import { attachLabelsToTasks } from '@/lib/task-utils';
+
+
+
 
 export default async function ListPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -27,16 +31,12 @@ export default async function ListPage({ params }: { params: Promise<{ id: strin
   // UI does not render them.
   // Impact: Removes expensive LEFT JOINs from the SQLite query layer,
   // reducing execution time and data payload size.
-  const listTasks = await db.query.tasks.findMany({
-    where: eq(tasks.listId, listId),
-    with: {
-      labels: {
-        with: {
-          label: true
-        }
-      },
-    },
-  });
+  const baseTasks = await db.select()
+    .from(tasks)
+    .where(eq(tasks.listId, listId))
+    .all();
+
+  const listTasks = await attachLabelsToTasks(baseTasks);
 
   return (
     <div className="container mx-auto max-w-4xl">
