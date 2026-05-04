@@ -80,10 +80,14 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
   }
 
   try {
+    // Extract only the fields belonging to the tasks table to prevent
+    // crash or mass assignment vulnerabilities from nested relational data
+    const { subtasks, labels, reminders, attachments, ...taskData } = validation.data;
+
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.insert(...).returning()` with `db.insert(...).returning().all()`
     // to eliminate microtask overhead and event loop blocking.
-    const newTask = db.insert(tasks).values(validation.data).returning().get();
+    const newTask = db.insert(tasks).values(taskData).returning().get();
     after(async () => {
         await logTaskHistory([
           {
@@ -123,10 +127,14 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
 
     if (!currentTask) return { success: false, error: 'Task not found' };
 
+    // Extract only the fields belonging to the tasks table to prevent
+    // crash or mass assignment vulnerabilities from nested relational data
+    const { subtasks, labels, reminders, attachments, ...taskData } = validatedData;
+
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.update(...).returning()` with `.returning().all()`
     // to eliminate microtask overhead and event loop blocking.
-    const result = db.update(tasks).set(validatedData as Partial<typeof tasks.$inferInsert>).where(eq(tasks.id, id)).returning().all();
+    const result = db.update(tasks).set(taskData as Partial<typeof tasks.$inferInsert>).where(eq(tasks.id, id)).returning().all();
     const updatedTask = result[0];
 
     // Log history for changed fields
