@@ -23,7 +23,7 @@ export async function attachLabelsToTasks(baseTasks: (typeof tasks.$inferSelect)
       if (!labelsByTaskId[taskId]) {
         labelsByTaskId[taskId] = [];
       }
-      labelsByTaskId[taskId].push(row as { taskId: number; label: typeof labels.$inferSelect });
+      labelsByTaskId[taskId].push({ taskId, label: row.label });
     }
   }
 
