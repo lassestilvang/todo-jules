@@ -61,6 +61,7 @@ export function DateTimePicker({ date, setDate, label, id }: DateTimePickerProps
           className="absolute right-1 h-7 w-7 text-muted-foreground hover:text-foreground"
           onClick={(e) => {
             e.preventDefault();
+            e.stopPropagation();
             setDate(undefined);
           }}
           aria-label="Clear date"
