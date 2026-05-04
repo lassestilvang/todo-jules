@@ -70,6 +70,7 @@ const TaskComponent = ({ task }: TaskProps) => {
                         task.priority === 'High' ? 'destructive' :
                         task.priority === 'Medium' ? 'default' : 'secondary'
                     }>
+                        <span className="sr-only">Priority: </span>
                         {task.priority}
                     </Badge>
                     )}
@@ -98,14 +99,16 @@ const TaskComponent = ({ task }: TaskProps) => {
 
             <div className="flex flex-wrap gap-2 mt-2">
                 {task.date && (
-                    <div className="flex items-center text-xs text-muted-foreground">
+                    <div className="flex items-center text-xs text-muted-foreground" title="Date">
                         <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
+                        <span className="sr-only">Date: </span>
                         {new Date(task.date).toLocaleDateString()}
                     </div>
                 )}
                  {task.deadline && (
-                    <div className="flex items-center text-xs text-red-400">
+                    <div className="flex items-center text-xs text-red-400" title="Deadline">
                         <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
+                        <span className="sr-only">Deadline: </span>
                         {new Date(task.deadline).toLocaleDateString()}
                     </div>
                 )}
