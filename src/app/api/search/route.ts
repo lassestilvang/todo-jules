@@ -17,10 +17,18 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Query too long' }, { status: 400 });
     }
 
+    // 🛡️ Sentinel: Sanitize user input to prevent FTS5 syntax errors and potential injection
+    // Keep only alphanumeric characters and spaces
+    const sanitizedQuery = query.replace(/[^\p{L}\p{N}\s]/gu, '').trim();
+
+    if (!sanitizedQuery) {
+      return NextResponse.json([]);
+    }
+
     const results = await db
       .select()
       .from(tasks)
-      .where(sql`id IN (SELECT rowid FROM tasks_fts WHERE tasks_fts MATCH ${'"' + query.replace(/"/g, '""') + '*"'})`)
+      .where(sql`id IN (SELECT rowid FROM tasks_fts WHERE tasks_fts MATCH ${'"' + sanitizedQuery + '"*'})`)
       .limit(20);
 
     return NextResponse.json(results);
