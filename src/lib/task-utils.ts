@@ -10,6 +10,7 @@ export async function attachLabelsToTasks(baseTasks: (typeof tasks.$inferSelect)
   if (taskIds.length > 0) {
     const allLabelsData = await db.select({
       taskId: taskLabels.taskId,
+      labelId: taskLabels.labelId,
       label: labels
     })
     .from(taskLabels)
