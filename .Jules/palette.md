@@ -36,3 +36,6 @@
 ## 2024-05-04 - Screen Reader Context for Metadata
 **Learning:** Found that isolated metadata values (like dates or priority levels) in the `Task` component were missing contextual labels for screen readers, leading to confusing announcements.
 **Action:** Always prepend standalone metadata displays with descriptive screen-reader-only text (e.g., `<span className="sr-only">Priority: </span>`) to provide necessary context without altering the visual design.
+## 2026-05-05 - Search Input Clear Button
+**Learning:** Adding a functional 'clear' button inside a search input significantly improves the user experience by allowing a quick reset. However, when placing a clear button inside the same relative container as a keyboard shortcut hint (e.g., `<kbd>/<kbd>`), it is essential to mutually exclusively toggle their visibility based on the input's state (`query.length === 0` for the hint, `query.length > 0` for the clear button) to prevent visual overlap and maintain a clean UI.
+**Action:** Always conditionally render search hints and clear buttons based on the input value to ensure they do not occupy the same visual space simultaneously.

@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 const Header = () => {
@@ -39,9 +39,22 @@ const Header = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <kbd className="absolute right-2.5 hidden h-5 select-none items-center gap-1 rounded border border-gray-600 bg-gray-700 px-1.5 font-mono text-[10px] font-medium text-gray-400 sm:flex group-focus-within:opacity-0 transition-opacity">
-            <span className="text-xs">/</span>
-          </kbd>
+          {query.length === 0 && (
+            <kbd className="absolute right-2.5 hidden h-5 select-none items-center gap-1 rounded border border-gray-600 bg-gray-700 px-1.5 font-mono text-[10px] font-medium text-gray-400 sm:flex group-focus-within:opacity-0 transition-opacity">
+              <span className="text-xs">/</span>
+            </kbd>
+          )}
+          {query.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              aria-label="Clear search"
+              title="Clear search"
+              className="absolute right-2.5 text-gray-400 hover:text-white flex items-center justify-center p-1 rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white transition-colors"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
         </div>
       </form>
     </header>
