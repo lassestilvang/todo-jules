@@ -31,9 +31,8 @@ export async function GET(request: Request) {
     const total = getTaskCount();
 
     // ⚡ Bolt Optimization: Use Drizzle's built-in relational query
-    // This implicitly uses JSON aggregation to return everything efficiently,
-    // avoiding the complex manual mapping and inArray queries entirely.
-    // Plus it adheres to memory constraints regarding anti-patterns!
+    // This significantly improves maintainability by replacing manual N+1 
+    // aggregation logic with Drizzle's native relation mapping.
     const allTasks = await db.query.tasks.findMany({
       limit,
       offset,
