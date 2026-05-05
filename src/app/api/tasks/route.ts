@@ -3,12 +3,12 @@ import { db } from '../../../lib/db';
 import {
   tasks,
   subtasks,
-  labels,
+
   taskLabels,
   reminders,
   attachments,
 } from '../../../lib/schema';
-import { eq, inArray } from 'drizzle-orm';
+
 
 import { createTaskSchema } from '../../../lib/validators';
 import { getTaskCount, invalidateTaskCountCache } from '../../../lib/cache';
@@ -28,50 +28,21 @@ export async function GET(request: Request) {
 
     const offset = (page - 1) * limit;
 
-    // ⚡ Bolt Optimization: Replace Promise.all with sequential awaits
-    // better-sqlite3 is inherently synchronous and blocks the event loop.
-    // Using Promise.all here does not provide parallel execution but adds
-    // microtask overhead and array allocation.
-    // ⚡ Bolt Optimization: Avoid using relational queries (findMany) with better-sqlite3
-    // because they introduce promise microtask overhead. Instead, use the core Query Builder
-    // API with `.all()` for synchronous, non-blocking execution which is faster.
     const total = getTaskCount();
 
-    const baseTasks = db.select()
-        .from(tasks)
-        .limit(limit)
-        .offset(offset)
-        .all();
-
-    // Reconstruct the payload using O(n) hash map to avoid N+1 query
-    const taskIds = baseTasks.map(t => t.id);
-
-    const labelsByTaskId: Record<number, { taskId: number; label: typeof labels.$inferSelect }[]> = {};
-
-    if (taskIds.length > 0) {
-        const allLabelsData = db.select({
-            taskId: taskLabels.taskId,
-            label: labels
-        })
-        .from(taskLabels)
-        .innerJoin(labels, eq(taskLabels.labelId, labels.id))
-        .where(inArray(taskLabels.taskId, taskIds))
-        .all();
-
-        for (const row of allLabelsData) {
-            const taskId = row.taskId!;
-            if (!labelsByTaskId[taskId]) {
-                labelsByTaskId[taskId] = [];
-            }
-            // Keep the nested object structure { taskId: number, label: object } to maintain existing payload shape
-            labelsByTaskId[taskId].push(row as { taskId: number; label: typeof labels.$inferSelect });
+    // ⚡ Bolt Optimization: Use Drizzle's built-in relational query
+    // This implicitly uses JSON aggregation to return everything efficiently,
+    // avoiding the complex manual mapping and inArray queries entirely.
+    // Plus it adheres to memory constraints regarding anti-patterns!
+    const allTasks = await db.query.tasks.findMany({
+      limit,
+      offset,
+      with: {
+        labels: {
+          with: { label: true }
         }
-    }
-
-    const allTasks = baseTasks.map(task => ({
-        ...task,
-        labels: labelsByTaskId[task.id] || []
-    }));
+      }
+    });
 
     return NextResponse.json({
       data: allTasks,
