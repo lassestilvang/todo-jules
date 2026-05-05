@@ -9,6 +9,7 @@ import { logTaskHistory } from '@/lib/history';
 import { createTaskSchema, updateTaskSchema } from '@/lib/validators';
 import { z } from 'zod';
 import { invalidateTaskCountCache } from '@/lib/cache';
+import { attachLabelsToTasks } from '@/lib/task-utils';
 
 // Helper to get today's start and end timestamps
 const getTodayRange = () => {
@@ -27,63 +28,47 @@ const getNext7DaysRange = () => {
 };
 
 export async function getTasksForInbox() {
-  return db.query.tasks.findMany({
-    where: isNull(tasks.listId),
-    limit: 50,
-    with: {
-      labels: {
-        with: {
-          label: true
-        }
-      },
-    },
-    orderBy: [desc(tasks.createdAt)],
-  });
+  const baseTasks = await db.select()
+    .from(tasks)
+    .where(isNull(tasks.listId))
+    .limit(50)
+    .orderBy(desc(tasks.createdAt))
+    .all();
+
+  return await attachLabelsToTasks(baseTasks);
 }
 
 export async function getTasksForToday() {
   const { start, end } = getTodayRange();
-  return db.query.tasks.findMany({
-    where: and(gte(tasks.date, start), lte(tasks.date, end)),
-    with: {
-      labels: {
-        with: {
-          label: true
-        }
-      },
-    },
-    orderBy: [asc(tasks.date)],
-  });
+  const baseTasks = await db.select()
+    .from(tasks)
+    .where(and(gte(tasks.date, start), lte(tasks.date, end)))
+    .orderBy(asc(tasks.date))
+    .all();
+
+  return await attachLabelsToTasks(baseTasks);
 }
 
 export async function getTasksForUpcoming() {
   const { end } = getTodayRange(); // Tasks after today
-  return db.query.tasks.findMany({
-    where: gte(tasks.date, end),
-    with: {
-      labels: {
-        with: {
-          label: true
-        }
-      },
-    },
-    orderBy: [asc(tasks.date)],
-  });
+  const baseTasks = await db.select()
+    .from(tasks)
+    .where(gte(tasks.date, end))
+    .orderBy(asc(tasks.date))
+    .all();
+
+  return await attachLabelsToTasks(baseTasks);
 }
 
 export async function getTasksForNext7Days() {
   const { start, end } = getNext7DaysRange();
-  return db.query.tasks.findMany({
-    where: and(gte(tasks.date, start), lte(tasks.date, end)),
-    with: {
-      labels: {
-        with: {
-          label: true
-        }
-      },
-    },
-    orderBy: [asc(tasks.date)],
-  });
+  const baseTasks = await db.select()
+    .from(tasks)
+    .where(and(gte(tasks.date, start), lte(tasks.date, end)))
+    .orderBy(asc(tasks.date))
+    .all();
+
+  return await attachLabelsToTasks(baseTasks);
 }
 
 import { HistoryLog } from '@/lib/history';
@@ -95,10 +80,14 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
   }
 
   try {
+    // Extract only the fields belonging to the tasks table to prevent
+    // crash or mass assignment vulnerabilities from nested relational data
+    const { subtasks, labels, reminders, attachments, ...taskData } = validation.data;
+
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.insert(...).returning()` with `db.insert(...).returning().all()`
     // to eliminate microtask overhead and event loop blocking.
-    const newTask = db.insert(tasks).values(validation.data).returning().get();
+    const newTask = db.insert(tasks).values(taskData).returning().get();
     after(async () => {
         await logTaskHistory([
           {
@@ -138,10 +127,14 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
 
     if (!currentTask) return { success: false, error: 'Task not found' };
 
+    // Extract only the fields belonging to the tasks table to prevent
+    // crash or mass assignment vulnerabilities from nested relational data
+    const { subtasks, labels, reminders, attachments, ...taskData } = validatedData;
+
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.update(...).returning()` with `.returning().all()`
     // to eliminate microtask overhead and event loop blocking.
-    const result = db.update(tasks).set(validatedData as Partial<typeof tasks.$inferInsert>).where(eq(tasks.id, id)).returning().all();
+    const result = db.update(tasks).set(taskData as Partial<typeof tasks.$inferInsert>).where(eq(tasks.id, id)).returning().all();
     const updatedTask = result[0];
 
     // Log history for changed fields

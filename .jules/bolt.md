@@ -80,3 +80,8 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-05-20 - Vitest Mocks must match Drizzle query structure
 **Learning:** When refactoring Drizzle ORM queries between the core Query Builder API (e.g., `db.select().from()`) and the Relational API (e.g., `db.query.table.findMany()`), failure to update the corresponding Vitest mock structures (`vi.mock`) will cause tests to crash with undefined method errors.
 **Action:** Always ensure Vitest mock configurations are updated to accurately reflect the new call chain structure when refactoring Drizzle queries.
+## 2026-06-03 - Retain await with synchronous-like ORM methods
+
+**Learning:** When refactoring Drizzle ORM queries to optimize performance (such as switching from `db.query.*.findMany()` to `db.select()...all()`), it is critical to retain the `await` keyword, even if the underlying database driver (like `better-sqlite3`) executes synchronously. If the driver is asynchronous or swapped in the future (e.g., `@libsql/client`), the `.all()` method will return a `Promise`. Missing the `await` keyword leads to iterating or mapping over a `Promise` instead of an array, causing fatal `TypeError`s at runtime.
+
+**Action:** Always include `await` for top-level database query resolutions outside of strict synchronous transaction blocks (e.g., `const results = await db.select().all();`), ensuring the result is properly unwrapped.

@@ -32,14 +32,17 @@ export async function PUT(
 
     const updatedTask = db.transaction((tx) => {
       let updated;
-      if (Object.keys(validatedBody).length > 0) {
+
+      const { subtasks, labels, reminders, attachments, ...taskData } = validatedBody;
+
+      if (Object.keys(taskData).length > 0) {
         const [result] = tx
           .update(tasks)
           .set({
-            ...validatedBody,
-            date: validatedBody.date ? new Date(validatedBody.date) : undefined,
-            deadline: validatedBody.deadline
-              ? new Date(validatedBody.deadline)
+            ...taskData,
+            date: taskData.date ? new Date(taskData.date) : undefined,
+            deadline: taskData.deadline
+              ? new Date(taskData.deadline)
               : undefined,
           })
           .where(eq(tasks.id, taskId))
