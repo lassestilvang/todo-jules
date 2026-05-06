@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useOptimistic, startTransition } from 'react';
 import { motion } from 'framer-motion';
 import { Task } from '@/lib/types';
 import { toggleTaskCompletion, deleteTask } from '@/app/actions/task';
@@ -18,9 +18,20 @@ interface TaskProps {
 
 const TaskComponent = ({ task }: TaskProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [optimisticCompleted, setOptimisticCompleted] = useOptimistic(
+    task.completed ?? false,
+    (state, newCompleted: boolean) => newCompleted
+  );
 
   const handleToggle = async (checked: boolean) => {
-    await toggleTaskCompletion(task.id, checked);
+    startTransition(() => {
+      setOptimisticCompleted(checked);
+    });
+    try {
+      await toggleTaskCompletion(task.id, checked);
+    } catch {
+      toast.error('Failed to update task status');
+    }
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -44,14 +55,14 @@ const TaskComponent = ({ task }: TaskProps) => {
       transition={{ duration: 0.2 }}
       className="group"
     >
-      <Card className={`mb-3 transition-colors hover:shadow-md ${task.completed ? 'opacity-60 bg-muted/50' : 'bg-card'}`}>
+      <Card className={`mb-3 transition-colors hover:shadow-md ${optimisticCompleted ? 'opacity-60 bg-muted/50' : 'bg-card'}`}>
         <CardContent className="p-4 flex items-start gap-4">
           <div className="pt-1">
             <Checkbox
                 id={`task-${task.id}`}
-                checked={task.completed ?? false}
+                checked={optimisticCompleted}
                 onCheckedChange={handleToggle}
-                aria-label={`Mark ${task.name} as ${task.completed ? 'incomplete' : 'complete'}`}
+                aria-label={`Mark ${task.name} as ${optimisticCompleted ? 'incomplete' : 'complete'}`}
             />
           </div>
 
@@ -59,7 +70,7 @@ const TaskComponent = ({ task }: TaskProps) => {
             <div className="flex items-center justify-between">
                 <label
                     htmlFor={`task-${task.id}`}
-                    className={`font-medium cursor-pointer select-none transition-colors hover:text-primary ${task.completed ? 'line-through text-muted-foreground' : ''}`}
+                    className={`font-medium cursor-pointer select-none transition-colors hover:text-primary ${optimisticCompleted ? 'line-through text-muted-foreground' : ''}`}
                 >
                     {task.name}
                 </label>
@@ -127,6 +138,7 @@ const TaskComponent = ({ task }: TaskProps) => {
                     }}
                   >
                     {label.icon && <span className="mr-1" aria-hidden="true">{label.icon}</span>}
+                    <span className="sr-only">Label: </span>
                     {label.name}
                   </Badge>
                 ))}
