@@ -3,8 +3,8 @@ import { z } from 'zod';
 export const createTaskSchema = z.object({
   name: z.string().min(1, 'Task name is required').max(255),
   description: z.string().max(10000, 'Description is too long').optional(),
-  date: z.union([z.string().transform((val) => val ? new Date(val) : undefined), z.date()]).optional().nullable(),
-  deadline: z.union([z.string().transform((val) => val ? new Date(val) : undefined), z.date()]).optional().nullable(),
+  date: z.union([z.string().max(100, 'Date string is too long').transform((val) => val ? new Date(val) : undefined).refine((d) => !d || !isNaN(d.getTime()), 'Invalid date'), z.date()]).optional().nullable(),
+  deadline: z.union([z.string().max(100, 'Date string is too long').transform((val) => val ? new Date(val) : undefined).refine((d) => !d || !isNaN(d.getTime()), 'Invalid date'), z.date()]).optional().nullable(),
   listId: z.number().optional(),
   priority: z.enum(['None', 'Low', 'Medium', 'High']).optional(),
   estimate: z.number().optional(),
