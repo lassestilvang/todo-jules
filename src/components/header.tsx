@@ -47,7 +47,7 @@ const Header = () => {
           {query.length > 0 && (
             <button
               type="button"
-              onClick={() => setQuery('')}
+              onClick={() => { setQuery(''); inputRef.current?.focus(); }}
               aria-label="Clear search"
               title="Clear search"
               className="absolute right-2.5 text-gray-400 hover:text-white flex items-center justify-center p-1 rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white transition-colors"
