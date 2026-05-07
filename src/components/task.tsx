@@ -24,14 +24,18 @@ const TaskComponent = ({ task }: TaskProps) => {
   );
 
   const handleToggle = async (checked: boolean) => {
+    // ⚡ Bolt Optimization: Synchronous startTransition for Optimistic Updates
+    // Separated the synchronous state update from the asynchronous server action.
     startTransition(() => {
       setOptimisticCompleted(checked);
     });
-    try {
-      await toggleTaskCompletion(task.id, checked);
-    } catch {
-      toast.error('Failed to update task status');
-    }
+    startTransition(async () => {
+      try {
+        await toggleTaskCompletion(task.id, checked);
+      } catch {
+        toast.error('Failed to update task status');
+      }
+    });
   };
 
   const handleDelete = async (e: React.MouseEvent) => {

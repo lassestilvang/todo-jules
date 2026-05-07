@@ -85,3 +85,9 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 **Learning:** When refactoring Drizzle ORM queries to optimize performance (such as switching from `db.query.*.findMany()` to `db.select()...all()`), it is critical to retain the `await` keyword, even if the underlying database driver (like `better-sqlite3`) executes synchronously. If the driver is asynchronous or swapped in the future (e.g., `@libsql/client`), the `.all()` method will return a `Promise`. Missing the `await` keyword leads to iterating or mapping over a `Promise` instead of an array, causing fatal `TypeError`s at runtime.
 
 **Action:** Always include `await` for top-level database query resolutions outside of strict synchronous transaction blocks (e.g., `const results = await db.select().all();`), ensuring the result is properly unwrapped.
+
+## 2026-06-03 - Separate Optimistic UI updates from Server Actions in startTransition
+
+**Learning:** React's `startTransition` expects a synchronous callback for immediate state updates. When combining optimistic UI updates (e.g., using `useOptimistic`) with asynchronous server actions, any state updates or asynchronous operations after an `await` lose the transition context and delay the UI's perceived responsiveness.
+
+**Action:** Split the logic into two distinct `startTransition` calls: a synchronous one for `setOptimisticState` to ensure the UI reacts instantly, and a separate asynchronous one for the server action to maintain the pending state and track the operation's duration.
