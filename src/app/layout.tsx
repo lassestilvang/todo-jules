@@ -40,13 +40,19 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-4 focus:left-4 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:shadow-md"
+          >
+            Skip to main content
+          </a>
           <div className="flex h-screen bg-background">
             <SidebarServer />
             <div className="flex-1 flex flex-col overflow-hidden">
               <Header />
-              <main className="flex-1 overflow-y-auto p-8">
-              {children}
-            </main>
+              <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto p-8 focus:outline-none">
+                {children}
+              </main>
             </div>
           </div>
           <Toaster />
