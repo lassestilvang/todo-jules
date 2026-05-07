@@ -39,3 +39,6 @@
 ## 2026-05-05 - Search Input Clear Button
 **Learning:** Adding a functional 'clear' button inside a search input significantly improves the user experience by allowing a quick reset. However, when placing a clear button inside the same relative container as a keyboard shortcut hint (e.g., `<kbd>/<kbd>`), it is essential to mutually exclusively toggle their visibility based on the input's state (`query.length === 0` for the hint, `query.length > 0` for the clear button) to prevent visual overlap and maintain a clean UI.
 **Action:** Always conditionally render search hints and clear buttons based on the input value to ensure they do not occupy the same visual space simultaneously.
+## 2026-05-06 - Keyboard Accessible Skip Links
+**Learning:** To provide a robust keyboard navigation experience, a visually hidden 'Skip to main content' link should be placed as the first focusable element in the document body. To correctly style this using Tailwind, use the classes `sr-only focus:not-sr-only` so it becomes visible only when focused.
+**Action:** Always ensure the main layout includes a skip link targeting a main content area with id="main-content" and tabIndex={-1} (to allow programmatic focus without adding it to the tab order), and use focus:outline-none to prevent a redundant focus ring around the entire main content block.
