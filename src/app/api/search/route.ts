@@ -29,7 +29,8 @@ export async function GET(request: Request) {
       .select()
       .from(tasks)
       .where(sql`id IN (SELECT rowid FROM tasks_fts WHERE tasks_fts MATCH ${'"' + sanitizedQuery + '"*'})`)
-      .limit(20);
+      .limit(20)
+      .all();
 
     return NextResponse.json(results);
   } catch (error) {
