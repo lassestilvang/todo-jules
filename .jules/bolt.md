@@ -88,6 +88,6 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 
 ## 2026-06-03 - Separate Optimistic UI updates from Server Actions in startTransition
 
-**Learning:** React's `startTransition` expects a synchronous callback for immediate state updates. When combining optimistic UI updates (e.g., using `useOptimistic`) with asynchronous server actions, any state updates or asynchronous operations after an `await` lose the transition context and delay the UI's perceived responsiveness.
+**Learning:** In React 19, `startTransition` supports asynchronous functions to handle Actions. When using `useOptimistic`, the state update should be placed inside the same `startTransition` as the asynchronous server action, before any `await` calls. This ensures the optimistic update is applied synchronously while keeping the transition active until the server action completes, preventing premature state reversion.
 
-**Action:** Split the logic into two distinct `startTransition` calls: a synchronous one for `setOptimisticState` to ensure the UI reacts instantly, and a separate asynchronous one for the server action to maintain the pending state and track the operation's duration.
+**Action:** Wrap both the optimistic state update and the asynchronous server action in a single `startTransition` call. Ensure the optimistic update occurs before the first `await` to provide immediate feedback.
