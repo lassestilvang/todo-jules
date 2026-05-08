@@ -85,3 +85,6 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 **Learning:** When refactoring Drizzle ORM queries to optimize performance (such as switching from `db.query.*.findMany()` to `db.select()...all()`), it is critical to retain the `await` keyword, even if the underlying database driver (like `better-sqlite3`) executes synchronously. If the driver is asynchronous or swapped in the future (e.g., `@libsql/client`), the `.all()` method will return a `Promise`. Missing the `await` keyword leads to iterating or mapping over a `Promise` instead of an array, causing fatal `TypeError`s at runtime.
 
 **Action:** Always include `await` for top-level database query resolutions outside of strict synchronous transaction blocks (e.g., `const results = await db.select().all();`), ensuring the result is properly unwrapped.
+## 2026-05-08 - Update Vitest mocks for terminal execution methods
+**Learning:** When adding explicit execution methods like `.all()` or `.get()` to Drizzle ORM query chains, the corresponding Vitest mocks must be updated to return an object containing that method (e.g., `.limit(vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue(mockData) }))`) instead of resolving directly on the preceding method.
+**Action:** Always verify and update test mocks when appending terminal execution methods to query builder chains.
