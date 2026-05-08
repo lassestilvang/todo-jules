@@ -57,7 +57,7 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                 <Link
                   href={link.href}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                     isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
                   )}
                   aria-current={isActive ? "page" : undefined}
@@ -89,7 +89,7 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                             <Link
                                 href={`/lists/${list.id}`}
                                 className={cn(
-                                    "flex-1 flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
+                                    "flex-1 flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                                     isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
                                 )}
                                 aria-current={isActive ? "page" : undefined}

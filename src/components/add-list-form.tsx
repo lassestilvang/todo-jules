@@ -52,7 +52,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-sm"
             aria-label="Create new list"
             title="Create new list"
         >
