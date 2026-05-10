@@ -12,6 +12,7 @@ import {
 
 import { createTaskSchema } from '../../../lib/validators';
 import { getTaskCount, invalidateTaskCountCache } from '../../../lib/cache';
+import { attachLabelsToTasks } from '../../../lib/task-utils';
 
 export async function GET(request: Request) {
   try {
@@ -30,18 +31,16 @@ export async function GET(request: Request) {
 
     const total = getTaskCount();
 
-    // ⚡ Bolt Optimization: Use Drizzle's built-in relational query
-    // This significantly improves maintainability by replacing manual N+1 
-    // aggregation logic with Drizzle's native relation mapping.
-    const allTasks = await db.query.tasks.findMany({
-      limit,
-      offset,
-      with: {
-        labels: {
-          with: { label: true }
-        }
-      }
-    });
+    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+    // Replaced `await db.query.tasks.findMany()` with `db.select().from(tasks).limit().offset().all()`
+    // to eliminate microtask overhead caused by relational queries in Drizzle.
+    const baseTasks = db.select()
+      .from(tasks)
+      .limit(limit)
+      .offset(offset)
+      .all();
+
+    const allTasks = await attachLabelsToTasks(baseTasks);
 
     return NextResponse.json({
       data: allTasks,
