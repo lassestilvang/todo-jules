@@ -131,7 +131,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
           History
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent aria-describedby={undefined}>
         <SheetHeader>
           <SheetTitle>Task History</SheetTitle>
         </SheetHeader>
