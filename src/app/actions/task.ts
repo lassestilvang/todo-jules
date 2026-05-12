@@ -138,7 +138,7 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
       // Replaced `await db.update(...).returning()` with `.returning().all()`
       // to eliminate microtask overhead and event loop blocking.
       const result = db.update(tasks).set(taskData as Partial<typeof tasks.$inferInsert>).where(eq(tasks.id, id)).returning().all();
-      updatedTask = result[0];
+      updatedTask = result[0] ?? currentTask;
     }
 
     // Log history for changed fields
