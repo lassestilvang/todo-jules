@@ -59,7 +59,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
           <Plus className="h-4 w-4" aria-hidden="true" />
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent aria-describedby={undefined} className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create new list</DialogTitle>
         </DialogHeader>
