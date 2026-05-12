@@ -10,7 +10,7 @@ export async function GET() {
 
     const allTasks = await db.select().from(tasks).where(
       gte(tasks.date, today)
-    );
+    ).all();
     return NextResponse.json(allTasks);
   } catch (error) {
     console.error('Error fetching upcoming tasks:', error);
