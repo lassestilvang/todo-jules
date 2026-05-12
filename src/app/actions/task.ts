@@ -131,11 +131,21 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
     // crash or mass assignment vulnerabilities from nested relational data
     const { subtasks, labels, reminders, attachments, ...taskData } = validatedData;
 
-    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
-    // Replaced `await db.update(...).returning()` with `.returning().all()`
-    // to eliminate microtask overhead and event loop blocking.
-    const result = db.update(tasks).set(taskData as Partial<typeof tasks.$inferInsert>).where(eq(tasks.id, id)).returning().all();
-    const updatedTask = result[0];
+    let updatedTask = currentTask;
+
+const filteredTaskData = Object.fromEntries(
+  Object.entries(taskData).filter(([_, v]) => v !== undefined)
+);
+
+if (Object.keys(filteredTaskData).length > 0) {
+  // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+  // Replaced `await db.update(...).returning()` with `.returning().all()`
+  // to eliminate microtask overhead and event loop blocking.
+  const result = db.update(tasks).set(filteredTaskData as Partial<typeof tasks.$inferInsert>).where(eq(tasks.id, id)).returning().all();
+  if (result.length > 0) {
+    updatedTask = result[0] as typeof currentTask;
+  }
+}
 
     // Log history for changed fields
     const historyLogs: HistoryLog[] = [];
