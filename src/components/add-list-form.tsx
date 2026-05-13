@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -62,6 +63,9 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
       <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Create new list</DialogTitle>
+          <DialogDescription className="sr-only">
+            Fill out the form below to create a new list.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div>
