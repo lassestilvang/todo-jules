@@ -78,9 +78,9 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
 
             <ul className="space-y-1">
                 {initialLists.length === 0 && (
-                     <div className="px-3 text-sm text-muted-foreground italic">
+                     <li className="px-3 text-sm text-muted-foreground italic">
                         No lists yet
-                    </div>
+                    </li>
                 )}
                 {initialLists.map((list) => {
                     const isActive = pathname === `/lists/${list.id}`;
