@@ -17,4 +17,4 @@ async function run() {
   console.log(`get: ${t3 - t2}ms`);
 }
 
-run();
+run().catch(console.error);
