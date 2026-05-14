@@ -8,6 +8,7 @@ export async function GET() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    // ⚡ Bolt Optimization: Appended `.all()` and removed `await` to execute the query synchronously and eliminate microtask overhead.
     const allTasks = db.select().from(tasks).where(
       gte(tasks.date, today)
     ).all();

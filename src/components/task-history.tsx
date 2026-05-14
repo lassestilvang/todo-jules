@@ -5,6 +5,7 @@ import { getTaskHistory } from '@/app/actions/history';
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -131,9 +132,12 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
           History
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent aria-describedby={undefined}>
         <SheetHeader>
           <SheetTitle>Task History</SheetTitle>
+          <SheetDescription className="sr-only">
+            View the history of changes made to this task.
+          </SheetDescription>
         </SheetHeader>
         <div className="mt-6 space-y-4">
           {loading ? (

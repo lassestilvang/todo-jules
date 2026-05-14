@@ -10,6 +10,7 @@ export async function GET() {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    // ⚡ Bolt Optimization: Appended `.all()` and removed `await` to execute the query synchronously and eliminate microtask overhead.
     const allTasks = db.select().from(tasks).where(
       and(
         gte(tasks.date, today),

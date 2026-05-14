@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -52,16 +53,19 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-sm"
             aria-label="Create new list"
             title="Create new list"
         >
           <Plus className="h-4 w-4" aria-hidden="true" />
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Create new list</DialogTitle>
+          <DialogDescription className="sr-only">
+            Fill out the form below to create a new list.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div>

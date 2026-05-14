@@ -48,7 +48,7 @@ describe('GET /api/search', () => {
     ];
 
     const whereMock = vi.fn().mockReturnValue({
-      limit: vi.fn().mockResolvedValue(mockTasks)
+      limit: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue(mockTasks) })
     });
 
     vi.mocked(db.select).mockReturnValue({
@@ -82,7 +82,7 @@ describe('GET /api/search', () => {
     vi.mocked(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue(mockTasks)
+          limit: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue(mockTasks) })
         })
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
