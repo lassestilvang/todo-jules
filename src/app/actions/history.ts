@@ -10,7 +10,7 @@ export async function getTaskHistory(taskId: number) {
   }
 
   try {
-    const history = await db.select()
+    const history = db.select()
       .from(taskHistory)
       .where(eq(taskHistory.taskId, taskId))
       .orderBy(desc(taskHistory.changedAt))

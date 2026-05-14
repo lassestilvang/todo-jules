@@ -10,6 +10,7 @@ import { createTaskSchema, updateTaskSchema } from '@/lib/validators';
 import { z } from 'zod';
 import { invalidateTaskCountCache } from '@/lib/cache';
 import { attachLabelsToTasks } from '@/lib/task-utils';
+import { HistoryLog } from '@/lib/history';
 
 // Helper to get today's start and end timestamps
 const getTodayRange = () => {
@@ -28,50 +29,48 @@ const getNext7DaysRange = () => {
 };
 
 export async function getTasksForInbox() {
-  const baseTasks = await db.select()
+  const baseTasks = db.select()
     .from(tasks)
     .where(isNull(tasks.listId))
     .limit(50)
     .orderBy(desc(tasks.createdAt))
     .all();
 
-  return await attachLabelsToTasks(baseTasks);
+  return attachLabelsToTasks(baseTasks);
 }
 
 export async function getTasksForToday() {
   const { start, end } = getTodayRange();
-  const baseTasks = await db.select()
+  const baseTasks = db.select()
     .from(tasks)
     .where(and(gte(tasks.date, start), lte(tasks.date, end)))
     .orderBy(asc(tasks.date))
     .all();
 
-  return await attachLabelsToTasks(baseTasks);
+  return attachLabelsToTasks(baseTasks);
 }
 
 export async function getTasksForUpcoming() {
   const { end } = getTodayRange(); // Tasks after today
-  const baseTasks = await db.select()
+  const baseTasks = db.select()
     .from(tasks)
     .where(gte(tasks.date, end))
     .orderBy(asc(tasks.date))
     .all();
 
-  return await attachLabelsToTasks(baseTasks);
+  return attachLabelsToTasks(baseTasks);
 }
 
 export async function getTasksForNext7Days() {
   const { start, end } = getNext7DaysRange();
-  const baseTasks = await db.select()
+  const baseTasks = db.select()
     .from(tasks)
     .where(and(gte(tasks.date, start), lte(tasks.date, end)))
     .orderBy(asc(tasks.date))
     .all();
 
-  return await attachLabelsToTasks(baseTasks);
+  return attachLabelsToTasks(baseTasks);
 }
-
-import { HistoryLog } from '@/lib/history';
 
 export async function createTask(data: z.input<typeof createTaskSchema>) {
   const validation = createTaskSchema.safeParse(data);
@@ -88,8 +87,8 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
     // Replaced `await db.insert(...).returning()` with `db.insert(...).returning().all()`
     // to eliminate microtask overhead and event loop blocking.
     const newTask = db.insert(tasks).values(taskData).returning().get();
-    after(async () => {
-        await logTaskHistory([
+    after(() => {
+        logTaskHistory([
           {
             taskId: newTask.id,
             changedField: 'created',
@@ -156,8 +155,8 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
       }
     }
 
-    after(async () => {
-        await logTaskHistory(historyLogs);
+    after(() => {
+        logTaskHistory(historyLogs);
     });
 
     revalidatePath('/', 'layout');

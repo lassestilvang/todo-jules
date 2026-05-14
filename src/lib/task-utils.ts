@@ -3,12 +3,12 @@ import { taskLabels, labels, tasks } from '@/lib/schema';
 import { eq, inArray } from 'drizzle-orm';
 
 // Helper to reconstruct labels for tasks
-export async function attachLabelsToTasks(baseTasks: (typeof tasks.$inferSelect)[]) {
+export function attachLabelsToTasks(baseTasks: (typeof tasks.$inferSelect)[]) {
   const taskIds = baseTasks.map(t => t.id);
   const labelsByTaskId: Record<number, { taskId: number; label: typeof labels.$inferSelect }[]> = {};
 
   if (taskIds.length > 0) {
-    const allLabelsData = await db.select({
+    const allLabelsData = db.select({
       taskId: taskLabels.taskId,
       labelId: taskLabels.labelId,
       label: labels
