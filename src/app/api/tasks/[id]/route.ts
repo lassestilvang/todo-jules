@@ -61,8 +61,8 @@ export async function PUT(
       }
 
       // Handle subtasks
-      if (validatedBody.subtasks) {
-        const { incomingIds, toInsert, toUpdate } = validatedBody.subtasks.reduce(
+      if (payloadSubtasks) {
+        const { incomingIds, toInsert, toUpdate } = payloadSubtasks.reduce(
           (acc, st) => {
             if (st.id !== undefined) {
               acc.incomingIds.push(st.id);
@@ -79,7 +79,7 @@ export async function PUT(
           {
             incomingIds: [] as number[],
             toInsert: [] as { name: string; completed: boolean; taskId: number }[],
-            toUpdate: [] as NonNullable<typeof validatedBody.subtasks>,
+            toUpdate: [] as NonNullable<typeof payloadSubtasks>,
           }
         );
 
@@ -137,12 +137,12 @@ export async function PUT(
       }
 
       // Handle labels
-      if (validatedBody.labels) {
+      if (payloadLabels) {
         tx.delete(taskLabels).where(eq(taskLabels.taskId, taskId)).run();
-        if (validatedBody.labels.length > 0) {
+        if (payloadLabels.length > 0) {
           tx.insert(taskLabels)
             .values(
-              validatedBody.labels.map((labelId) => ({
+              payloadLabels.map((labelId) => ({
                 taskId: taskId,
                 labelId,
               }))
@@ -152,12 +152,12 @@ export async function PUT(
       }
 
       // Handle reminders
-      if (validatedBody.reminders) {
+      if (payloadReminders) {
         tx.delete(reminders).where(eq(reminders.taskId, taskId)).run();
-        if (validatedBody.reminders.length > 0) {
+        if (payloadReminders.length > 0) {
           tx.insert(reminders)
             .values(
-              validatedBody.reminders.map((reminder) => ({
+              payloadReminders.map((reminder) => ({
                 ...reminder,
                 taskId: taskId,
               }))
@@ -167,12 +167,12 @@ export async function PUT(
       }
 
       // Handle attachments
-      if (validatedBody.attachments) {
+      if (payloadAttachments) {
         tx.delete(attachments).where(eq(attachments.taskId, taskId)).run();
-        if (validatedBody.attachments.length > 0) {
+        if (payloadAttachments.length > 0) {
           tx.insert(attachments)
             .values(
-              validatedBody.attachments.map((attachment) => ({
+              payloadAttachments.map((attachment) => ({
                 ...attachment,
                 taskId: taskId,
               }))

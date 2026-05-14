@@ -94,3 +94,9 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-05-08 - Update Vitest mocks for terminal execution methods
 **Learning:** When adding explicit execution methods like `.all()` or `.get()` to Drizzle ORM query chains, the corresponding Vitest mocks must be updated to return an object containing that method (e.g., `.limit(vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue(mockData) }))`) instead of resolving directly on the preceding method.
 **Action:** Always verify and update test mocks when appending terminal execution methods to query builder chains.
+## 2026-06-25 - Avoid no-explicit-any when mocking Drizzle results in tests
+**Learning:** When mocking Drizzle ORM query chains in test files (like `route.test.ts`), simply casting the return value `as any` triggers `@typescript-eslint/no-explicit-any` errors, preventing successful linting.
+**Action:** To resolve `@typescript-eslint/no-explicit-any` errors when mocking Drizzle ORM query results in tests, avoid `as any` by double-casting the mock data to the schema's inferred type (e.g., `as unknown as import('@/lib/schema').tasks.$inferSelect[]`) to properly type the response and satisfy the linter.
+## 2026-06-25 - Maintain relational destructuring when replacing DB query types
+**Learning:** When refactoring database actions (like `updateTask`) to use the core query builder instead of the relational API, removing the explicit object destructuring (e.g., `const { subtasks, labels, ...taskData }`) that omits nested relational arrays causes SQLite crashes and introduces mass assignment vulnerabilities when `taskData` is passed to `.set()` or `.values()`.
+**Action:** When refactoring ORM calls, ALWAYS preserve the destructured variable omissions (even if unused) or explicitly alias them (`subtasks: payloadSubtasks`) to strip them out, preventing invalid nested objects from reaching the core Query Builder's `.set()` or `.values()` methods.

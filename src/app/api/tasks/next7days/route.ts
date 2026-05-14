@@ -10,7 +10,8 @@ export async function GET() {
     const next7days = new Date(today);
     next7days.setDate(next7days.getDate() + 7);
 
-    const allTasks = await db.select().from(tasks).where(
+    // ⚡ Bolt Optimization: Appended `.all()` and removed `await` to execute the query synchronously and eliminate microtask overhead.
+    const allTasks = db.select().from(tasks).where(
       and(
         gte(tasks.date, today),
         lt(tasks.date, next7days)
