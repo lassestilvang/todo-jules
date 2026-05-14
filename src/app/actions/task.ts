@@ -82,7 +82,7 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
   try {
     // Extract only the fields belonging to the tasks table to prevent
     // crash or mass assignment vulnerabilities from nested relational data
-    const { subtasks, labels, reminders, attachments, ...taskData } = validation.data;
+    const { subtasks: payloadSubtasks, labels: payloadLabels, reminders: payloadReminders, attachments: payloadAttachments, ...taskData } = validation.data;
 
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.insert(...).returning()` with `db.insert(...).returning().all()`
@@ -121,15 +121,13 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
   const validatedData = validation.data;
 
   try {
-    const currentTask = await db.query.tasks.findFirst({
-      where: eq(tasks.id, id),
-    });
+    // ⚡ Bolt Optimization: Use core query builder API instead of relational API\n    // Replaced await db.query.tasks.findFirst() with await db.select().from(tasks).where().get()\n    // to optimize query construction while maintaining driver compatibility.\n    const currentTask = await db.select().from(tasks).where(eq(tasks.id, id)).get();
 
     if (!currentTask) return { success: false, error: 'Task not found' };
 
     // Extract only the fields belonging to the tasks table to prevent
     // crash or mass assignment vulnerabilities from nested relational data
-    const { subtasks, labels, reminders, attachments, ...taskData } = validatedData;
+    const { subtasks: payloadSubtasks, labels: payloadLabels, reminders: payloadReminders, attachments: payloadAttachments, ...taskData } = validatedData;
 
     let updatedTask = currentTask;
 
