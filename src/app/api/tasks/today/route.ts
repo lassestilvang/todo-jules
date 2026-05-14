@@ -10,12 +10,12 @@ export async function GET() {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const allTasks = await db.select().from(tasks).where(
+    const allTasks = db.select().from(tasks).where(
       and(
         gte(tasks.date, today),
         lt(tasks.date, tomorrow)
       )
-    );
+    ).all();
     return NextResponse.json(allTasks);
   } catch (error) {
     console.error('Error fetching tasks for today:', error);

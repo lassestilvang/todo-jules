@@ -10,12 +10,12 @@ export async function GET() {
     const next7days = new Date(today);
     next7days.setDate(next7days.getDate() + 7);
 
-    const allTasks = await db.select().from(tasks).where(
+    const allTasks = db.select().from(tasks).where(
       and(
         gte(tasks.date, today),
         lt(tasks.date, next7days)
       )
-    );
+    ).all();
     return NextResponse.json(allTasks);
   } catch (error) {
     console.error('Error fetching tasks for the next 7 days:', error);
