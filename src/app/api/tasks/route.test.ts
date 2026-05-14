@@ -84,7 +84,7 @@ describe('GET /api/tasks', () => {
     // @ts-expect-error mock chain
     const mockAllMethod = db.select().from().limit().offset().all;
     vi.mocked(mockAllMethod).mockReturnValue([]);
-    vi.mocked(taskUtils.attachLabelsToTasks).mockResolvedValue([] as unknown);
+    vi.mocked(taskUtils.attachLabelsToTasks).mockResolvedValue([] as any);
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
     const response = await GET(request);
