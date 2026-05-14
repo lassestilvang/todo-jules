@@ -1,6 +1,5 @@
 import { db } from './src/lib/db';
-import { lists, tasks } from './src/lib/schema';
-import { eq } from 'drizzle-orm';
+import { tasks } from './src/lib/schema';
 
 async function run() {
   const t0 = performance.now();
