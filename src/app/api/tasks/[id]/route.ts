@@ -33,7 +33,8 @@ export async function PUT(
     const updatedTask = db.transaction((tx) => {
       let updated;
 
-      const { subtasks, labels, reminders, attachments, ...taskData } = validatedBody;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { subtasks: _, labels: __, reminders: ___, attachments: ____, ...taskData } = validatedBody;
 
       if (Object.keys(taskData).length > 0) {
         const [result] = tx
