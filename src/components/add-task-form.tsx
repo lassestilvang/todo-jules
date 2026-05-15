@@ -74,6 +74,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
         </Label>
         <Input
           ref={inputRef}
+          disabled={isPending}
           type="text"
           id="task-name"
           value={name}
