@@ -40,7 +40,7 @@ export async function GET(request: Request) {
       .offset(offset)
       .all();
 
-    const allTasks = await attachLabelsToTasks(baseTasks);
+    const allTasks = attachLabelsToTasks(baseTasks);
 
     return NextResponse.json({
       data: allTasks,
