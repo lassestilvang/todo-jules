@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { createTask } from '@/app/actions/task';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
   const [deadline, setDeadline] = useState<Date | undefined>(undefined);
   const [priority, setPriority] = useState('None');
   const [isPending, setIsPending] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +53,8 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
             if (onTaskAdded) {
                 onTaskAdded();
             }
+            // Focus the input to allow for continuous rapid entry
+            inputRef.current?.focus();
         } else {
             toast.error('Failed to create task');
         }
@@ -70,6 +73,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
           Task Name <span className="text-destructive" aria-hidden="true">*</span>
         </Label>
         <Input
+          ref={inputRef}
           type="text"
           id="task-name"
           value={name}
