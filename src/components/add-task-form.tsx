@@ -54,7 +54,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
                 onTaskAdded();
             }
             // Focus the input to allow for continuous rapid entry
-            inputRef.current?.focus();
+            setTimeout(() => inputRef.current?.focus(), 0);
         } else {
             toast.error('Failed to create task');
         }
