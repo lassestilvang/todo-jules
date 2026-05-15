@@ -25,7 +25,8 @@ export async function GET(request: Request) {
       return NextResponse.json([]);
     }
 
-    const results = await db
+    // ⚡ Bolt Optimization: Removed `await` to execute synchronously and eliminate microtask overhead
+    const results = db
       .select()
       .from(tasks)
       .where(sql`id IN (SELECT rowid FROM tasks_fts WHERE tasks_fts MATCH ${'"' + sanitizedQuery + '"*'})`)
