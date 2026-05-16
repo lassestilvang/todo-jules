@@ -27,6 +27,9 @@ describe('POST /api/lists', () => {
   it('should return a 201 status code and the new list', async () => {
     const request = new Request('http://localhost/api/lists', {
       method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
       body: JSON.stringify({ name: 'Test List', color: '#ffffff', emoji: '🎉' }),
     });
 

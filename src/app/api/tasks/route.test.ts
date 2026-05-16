@@ -4,8 +4,6 @@ import { db } from '../../../lib/db';
 import * as cache from '../../../lib/cache';
 import * as taskUtils from '../../../lib/task-utils';
 
-const mockAll = vi.fn();
-
 // Mock dependencies
 vi.mock('../../../lib/db', () => {
   const mockAll = vi.fn();
@@ -55,7 +53,7 @@ describe('GET /api/tasks', () => {
     // @ts-expect-error mock chain
     const mockAllMethod = db.select().from().limit().offset().all;
     vi.mocked(mockAllMethod).mockReturnValue([mockTask]);
-    vi.mocked(taskUtils.attachLabelsToTasks).mockResolvedValue([mockTask] as unknown as import("@/lib/schema").tasks.$inferSelect[]);
+    vi.mocked(taskUtils.attachLabelsToTasks).mockReturnValue([mockTask] as unknown as import("@/lib/schema").tasks.$inferSelect[]);
 
     const request = new Request('http://localhost/api/tasks?page=1&limit=10');
     const response = await GET(request);
@@ -84,7 +82,7 @@ describe('GET /api/tasks', () => {
     // @ts-expect-error mock chain
     const mockAllMethod = db.select().from().limit().offset().all;
     vi.mocked(mockAllMethod).mockReturnValue([]);
-    vi.mocked(taskUtils.attachLabelsToTasks).mockResolvedValue([] as unknown as import("@/lib/schema").tasks.$inferSelect[]);
+    vi.mocked(taskUtils.attachLabelsToTasks).mockReturnValue([] as unknown as import("@/lib/schema").tasks.$inferSelect[]);
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
     const response = await GET(request);
@@ -112,7 +110,7 @@ describe('GET /api/tasks', () => {
     // @ts-expect-error mock chain
     const mockAllMethod = db.select().from().limit().offset().all;
     vi.mocked(mockAllMethod).mockReturnValue([]);
-    vi.mocked(taskUtils.attachLabelsToTasks).mockResolvedValue([] as unknown as import("@/lib/schema").tasks.$inferSelect[]);
+    vi.mocked(taskUtils.attachLabelsToTasks).mockReturnValue([] as unknown as import("@/lib/schema").tasks.$inferSelect[]);
 
     // Test with invalid page and limit
     const request = new Request('http://localhost/api/tasks?page=abc&limit=-5');
@@ -138,6 +136,9 @@ describe('POST /api/tasks', () => {
     const newTask = { name: 'Test Task', listId: 1 };
     const request = new Request('http://localhost/api/tasks', {
       method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
       body: JSON.stringify(newTask),
     });
 
