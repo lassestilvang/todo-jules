@@ -24,7 +24,7 @@ export async function PUT(
 
     // 🛡️ Sentinel: Enforce application/json to prevent CSRF attacks via simple requests
     const contentType = request.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
+    if (!contentType || contentType.split(';')[0].trim().toLowerCase() !== 'application/json') {
       return NextResponse.json({ error: 'Unsupported Media Type' }, { status: 415 });
     }
 
