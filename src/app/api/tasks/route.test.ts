@@ -4,8 +4,6 @@ import { db } from '../../../lib/db';
 import * as cache from '../../../lib/cache';
 import * as taskUtils from '../../../lib/task-utils';
 
-const mockAll = vi.fn();
-
 // Mock dependencies
 vi.mock('../../../lib/db', () => {
   const mockAll = vi.fn();
@@ -138,6 +136,9 @@ describe('POST /api/tasks', () => {
     const newTask = { name: 'Test Task', listId: 1 };
     const request = new Request('http://localhost/api/tasks', {
       method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
       body: JSON.stringify(newTask),
     });
 
