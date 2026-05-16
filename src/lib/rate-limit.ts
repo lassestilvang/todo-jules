@@ -18,7 +18,7 @@ setInterval(() => {
       rateLimitMap.delete(key);
     }
   }
-}, 5 * 60 * 1000).unref(); // unref so it doesn't block Node exit
+}, 5 * 60 * 1000);
 
 export function rateLimit(identifier: string, limit: number, windowMs: number) {
   const now = Date.now();
