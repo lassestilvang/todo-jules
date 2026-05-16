@@ -48,6 +48,13 @@ export async function PUT(
     if (!/^\d+$/.test(idString)) {
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
     }
+
+    // 🛡️ Sentinel: Enforce application/json to prevent CSRF attacks via simple requests
+    const contentType = request.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return NextResponse.json({ error: 'Unsupported Media Type' }, { status: 415 });
+    }
+
     const body = await request.json();
     const validation = updateListSchema.safeParse(body);
 
@@ -59,6 +66,7 @@ export async function PUT(
 
     // 🛡️ Sentinel: Prevent "No values to set" error
     const updateData = Object.fromEntries(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       Object.entries({ name, color, emoji }).filter(([_, v]) => v !== undefined)
     );
 

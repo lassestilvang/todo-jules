@@ -21,6 +21,13 @@ export async function PUT(
     if (Number.isNaN(taskId) || String(taskId) !== id) {
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
     }
+
+    // 🛡️ Sentinel: Enforce application/json to prevent CSRF attacks via simple requests
+    const contentType = request.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return NextResponse.json({ error: 'Unsupported Media Type' }, { status: 415 });
+    }
+
     const body = await request.json();
     const validation = updateTaskSchema.safeParse(body);
 
