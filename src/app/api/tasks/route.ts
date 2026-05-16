@@ -1,3 +1,4 @@
+import { rateLimit } from '@/lib/rate-limit';
 import { NextResponse } from 'next/server';
 import { db } from '../../../lib/db';
 import {
@@ -62,6 +63,17 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    // Basic rate limit: 100 requests per minute per IP
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    const { success } = rateLimit(`tasks_post_${ip}`, 100, 60 * 1000);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many requests, please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const validation = createTaskSchema.safeParse(body);
 

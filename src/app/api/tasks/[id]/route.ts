@@ -34,7 +34,7 @@ export async function PUT(
       let updated;
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { subtasks, labels, reminders, attachments, ...taskData } = validatedBody;
+      const { subtasks: payloadSubtasks, labels: payloadLabels, reminders: payloadReminders, attachments: payloadAttachments, ...taskData } = validatedBody;
 
       if (Object.keys(taskData).length > 0) {
         const [result] = tx
