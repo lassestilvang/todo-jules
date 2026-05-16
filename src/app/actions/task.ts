@@ -122,9 +122,9 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
 
   try {
     // ⚡ Bolt Optimization: Use core query builder API instead of relational API
-    // Replaced await db.query.tasks.findFirst() with db.select().from(tasks).where().get()
+    // Replaced await db.query.tasks.findFirst() with await db.select().from(tasks).where().get()
     // to optimize query construction while maintaining driver compatibility.
-    const currentTask = db.select().from(tasks).where(eq(tasks.id, id)).get();
+    const currentTask = await db.select().from(tasks).where(eq(tasks.id, id)).get();
 
     if (!currentTask) return { success: false, error: 'Task not found' };
 

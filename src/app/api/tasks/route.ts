@@ -1,3 +1,4 @@
+import { rateLimit } from '@/lib/rate-limit';
 import { NextResponse } from 'next/server';
 import { db } from '../../../lib/db';
 import {
@@ -62,10 +63,15 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    // 🛡️ Sentinel: Enforce application/json to prevent CSRF attacks via simple requests
-    const contentType = request.headers.get('content-type');
-    if (!contentType || contentType.split(';')[0].trim().toLowerCase() !== 'application/json') {
-      return NextResponse.json({ error: 'Unsupported Media Type' }, { status: 415 });
+    // Basic rate limit: 100 requests per minute per IP
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown';
+    const { success } = rateLimit(`tasks_post_${ip}`, 100, 60 * 1000);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many requests, please try again later.' },
+        { status: 429 }
+      );
     }
 
     const body = await request.json();
