@@ -18,6 +18,9 @@ describe('PUT /api/tasks/[id]', () => {
     const updatedTask = { id: 1, name: 'Updated Task' };
     const request = new Request('http://localhost/api/tasks/1', {
       method: 'PUT',
+      headers: {
+        'content-type': 'application/json',
+      },
       body: JSON.stringify({ name: 'Updated Task' }),
     });
 

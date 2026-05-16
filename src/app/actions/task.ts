@@ -81,6 +81,7 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
   try {
     // Extract only the fields belonging to the tasks table to prevent
     // crash or mass assignment vulnerabilities from nested relational data
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { subtasks: payloadSubtasks, labels: payloadLabels, reminders: payloadReminders, attachments: payloadAttachments, ...taskData } = validation.data;
 
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
@@ -129,6 +130,7 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
 
     // Extract only the fields belonging to the tasks table to prevent
     // crash or mass assignment vulnerabilities from nested relational data
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { subtasks: payloadSubtasks, labels: payloadLabels, reminders: payloadReminders, attachments: payloadAttachments, ...taskData } = validatedData;
 
     let updatedTask = currentTask;

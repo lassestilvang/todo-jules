@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { createTask } from '@/app/actions/task';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,14 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
   const [deadline, setDeadline] = useState<Date | undefined>(undefined);
   const [priority, setPriority] = useState('None');
   const [isPending, setIsPending] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      e.currentTarget.requestSubmit();
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +60,8 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
             if (onTaskAdded) {
                 onTaskAdded();
             }
+            // Focus the input to allow for continuous rapid entry
+            setTimeout(() => inputRef.current?.focus(), 0);
         } else {
             toast.error('Failed to create task');
         }
@@ -64,12 +74,15 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-card p-6 rounded-lg border">
+    <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="bg-card p-6 rounded-lg border">
+      <fieldset disabled={isPending} className="space-y-4">
       <div>
         <Label htmlFor="task-name" className="mb-1 block">
           Task Name <span className="text-destructive" aria-hidden="true">*</span>
         </Label>
         <Input
+          ref={inputRef}
+          disabled={isPending}
           type="text"
           id="task-name"
           value={name}
@@ -119,10 +132,18 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
       <Button
         type="submit"
         disabled={isPending}
-        className="w-full"
+        className="w-full relative"
       >
-        {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Adding...</> : 'Add Task'}
+        {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Adding...</> : (
+            <>
+                Add Task
+                <kbd className="absolute right-4 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+                    <span className="text-xs">⌘/Ctrl Enter</span>
+                </kbd>
+            </>
+        )}
       </Button>
+      </fieldset>
     </form>
   );
 };

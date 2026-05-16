@@ -23,6 +23,9 @@ describe('PUT /api/lists/{id}', () => {
 
     const request = new Request('http://localhost/api/lists/1', {
       method: 'PUT',
+      headers: {
+        'content-type': 'application/json',
+      },
       body: JSON.stringify({ name: 'Updated List', color: '#000000', emoji: '✨' }),
     });
 
@@ -38,6 +41,9 @@ describe('PUT /api/lists/{id}', () => {
 
     const request = new Request('http://localhost/api/lists/999', {
       method: 'PUT',
+      headers: {
+        'content-type': 'application/json',
+      },
       body: JSON.stringify({ name: 'Updated List' }),
     });
 
