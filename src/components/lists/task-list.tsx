@@ -117,6 +117,13 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
     }
   };
 
+  // ⚡ Bolt Optimization: Memoize task IDs array for SortableContext
+  // Why: SortableContext triggers expensive cascading re-renders across the
+  // entire drag-and-drop tree if the `items` array reference changes. By
+  // memoizing the mapped task IDs array, we ensure SortableContext only updates
+  // when the actual order or composition of tasks changes, not on every render.
+  const taskIds = React.useMemo(() => optimisticTasks.map(t => t.id), [optimisticTasks]);
+
   if (optimisticTasks.length === 0) {
     return (
       <div className="text-center p-12 mt-8 border-2 border-dashed rounded-lg bg-card/50">
@@ -138,7 +145,7 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
       onDragEnd={handleDragEnd}
     >
       <SortableContext
-        items={optimisticTasks.map(t => t.id)}
+        items={taskIds}
         strategy={verticalListSortingStrategy}
       >
         <div className="space-y-4">
