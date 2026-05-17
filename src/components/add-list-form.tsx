@@ -67,7 +67,8 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
             Fill out the form below to create a new list.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+        <form onSubmit={handleSubmit} className="py-4">
+          <fieldset disabled={isPending} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-1">
               Name <span className="text-destructive" aria-hidden="true">*</span>
@@ -114,6 +115,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
           <Button type="submit" disabled={isPending} className="w-full">
             {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Creating...</> : 'Create List'}
           </Button>
+          </fieldset>
         </form>
       </DialogContent>
     </Dialog>
