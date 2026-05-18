@@ -6,3 +6,7 @@
 ## 2024-05-15 - Enhancing Rapid Entry Workflows
 **Learning:** In productivity apps, users frequently need to enter multiple items (like tasks) in quick succession. After successfully submitting a form, if the focus drops, the user is forced to use the mouse or manually tab back to the input to add the next item, introducing significant friction.
 **Action:** When implementing rapid-entry forms (such as `AddTaskForm`), always use a `useRef` to programmatically restore focus to the primary input field immediately after a successful submission and form reset, enabling seamless continuous entry.
+
+## 2024-05-18 - Adding Context to Destructive Actions
+**Learning:** Native `window.confirm` dialogs often lack context. When a user is performing a destructive action (like deleting a task or list), a generic message like "Are you sure you want to delete this?" can cause hesitation, especially if the user clicked quickly or the UI shifted.
+**Action:** Always interpolate the specific name or title of the item being deleted into the confirmation message (e.g., `Are you sure you want to delete the task "${task.name}"?`) to provide clear, cognitive reassurance and prevent accidental deletions.

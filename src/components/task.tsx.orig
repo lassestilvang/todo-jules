@@ -41,7 +41,7 @@ const TaskComponent = ({ task }: TaskProps) => {
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (window.confirm(`Are you sure you want to delete the task "${task.name}"?`)) {
+    if (window.confirm('Are you sure you want to delete this task?')) {
       setIsDeleting(true);
       try {
         await deleteTask(task.id);
