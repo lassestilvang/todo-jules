@@ -12,6 +12,8 @@ import { TaskHistory } from '@/components/task-history';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
+const dateFormatter = new Intl.DateTimeFormat();
+
 interface TaskProps {
   task: Task;
 }
@@ -117,14 +119,14 @@ const TaskComponent = ({ task }: TaskProps) => {
                     <div className="flex items-center text-xs text-muted-foreground" title="Date">
                         <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
                         <span className="sr-only">Date: </span>
-                        {new Date(task.date).toLocaleDateString()}
+                        <span suppressHydrationWarning>{dateFormatter.format(new Date(task.date))}</span>
                     </div>
                 )}
                  {task.deadline && (
                     <div className="flex items-center text-xs text-red-400" title="Deadline">
                         <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
                         <span className="sr-only">Deadline: </span>
-                        {new Date(task.deadline).toLocaleDateString()}
+                        <span suppressHydrationWarning>{dateFormatter.format(new Date(task.deadline))}</span>
                     </div>
                 )}
             </div>
