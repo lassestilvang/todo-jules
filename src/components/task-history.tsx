@@ -38,6 +38,11 @@ const historyCache = new Map<number, CacheEntry>();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const MAX_CACHE_SIZE = 100;
 
+const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+    year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: 'numeric', minute: 'numeric', second: 'numeric'
+});
+
 function getFromCache(taskId: number): CacheEntry | null {
   const entry = historyCache.get(taskId);
   if (!entry) return null;
@@ -164,7 +169,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
               {history.map((item) => (
                 <li key={item.id} className="text-sm border-b pb-2">
                   <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>{new Date(item.changedAt).toLocaleString()}</span>
+                    <span>{dateTimeFormatter.format(new Date(item.changedAt))}</span>
                     <span className="font-semibold capitalize">{item.changedField}</span>
                   </div>
                   <div>
