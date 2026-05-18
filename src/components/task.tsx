@@ -119,7 +119,7 @@ const TaskComponent = ({ task }: TaskProps) => {
                     <div className="flex items-center text-xs text-muted-foreground" title="Date">
                         <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
                         <span className="sr-only">Date: </span>
-                        {dateFormatter.format(new Date(task.date))}
+                        <span suppressHydrationWarning>{dateFormatter.format(new Date(task.date))}</span>
                     </div>
                 )}
                  {task.deadline && (
