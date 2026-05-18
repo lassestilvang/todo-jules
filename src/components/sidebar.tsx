@@ -29,7 +29,7 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
     e.preventDefault();
     e.stopPropagation();
     const listToDelete = initialLists.find(l => l.id === id);
-    if(confirm(`Are you sure you want to delete the list "${listToDelete?.name}"?`)) {
+    if (window.confirm(`Are you sure you want to delete the list "${listToDelete?.name || 'this list'}"?`)) {
         setDeletingId(id);
         try {
             await deleteList(id);
