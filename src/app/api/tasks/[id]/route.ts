@@ -220,7 +220,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown';
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
     const { success: rateLimitSuccess } = rateLimit(`tasks_delete_${ip}`, 100, 60 * 1000);
 
     if (!rateLimitSuccess) {
