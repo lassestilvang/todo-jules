@@ -9,6 +9,7 @@ import { ThemeToggle } from './theme-toggle';
 import AddListForm from './add-list-form';
 import { deleteList } from '@/app/actions/list';
 import { Button } from './ui/button';
+import { toast } from 'sonner';
 
 interface SidebarProps {
   initialLists?: { id: number; name: string; color: string; emoji: string }[];
@@ -33,6 +34,9 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
         setDeletingId(id);
         try {
             await deleteList(id);
+            toast.success(`List "${listToDelete?.name || ''}" deleted`);
+        } catch {
+            toast.error('Failed to delete list');
         } finally {
             setDeletingId(null);
         }
@@ -109,7 +113,7 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                                 )}
                                 onClick={(e) => handleDeleteList(e, list.id)}
                                 aria-label={`Delete list ${list.name}`}
-                                title="Delete list"
+                                title={deletingId === list.id ? 'Deleting list...' : 'Delete list'}
                                 disabled={deletingId === list.id}
                             >
                                 {deletingId === list.id ? (

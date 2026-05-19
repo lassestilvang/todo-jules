@@ -47,6 +47,9 @@ const TaskComponent = ({ task }: TaskProps) => {
       setIsDeleting(true);
       try {
         await deleteTask(task.id);
+        toast.success('Task deleted');
+      } catch {
+        toast.error('Failed to delete task');
       } finally {
         setIsDeleting(false);
       }
@@ -97,7 +100,7 @@ const TaskComponent = ({ task }: TaskProps) => {
                         className="h-8 w-8 text-muted-foreground hover:text-destructive transition-opacity opacity-0 group-hover:opacity-100 focus-within:opacity-100"
                         onClick={handleDelete}
                         aria-label={`Delete task ${task.name}`}
-                        title="Delete task"
+                        title={isDeleting ? 'Deleting task...' : 'Delete task'}
                         disabled={isDeleting}
                         style={{ opacity: isDeleting ? 1 : undefined }}
                     >
