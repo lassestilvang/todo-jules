@@ -17,7 +17,9 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    // 🛡️ Sentinel: Use the left-most IP to avoid global DoS (all traffic sharing the right-most proxy IP).
+    // Note: This relies on the left-most IP which is spoofable.
+    const ip = request.headers.get('x-forwarded-for')?.split(',')?.[0]?.trim() || 'unknown';
     const { success } = rateLimit(`tasks_put_${ip}`, 100, 60 * 1000);
 
     if (!success) {
@@ -220,7 +222,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    // 🛡️ Sentinel: Use the left-most IP to avoid global DoS (all traffic sharing the right-most proxy IP).
+    // Note: This relies on the left-most IP which is spoofable.
+    const ip = request.headers.get('x-forwarded-for')?.split(',')?.[0]?.trim() || 'unknown';
     const { success: rateLimitSuccess } = rateLimit(`tasks_delete_${ip}`, 100, 60 * 1000);
 
     if (!rateLimitSuccess) {
