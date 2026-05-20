@@ -142,7 +142,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
           <History className="h-4 w-4" aria-hidden="true" />
         </Button>
       </SheetTrigger>
-      <SheetContent aria-describedby={undefined}>
+      <SheetContent>
         <SheetHeader>
           <SheetTitle>Task History</SheetTitle>
           <SheetDescription className="sr-only">
