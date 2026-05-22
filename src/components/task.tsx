@@ -64,7 +64,7 @@ const TaskComponent = ({ task }: TaskProps) => {
       transition={{ duration: 0.2 }}
       className="group"
     >
-      <Card className={`mb-3 transition-colors hover:shadow-md ${optimisticCompleted ? 'opacity-60 bg-muted/50' : 'bg-card'}`}>
+      <Card className={`transition-colors hover:shadow-md ${optimisticCompleted ? 'opacity-60 bg-muted/50' : 'bg-card'}`}>
         <CardContent className="p-4 flex items-start gap-4">
           <div className="pt-1">
             <Checkbox

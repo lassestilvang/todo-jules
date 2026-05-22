@@ -51,7 +51,14 @@ const SortableTaskItem = React.memo(function SortableTaskItemComponent({ task }:
     };
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        <div
+          ref={setNodeRef}
+          style={style}
+          {...attributes}
+          {...listeners}
+          className={`rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          tabIndex={0}
+        >
             <TaskComponent task={task} />
         </div>
     );
