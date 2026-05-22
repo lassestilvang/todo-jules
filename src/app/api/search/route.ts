@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
 import { sql } from 'drizzle-orm';
+import { attachLabelsToTasks } from '@/lib/task-utils';
 
 export async function GET(request: Request) {
   try {
@@ -32,7 +33,13 @@ export async function GET(request: Request) {
       .limit(20)
       .all();
 
-    return NextResponse.json(results);
+    // ⚡ Bolt Optimization: Use `attachLabelsToTasks` for bulk lookup
+    // Prevents N+1 query problem by extracting all task IDs and fetching
+    // related task labels in a single bulk query with O(n) memory mapping
+    // instead of initiating an individual DB query per task result.
+    const tasksWithLabels = attachLabelsToTasks(results);
+
+    return NextResponse.json(tasksWithLabels);
   } catch (error) {
     console.error('Error searching tasks:', error);
     return NextResponse.json({ error: 'Failed to search tasks' }, { status: 500 });
