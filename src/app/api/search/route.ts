@@ -33,10 +33,7 @@ export async function GET(request: Request) {
       .limit(20)
       .all();
 
-    // ⚡ Bolt Optimization: Use `attachLabelsToTasks` for bulk lookup
-    // Prevents N+1 query problem by extracting all task IDs and fetching
-    // related task labels in a single bulk query with O(n) memory mapping
-    // instead of initiating an individual DB query per task result.
+    // Bulk fetch and attach labels to tasks to avoid N+1 queries.
     const tasksWithLabels = attachLabelsToTasks(results);
 
     return NextResponse.json(tasksWithLabels);
