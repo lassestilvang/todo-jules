@@ -2,6 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from './route';
 import { db } from '@/lib/db';
 
+vi.mock('@/lib/task-utils', () => ({
+  attachLabelsToTasks: vi.fn((tasks) => tasks),
+}));
+
 vi.mock('@/lib/db', () => ({
   db: {
     select: vi.fn(),

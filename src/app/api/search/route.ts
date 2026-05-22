@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
 import { sql } from 'drizzle-orm';
+import { attachLabelsToTasks } from '@/lib/task-utils';
 
 export async function GET(request: Request) {
   try {
@@ -44,7 +45,10 @@ export async function GET(request: Request) {
       .limit(20)
       .all();
 
-    return NextResponse.json(results);
+    // Bulk fetch and attach labels to tasks to avoid N+1 queries.
+    const tasksWithLabels = attachLabelsToTasks(results);
+
+    return NextResponse.json(tasksWithLabels);
   } catch (error) {
     console.error('Error searching tasks:', error);
     return NextResponse.json({ error: 'Failed to search tasks' }, { status: 500 });
