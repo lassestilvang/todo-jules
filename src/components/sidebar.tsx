@@ -109,7 +109,7 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                                     "h-8 w-8 text-muted-foreground hover:text-destructive transition-opacity",
                                     deletingId === list.id
                                         ? "opacity-100"
-                                        : "opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 md:group-focus-within:opacity-100"
+                                        : "opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
                                 )}
                                 onClick={(e) => handleDeleteList(e, list.id)}
                                 aria-label={`Delete list ${list.name}`}
