@@ -58,3 +58,6 @@
 ## 2026-05-22 - Visual and Keyboard Feedback for Drag and Drop Items
 **Learning:** By default, draggable items using `@dnd-kit/sortable` do not have a visual indication that they are draggable or focused when navigating via keyboard. This makes the drag-and-drop functionality difficult to discover and use for keyboard users.
 **Action:** When implementing sortable items, always explicitly add `tabIndex={0}` to the item container along with visible focus ring classes (e.g., `focus-visible:ring-2`). Additionally, add explicit cursor styles (`cursor-grab` normally, `cursor-grabbing` when `isDragging`) to provide visual feedback to mouse users.
+## 2024-05-24 - Touch-Device Discoverability for Hover Actions
+**Learning:** Hiding action buttons (like delete or history) using `opacity-0 group-hover:opacity-100` creates a critical discoverability and usability issue on touch devices (mobile/tablets) where the hover state does not exist. Users cannot see or interact with these buttons unless they accidentally tap the exact invisible area.
+**Action:** When hiding actions behind a hover state for visual cleanliness, always use responsive modifiers (e.g., `opacity-100 md:opacity-0 md:group-hover:opacity-100`) so the actions are persistently visible on touch/mobile devices and only hide on desktop screens.
