@@ -97,7 +97,7 @@ const TaskComponent = ({ task }: TaskProps) => {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive transition-opacity opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 md:group-focus-within:opacity-100"
                         onClick={handleDelete}
                         aria-label={`Delete task ${task.name}`}
                         title={isDeleting ? 'Deleting task...' : 'Delete task'}
