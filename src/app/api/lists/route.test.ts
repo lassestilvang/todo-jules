@@ -15,7 +15,8 @@ vi.mock('../../../lib/db', () => ({
 
 describe('GET /api/lists', () => {
   it('should return a list of lists', async () => {
-    const response = await GET();
+    const request = new Request('http://localhost/api/lists');
+    const response = await GET(request);
     const data = await response.json();
 
     expect(response.status).toBe(200);

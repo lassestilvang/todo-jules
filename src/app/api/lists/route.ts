@@ -92,8 +92,19 @@ export async function POST(request: Request) {
  *       500:
  *         description: Internal server error.
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // 🛡️ Sentinel: Use the left-most IP to avoid global DoS (all traffic sharing the right-most proxy IP).
+    const ip = request.headers.get('x-forwarded-for')?.split(',')?.[0]?.trim() || 'unknown';
+    const { success } = rateLimit(`lists_get_${ip}`, 100, 60 * 1000);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many requests, please try again later.' },
+        { status: 429 }
+      );
+    }
+
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.select(...)` with `.all()` to eliminate microtask overhead.
     const allLists = db.select().from(lists).all();
