@@ -15,16 +15,20 @@ interface SidebarProps {
   initialLists?: { id: number; name: string; color: string; emoji: string }[];
 }
 
+// ⚡ Bolt Optimization: Hoist static configuration out of the render loop
+// Why: The links array is static. By defining it outside the component,
+// we prevent a new array and its 4 nested object references from being
+// needlessly allocated and garbage collected on every re-render of the Sidebar.
+const links = [
+  { href: '/', label: 'Inbox', icon: Inbox },
+  { href: '/today', label: 'Today', icon: Calendar },
+  { href: '/next7days', label: 'Next 7 Days', icon: CalendarDays },
+  { href: '/upcoming', label: 'Upcoming', icon: LayoutList },
+];
+
 const Sidebar = ({ initialLists = [] }: SidebarProps) => {
   const pathname = usePathname();
   const [deletingId, setDeletingId] = useState<number | null>(null);
-
-  const links = [
-    { href: '/', label: 'Inbox', icon: Inbox },
-    { href: '/today', label: 'Today', icon: Calendar },
-    { href: '/next7days', label: 'Next 7 Days', icon: CalendarDays },
-    { href: '/upcoming', label: 'Upcoming', icon: LayoutList },
-  ];
 
   const handleDeleteList = async (e: React.MouseEvent, id: number) => {
     e.preventDefault();
