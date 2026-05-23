@@ -8,8 +8,8 @@ overrides:
   esbuild@<=0.24.2: 0.27.7
   postcss@<8.5.10: '>=8.5.10'
   next: 16.2.6
-  ws: '>=8.20.1'
-  brace-expansion@<2.0.0: ^2.1.0
+  ws: ^8.20.1
+  brace-expansion@<2.0.1: ^2.1.0
 
 importers:
 
@@ -40,7 +40,7 @@ importers:
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.14)(react@19.2.3)
       better-sqlite3:
-        specifier: ^12.9.0
+        specifier: ^12.10.0
         version: 12.10.0
       class-variance-authority:
         specifier: ^0.7.1
