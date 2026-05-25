@@ -39,7 +39,7 @@ export const updateTaskSchema = z.object({
   })).max(100, 'Too many subtasks').optional(),
   labels: z.array(z.number()).max(50, 'Too many labels').optional(),
   reminders: z.array(z.object({
-    remindAt: z.union([z.string().max(100, 'Date string is too long').transform((val) => val ? new Date(val) : undefined).refine((d) => !!d && !isNaN(d.getTime()), 'Invalid date'), z.date()]),
+    remindAt: z.union([z.string().max(100, 'Date string is too long').transform((val) => val ? new Date(val) : undefined).refine((d) => !!d && !isNaN(d.getTime()), 'Invalid date'), z.date().refine((d) => !isNaN(d.getTime()), 'Invalid date')]),
   })).max(50, 'Too many reminders').optional(),
   attachments: z.array(z.object({
     url: z.string().max(2048, 'URL is too long').url('Invalid URL').regex(/^https?:\/\//i, 'URL must start with http:// or https://'),
