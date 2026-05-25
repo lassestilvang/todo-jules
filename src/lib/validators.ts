@@ -27,8 +27,8 @@ export const createTaskSchema = z.object({
 export const updateTaskSchema = z.object({
   name: z.string().min(1).max(255).optional(),
   description: z.string().max(10000, 'Description is too long').optional().nullable(),
-  date: z.union([z.string().max(100, 'Date string is too long').transform((val) => val ? new Date(val) : undefined).refine((d) => !d || !isNaN(d.getTime()), 'Invalid date'), z.date()]).optional().nullable(),
-  deadline: z.union([z.string().max(100, 'Date string is too long').transform((val) => val ? new Date(val) : undefined).refine((d) => !d || !isNaN(d.getTime()), 'Invalid date'), z.date()]).optional().nullable(),
+  date: z.union([z.string().max(100, 'Date string is too long').transform((val) => val ? new Date(val) : undefined).refine((d) => !d || !isNaN(d.getTime()), 'Invalid date'), z.date().refine((d) => !isNaN(d.getTime()), 'Invalid date')]).optional().nullable(),
+  deadline: z.union([z.string().max(100, 'Date string is too long').transform((val) => val ? new Date(val) : undefined).refine((d) => !d || !isNaN(d.getTime()), 'Invalid date'), z.date().refine((d) => !isNaN(d.getTime()), 'Invalid date')]).optional().nullable(),
   priority: z.enum(['None', 'Low', 'Medium', 'High']).optional(),
   completed: z.boolean().optional(),
   listId: z.number().optional().nullable(),
