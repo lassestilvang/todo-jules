@@ -149,6 +149,7 @@ export async function POST(request: Request) {
         tx.insert(reminders).values(
             validatedBody.reminders.map((reminder) => ({
               ...reminder,
+              remindAt: reminder.remindAt!,
               taskId: newTask.id,
             }))
           ).run();

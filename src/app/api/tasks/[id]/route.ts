@@ -179,6 +179,7 @@ export async function PUT(
             .values(
               payloadReminders.map((reminder) => ({
                 ...reminder,
+                remindAt: reminder.remindAt!,
                 taskId: taskId,
               }))
             )

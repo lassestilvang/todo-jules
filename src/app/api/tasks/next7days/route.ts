@@ -1,10 +1,22 @@
+import { rateLimit } from '@/lib/rate-limit';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
 import { and, gte, lt } from 'drizzle-orm';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // 🛡️ Sentinel: Use the left-most IP to avoid global DoS (all traffic sharing the right-most proxy IP).
+    const ip = request.headers.get('x-forwarded-for')?.split(',')?.[0]?.trim() || 'unknown';
+    const { success } = rateLimit(`tasks_next7days_get_${ip}`, 100, 60 * 1000);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many requests, please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const next7days = new Date(today);
