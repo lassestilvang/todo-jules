@@ -21,6 +21,11 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 export function rateLimit(identifier: string, limit: number, windowMs: number) {
+  // 🛡️ Sentinel: Prevent Memory Exhaustion DoS via unbounded Map growth from IP spoofing
+  if (rateLimitMap.size > 10000) {
+    rateLimitMap.clear();
+  }
+
   const now = Date.now();
   let info = rateLimitMap.get(identifier);
 
