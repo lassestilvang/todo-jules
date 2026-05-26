@@ -7,7 +7,7 @@ import Task from '../../components/task';
 
 import { Task as TaskType } from '@/lib/types';
 import { useDebounce } from '@/hooks/use-debounce';
-import { Search as SearchIcon, Loader2 } from 'lucide-react';
+import { Search as SearchIcon, Loader2, CircleAlert } from 'lucide-react';
 
 const SearchContent = () => {
   const [tasks, setTasks] = useState<TaskType[]>([]);
@@ -30,6 +30,7 @@ const SearchContent = () => {
 
     const fetchTasks = async () => {
       setIsLoading(true);
+      setError(null);
       try {
         const response = await fetch(`/api/search?query=${encodeURIComponent(debouncedQuery)}`, {
           signal,
@@ -39,12 +40,14 @@ const SearchContent = () => {
         }
         const data = await response.json();
         setTasks(data as TaskType[]);
-      } catch (error) {
-        if (error instanceof Error && error.name === 'AbortError') {
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
           // Ignore abort errors
           return;
         }
-        console.error('Search error:', error);
+        console.error('Search error:', err);
+        setError('Failed to search tasks. Please try again.');
+        setTasks([]);
       } finally {
         if (!signal.aborted) {
           setIsLoading(false);
@@ -76,6 +79,12 @@ const SearchContent = () => {
           <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg bg-card/50 text-muted-foreground">
             <Loader2 className="h-10 w-10 animate-spin mb-4 text-primary" aria-hidden="true" />
             <p className="text-sm">Searching tasks...</p>
+          </div>
+        ) : error ? (
+          <div role="alert" className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg bg-destructive/10 text-destructive">
+            <CircleAlert className="h-12 w-12 opacity-80 mb-4" aria-hidden="true" />
+            <h3 className="text-lg font-medium">Search Failed</h3>
+            <p className="text-sm mt-1">{error}</p>
           </div>
         ) : !isLoading && debouncedQuery && tasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg bg-card/50 text-muted-foreground">
