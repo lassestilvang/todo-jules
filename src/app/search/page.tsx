@@ -47,6 +47,7 @@ const SearchContent = () => {
         }
         console.error('Search error:', err);
         setError('Failed to search tasks. Please try again.');
+        setTasks([]);
       } finally {
         if (!signal.aborted) {
           setIsLoading(false);
