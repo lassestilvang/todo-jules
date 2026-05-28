@@ -49,6 +49,13 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      e.currentTarget.requestSubmit();
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -67,7 +74,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
             Fill out the form below to create a new list.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="py-4">
+        <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="py-4">
           <fieldset disabled={isPending} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-1">
@@ -117,8 +124,15 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
               </p>
             </div>
           </div>
-          <Button type="submit" disabled={isPending} className="w-full">
-            {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Creating...</> : 'Create List'}
+          <Button type="submit" disabled={isPending} className="w-full relative">
+            {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Creating...</> : (
+              <>
+                Create List
+                <kbd className="absolute right-4 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+                  ⌘/Ctrl Enter
+                </kbd>
+              </>
+            )}
           </Button>
           </fieldset>
         </form>
