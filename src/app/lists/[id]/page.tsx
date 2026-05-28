@@ -35,9 +35,12 @@ export default async function ListPage({ params }: { params: Promise<{ id: strin
   }
 
   const list = rows[0].list;
-  const baseTasks = rows
-    .filter((row) => row.task !== null)
-    .map((row) => row.task!);
+  const baseTasks = rows.reduce<(typeof tasks.$inferSelect)[]>((acc, row) => {
+    if (row.task !== null) {
+      acc.push(row.task);
+    }
+    return acc;
+  }, []);
 
   const listTasks = attachLabelsToTasks(baseTasks);
 
