@@ -18,23 +18,29 @@ export default async function ListPage({ params }: { params: Promise<{ id: strin
     notFound();
   }
 
-  const list = await db.query.lists.findFirst({
-    where: eq(lists.id, listId),
-  });
+  // ⚡ Bolt Optimization: Reduce DB calls on list pages
+  // We use a single query with a LEFT JOIN to fetch both the list and its tasks.
+  // This eliminates the need for a separate query to fetch the list details.
+  const rows = await db.select({
+    list: lists,
+    task: tasks,
+  })
+  .from(lists)
+  .leftJoin(tasks, eq(tasks.listId, lists.id))
+  .where(eq(lists.id, listId))
+  .all();
 
-  if (!list) {
+  if (rows.length === 0) {
     notFound();
   }
 
-  // ⚡ Bolt Optimization: Prune unused relations (subtasks, reminders, attachments)
-  // from Drizzle fetch on list pages since the TaskList and TaskComponent
-  // UI does not render them.
-  // Impact: Removes expensive LEFT JOINs from the SQLite query layer,
-  // reducing execution time and data payload size.
-  const baseTasks = db.select()
-    .from(tasks)
-    .where(eq(tasks.listId, listId))
-    .all();
+  const list = rows[0].list;
+  const baseTasks = rows.reduce<(typeof tasks.$inferSelect)[]>((acc, row) => {
+    if (row.task !== null) {
+      acc.push(row.task);
+    }
+    return acc;
+  }, []);
 
   const listTasks = attachLabelsToTasks(baseTasks);
 
