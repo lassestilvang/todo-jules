@@ -113,7 +113,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
                 required
               />
               <p id="emoji-helper" className="text-[11px] text-muted-foreground mt-1.5">
-                Tip: Press <kbd className="font-mono bg-muted/50 px-1 py-0.5 rounded border border-muted">Win + .</kbd> or <kbd className="font-mono bg-muted/50 px-1 py-0.5 rounded border border-muted">Cmd + Ctrl + Space</kbd>
+                Tip: Press <kbd className="font-mono bg-muted/50 px-1 py-0.5 rounded border border-muted whitespace-nowrap">Win + .</kbd> or <kbd className="font-mono bg-muted/50 px-1 py-0.5 rounded border border-muted whitespace-nowrap">Cmd + Ctrl + Space</kbd>
               </p>
             </div>
           </div>
