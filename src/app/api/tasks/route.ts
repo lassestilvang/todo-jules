@@ -1,4 +1,4 @@
-import { rateLimit } from '@/lib/rate-limit';
+import { rateLimit, getIp } from '@/lib/rate-limit';
 import { NextResponse } from 'next/server';
 import { db } from '../../../lib/db';
 import {
@@ -17,8 +17,7 @@ import { attachLabelsToTasks } from '../../../lib/task-utils';
 
 export async function GET(request: Request) {
   try {
-    // 🛡️ Sentinel: Use the left-most IP to avoid global DoS (all traffic sharing the right-most proxy IP).
-    const ip = request.headers.get('x-forwarded-for')?.split(',')?.[0]?.trim() || 'unknown';
+    const ip = getIp(request);
     const { success } = rateLimit(`tasks_get_${ip}`, 100, 60 * 1000);
 
     if (!success) {
@@ -75,9 +74,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     // Basic rate limit: 100 requests per minute per IP
-    // 🛡️ Sentinel: Use the left-most IP to avoid global DoS (all traffic sharing the right-most proxy IP).
-    // Note: This relies on the left-most IP which is spoofable.
-    const ip = request.headers.get('x-forwarded-for')?.split(',')?.[0]?.trim() || 'unknown';
+    const ip = getIp(request);
     const { success } = rateLimit(`tasks_post_${ip}`, 100, 60 * 1000);
 
     if (!success) {

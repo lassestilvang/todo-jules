@@ -1,4 +1,4 @@
-import { rateLimit } from '@/lib/rate-limit';
+import { rateLimit, getIp } from '@/lib/rate-limit';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { lists } from '@/lib/schema';
@@ -44,9 +44,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // 🛡️ Sentinel: Use the left-most IP to avoid global DoS (all traffic sharing the right-most proxy IP).
-    // Note: This relies on the left-most IP which is spoofable.
-    const ip = request.headers.get('x-forwarded-for')?.split(',')?.[0]?.trim() || 'unknown';
+    const ip = getIp(request);
     const { success } = rateLimit(`lists_put_${ip}`, 100, 60 * 1000);
 
     if (!success) {
@@ -139,9 +137,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // 🛡️ Sentinel: Use the left-most IP to avoid global DoS (all traffic sharing the right-most proxy IP).
-    // Note: This relies on the left-most IP which is spoofable.
-    const ip = request.headers.get('x-forwarded-for')?.split(',')?.[0]?.trim() || 'unknown';
+    const ip = getIp(request);
     const { success: rateLimitSuccess } = rateLimit(`lists_delete_${ip}`, 100, 60 * 1000);
 
     if (!rateLimitSuccess) {
