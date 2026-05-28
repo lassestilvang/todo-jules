@@ -108,8 +108,13 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
                 onChange={(e) => setEmoji(e.target.value)}
                 maxLength={2}
                 className="w-full"
+                placeholder="📋"
+                aria-describedby="emoji-helper"
                 required
               />
+              <p id="emoji-helper" className="text-[11px] text-muted-foreground mt-1.5">
+                Tip: Press <kbd className="font-mono bg-muted/50 px-1 py-0.5 rounded border border-muted whitespace-nowrap">Win + .</kbd> or <kbd className="font-mono bg-muted/50 px-1 py-0.5 rounded border border-muted whitespace-nowrap">Cmd + Ctrl + Space</kbd>
+              </p>
             </div>
           </div>
           <Button type="submit" disabled={isPending} className="w-full">
