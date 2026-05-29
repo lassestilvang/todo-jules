@@ -155,6 +155,7 @@ const TaskComponent = ({ task }: TaskProps) => {
               </div>
             )}
           </div>
+          </div>
         </fieldset>
       </Card>
     </motion.div>
