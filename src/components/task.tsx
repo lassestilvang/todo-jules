@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Task } from '@/lib/types';
 import { toggleTaskCompletion, deleteTask } from '@/app/actions/task';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Trash2, Loader2 } from 'lucide-react';
 import { TaskHistory } from '@/components/task-history';
@@ -64,8 +64,8 @@ const TaskComponent = ({ task }: TaskProps) => {
       transition={{ duration: 0.2 }}
       className="group"
     >
-      <Card className={`transition-colors hover:shadow-md ${optimisticCompleted ? 'opacity-60 bg-muted/50' : 'bg-card'}`}>
-        <CardContent className="p-4 flex items-start gap-4">
+      <Card className={`transition-colors hover:shadow-md ${optimisticCompleted ? 'opacity-60 bg-muted/50' : 'bg-card'} ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
+        <fieldset disabled={isDeleting} className="p-4 flex items-start gap-4 w-full m-0 border-0">
           <div className="pt-1">
             <Checkbox
                 id={`task-${task.id}`}
@@ -154,7 +154,7 @@ const TaskComponent = ({ task }: TaskProps) => {
               </div>
             )}
           </div>
-        </CardContent>
+        </fieldset>
       </Card>
     </motion.div>
   );

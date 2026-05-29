@@ -93,8 +93,9 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                 )}
                 {initialLists.map((list) => {
                     const isActive = pathname === `/lists/${list.id}`;
+                    const isDeleting = deletingId === list.id;
                     return (
-                        <li key={list.id} className="group flex items-center">
+                        <li key={list.id} className={cn("group flex items-center transition-opacity", isDeleting && "opacity-50 pointer-events-none")}>
                             <Link
                                 href={`/lists/${list.id}`}
                                 className={cn(
