@@ -65,7 +65,8 @@ const TaskComponent = ({ task }: TaskProps) => {
       className="group"
     >
       <Card className={`transition-colors hover:shadow-md ${optimisticCompleted ? 'opacity-60 bg-muted/50' : 'bg-card'} ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
-        <fieldset disabled={isDeleting} className="p-4 flex items-start gap-4 w-full m-0 border-0">
+        <fieldset disabled={isDeleting} className="w-full m-0 p-0 border-0">
+          <div className="p-4 flex items-start gap-4">
           <div className="pt-1">
             <Checkbox
                 id={`task-${task.id}`}
