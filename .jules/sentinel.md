@@ -110,3 +110,8 @@
 **Vulnerability:** Rate limiting implementation relied solely on the highly spoofable `x-forwarded-for` header to identify clients, extracting the left-most IP. An attacker could trivially bypass rate limits by injecting fake IPs into this header, leading to DoS.
 **Learning:** Extracting an IP address reliably requires checking trusted headers (like `x-real-ip`) before falling back to `x-forwarded-for`. The implementation was duplicated across 12 API routes.
 **Prevention:** Centralize IP extraction into a utility function (e.g., `getIp(request: Request)`) and ensure it prioritizes standard proxy headers (like `x-real-ip`) that are overwritten by the hosting platform/reverse proxy.
+
+## 2024-05-29 - Disable X-Powered-By Header
+**Vulnerability:** Information Disclosure
+**Learning:** Next.js by default includes an 'X-Powered-By: Next.js' header in all HTTP responses, which allows attackers to quickly fingerprint the framework being used.
+**Prevention:** Always set `poweredByHeader: false` in `next.config.ts` during project setup to reduce the attack surface by minimizing framework leakage.
