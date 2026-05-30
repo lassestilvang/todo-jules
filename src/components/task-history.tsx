@@ -113,7 +113,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
                 setToCache(taskId, data);
             }
         } catch (error) {
-            console.error("Failed to fetch history:", error instanceof Error ? error.message : 'Unknown error');
+            console.error("Failed to fetch history:", error);
             historyCache.delete(taskId);
         } finally {
             if (isMounted) {
