@@ -61,3 +61,6 @@
 ## 2024-05-24 - Touch-Device Discoverability for Hover Actions
 **Learning:** Hiding action buttons (like delete or history) using `opacity-0 group-hover:opacity-100` creates a critical discoverability and usability issue on touch devices (mobile/tablets) where the hover state does not exist. Users cannot see or interact with these buttons unless they accidentally tap the exact invisible area.
 **Action:** When hiding actions behind a hover state for visual cleanliness, always use responsive modifiers (e.g., `opacity-100 md:opacity-0 md:group-hover:opacity-100`) so the actions are persistently visible on touch/mobile devices and only hide on desktop screens.
+## 2026-05-24 - Dynamic Character Counters for Textareas
+**Learning:** When adding inline character limit indicators to textareas, it is essential to associate them correctly for screen readers using `aria-describedby` on the textarea, and `aria-live="polite"` on the counter container itself so updates are read out, while avoiding visually overlapping text using bottom padding.
+**Action:** Always wrap the textarea in a relative container, absolutely position the character counter, add bottom padding to the textarea, and ensure `aria-describedby` and `aria-live="polite"` are present for accessibility.
