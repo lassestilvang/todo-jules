@@ -103,7 +103,7 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
     revalidatePath('/', 'layout');
     return { success: true, data: newTask };
   } catch (error) {
-    console.error('Failed to create task:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Failed to create task:', error instanceof Error ? error.message : (typeof error === 'string' ? error : 'Unknown error'));
     return { success: false, error: 'Failed to create task' };
   }
 }
