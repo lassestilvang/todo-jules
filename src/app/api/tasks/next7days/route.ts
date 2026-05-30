@@ -30,7 +30,7 @@ export async function GET(request: Request) {
     ).all();
     return NextResponse.json(allTasks);
   } catch (error) {
-    console.error('Error fetching tasks for the next 7 days:', error);
+    console.error('Error fetching tasks for the next 7 days:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Failed to fetch tasks for the next 7 days' }, { status: 500 });
   }
 }

@@ -49,7 +49,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(tasksWithLabels);
   } catch (error) {
-    console.error('Error searching tasks:', error);
+    console.error('Error searching tasks:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Failed to search tasks' }, { status: 500 });
   }
 }

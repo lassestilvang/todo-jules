@@ -11,7 +11,7 @@ export function logTaskHistory(logs: HistoryLog[]) {
   try {
     db.insert(taskHistory).values(logs).run();
   } catch (error) {
-    console.error('Failed to log task history:', error);
+    console.error('Failed to log task history:', error instanceof Error ? error.message : 'Unknown error');
     // We don't want to fail the main action if logging fails, but we should know about it
   }
 }

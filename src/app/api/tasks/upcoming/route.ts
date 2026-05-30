@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     ).all();
     return NextResponse.json(allTasks);
   } catch (error) {
-    console.error('Error fetching upcoming tasks:', error);
+    console.error('Error fetching upcoming tasks:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Failed to fetch upcoming tasks' }, { status: 500 });
   }
 }

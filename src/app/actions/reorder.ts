@@ -56,7 +56,7 @@ export async function reorderTasks(items: { id: number; order: number }[]) {
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
-    console.error('Failed to reorder tasks:', error);
+    console.error('Failed to reorder tasks:', error instanceof Error ? error.message : 'Unknown error');
     return { success: false, error: 'Failed to reorder tasks' };
   }
 }
