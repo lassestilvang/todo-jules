@@ -115,3 +115,8 @@
 **Vulnerability:** Information Disclosure
 **Learning:** Next.js by default includes an 'X-Powered-By: Next.js' header in all HTTP responses, which allows attackers to quickly fingerprint the framework being used.
 **Prevention:** Always set `poweredByHeader: false` in `next.config.ts` during project setup to reduce the attack surface by minimizing framework leakage.
+
+## 2025-02-28 - Information Leakage via Raw Error Objects
+**Vulnerability:** Raw error objects (such as those thrown by `better-sqlite3` or networking libraries) were being logged directly using `console.error(error)` in `catch` blocks across API routes, server actions, and React components.
+**Learning:** Logging a full error object to server console output can inadvertently leak sensitive stack traces, database schema structures, or API internal states if logs are ingested by log aggregation tools where unauthorized internal actors might access them.
+**Prevention:** Always sanitize error objects before logging. For standard errors, extract `error.message` (e.g., `console.error('...', error instanceof Error ? error.message : 'Unknown error')`) instead of dumping the raw object.

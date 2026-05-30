@@ -22,7 +22,7 @@ export async function createList(name: string, color: string, emoji: string) {
     revalidatePath('/', 'layout');
     return { success: true, data: result };
   } catch (error) {
-    console.error('Failed to create list:', error);
+    console.error('Failed to create list:', error instanceof Error ? error.message : 'Unknown error');
     return { success: false, error: 'Failed to create list' };
   }
 }
@@ -39,7 +39,7 @@ export async function deleteList(id: number) {
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
-    console.error('Failed to delete list:', error);
+    console.error('Failed to delete list:', error instanceof Error ? error.message : 'Unknown error');
     return { success: false, error: 'Failed to delete list' };
   }
 }
@@ -51,7 +51,7 @@ export async function getLists() {
     const allLists = db.select().from(lists).all();
     return allLists;
   } catch (error) {
-    console.error('Failed to get lists:', error);
+    console.error('Failed to get lists:', error instanceof Error ? error.message : 'Unknown error');
     return [];
   }
 }

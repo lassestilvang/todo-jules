@@ -45,7 +45,7 @@ const SearchContent = () => {
           // Ignore abort errors
           return;
         }
-        console.error('Search error:', err);
+        console.error('Search error:', err instanceof Error ? err.message : 'Unknown error');
         setError('Failed to search tasks. Please try again.');
         setTasks([]);
       } finally {

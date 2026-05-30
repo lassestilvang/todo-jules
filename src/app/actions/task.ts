@@ -103,7 +103,7 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
     revalidatePath('/', 'layout');
     return { success: true, data: newTask };
   } catch (error) {
-    console.error('Failed to create task:', error);
+    console.error('Failed to create task:', error instanceof Error ? error.message : 'Unknown error');
     return { success: false, error: 'Failed to create task' };
   }
 }
@@ -167,7 +167,7 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
     revalidatePath('/', 'layout');
     return { success: true, data: updatedTask };
   } catch (error) {
-    console.error('Failed to update task:', error);
+    console.error('Failed to update task:', error instanceof Error ? error.message : 'Unknown error');
     return { success: false, error: 'Failed to update task' };
   }
 }
@@ -186,7 +186,7 @@ export async function deleteTask(id: number) {
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
-    console.error('Failed to delete task:', error);
+    console.error('Failed to delete task:', error instanceof Error ? error.message : 'Unknown error');
     return { success: false, error: 'Failed to delete task' };
   }
 }

@@ -104,7 +104,7 @@ export async function PUT(
 
     return NextResponse.json(updatedList);
   } catch (error) {
-    console.error('Error updating list:', error);
+    console.error('Error updating list:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
@@ -163,7 +163,7 @@ export async function DELETE(
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.error('Error deleting list:', error);
+    console.error('Error deleting list:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

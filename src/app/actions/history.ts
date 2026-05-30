@@ -17,7 +17,7 @@ export async function getTaskHistory(taskId: number) {
       .all();
     return history;
   } catch (error) {
-    console.error('Failed to get task history:', error);
+    console.error('Failed to get task history:', error instanceof Error ? error.message : 'Unknown error');
     return [];
   }
 }

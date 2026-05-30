@@ -208,7 +208,7 @@ export async function PUT(
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error updating task:', error);
+    console.error('Error updating task:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
       { error: 'Failed to update task' },
       { status: 500 }
@@ -248,7 +248,7 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error deleting task:', error);
+    console.error('Error deleting task:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
       { error: 'Failed to delete task' },
       { status: 500 }

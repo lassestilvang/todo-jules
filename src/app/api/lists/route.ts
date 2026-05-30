@@ -67,7 +67,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newList, { status: 201 });
   } catch (error) {
-    console.error('Error creating list:', error);
+    console.error('Error creating list:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
@@ -107,7 +107,7 @@ export async function GET(request: Request) {
     const allLists = db.select().from(lists).all();
     return NextResponse.json(allLists);
   } catch (error) {
-    console.error('Error fetching lists:', error);
+    console.error('Error fetching lists:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
