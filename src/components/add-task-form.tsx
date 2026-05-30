@@ -95,13 +95,24 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
         <Label htmlFor="description" className="mb-1 block">
           Description
         </Label>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="w-full flex min-h-[80px] rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-          placeholder="Add details..."
-        />
+        <div className="relative">
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full flex min-h-[80px] rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pb-6"
+            placeholder="Add details..."
+            maxLength={500}
+            aria-describedby="description-helper"
+          />
+          <div
+            id="description-helper"
+            className="absolute bottom-2 right-2 text-[10px] text-muted-foreground pointer-events-none select-none"
+            aria-live="polite"
+          >
+            {description.length}/500
+          </div>
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
