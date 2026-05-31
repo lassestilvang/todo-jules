@@ -4,8 +4,14 @@ import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
 import { sql, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
+import { rateLimit, getIpFromHeaders } from '@/lib/rate-limit';
 
 export async function reorderTasks(items: { id: number; order: number }[]) {
+  const ip = getIpFromHeaders(await headers());
+  const { success: rateLimitSuccess } = rateLimit(`tasks_reorder_${ip}`, 100, 60 * 1000);
+  if (!rateLimitSuccess) return { success: false, error: 'Too many requests' };
+
   if (!Array.isArray(items)) {
     return { success: false, error: 'Invalid items array' };
   }

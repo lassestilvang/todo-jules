@@ -11,6 +11,8 @@ import { z } from 'zod';
 import { invalidateTaskCountCache } from '@/lib/cache';
 import { attachLabelsToTasks } from '@/lib/task-utils';
 import { HistoryLog } from '@/lib/history';
+import { headers } from 'next/headers';
+import { rateLimit, getIpFromHeaders } from '@/lib/rate-limit';
 
 // Helper to get today's start and end timestamps
 const getTodayRange = () => {
@@ -29,6 +31,10 @@ const getNext7DaysRange = () => {
 };
 
 export async function getTasksForInbox() {
+  const ip = getIpFromHeaders(await headers());
+  const { success } = rateLimit(`tasks_inbox_get_${ip}`, 100, 60 * 1000);
+  if (!success) throw new Error('Too many requests');
+
   const baseTasks = db.select()
     .from(tasks)
     .where(isNull(tasks.listId))
@@ -40,6 +46,10 @@ export async function getTasksForInbox() {
 }
 
 export async function getTasksForToday() {
+  const ip = getIpFromHeaders(await headers());
+  const { success } = rateLimit(`tasks_today_get_${ip}`, 100, 60 * 1000);
+  if (!success) throw new Error('Too many requests');
+
   const { start, end } = getTodayRange();
   const baseTasks = db.select()
     .from(tasks)
@@ -51,6 +61,10 @@ export async function getTasksForToday() {
 }
 
 export async function getTasksForUpcoming() {
+  const ip = getIpFromHeaders(await headers());
+  const { success } = rateLimit(`tasks_upcoming_get_${ip}`, 100, 60 * 1000);
+  if (!success) throw new Error('Too many requests');
+
   const { end } = getTodayRange(); // Tasks after today
   const baseTasks = db.select()
     .from(tasks)
@@ -62,6 +76,10 @@ export async function getTasksForUpcoming() {
 }
 
 export async function getTasksForNext7Days() {
+  const ip = getIpFromHeaders(await headers());
+  const { success } = rateLimit(`tasks_next7days_get_${ip}`, 100, 60 * 1000);
+  if (!success) throw new Error('Too many requests');
+
   const { start, end } = getNext7DaysRange();
   const baseTasks = db.select()
     .from(tasks)
@@ -73,6 +91,10 @@ export async function getTasksForNext7Days() {
 }
 
 export async function createTask(data: z.input<typeof createTaskSchema>) {
+  const ip = getIpFromHeaders(await headers());
+  const { success: rateLimitSuccess } = rateLimit(`tasks_post_${ip}`, 100, 60 * 1000);
+  if (!rateLimitSuccess) return { success: false, error: 'Too many requests' };
+
   const validation = createTaskSchema.safeParse(data);
   if (!validation.success) {
       return { success: false, error: validation.error.flatten().fieldErrors };
@@ -109,6 +131,10 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
 }
 
 export async function updateTask(id: number, data: Partial<typeof tasks.$inferInsert>) {
+  const ip = getIpFromHeaders(await headers());
+  const { success: rateLimitSuccess } = rateLimit(`tasks_put_${ip}`, 100, 60 * 1000);
+  if (!rateLimitSuccess) return { success: false, error: 'Too many requests' };
+
   if (typeof id !== 'number' || isNaN(id)) {
     return { success: false, error: 'Invalid Task ID' };
   }
@@ -173,6 +199,10 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
 }
 
 export async function deleteTask(id: number) {
+  const ip = getIpFromHeaders(await headers());
+  const { success: rateLimitSuccess } = rateLimit(`tasks_delete_${ip}`, 100, 60 * 1000);
+  if (!rateLimitSuccess) return { success: false, error: 'Too many requests' };
+
   if (typeof id !== 'number' || isNaN(id)) {
     return { success: false, error: 'Invalid Task ID' };
   }
@@ -192,6 +222,10 @@ export async function deleteTask(id: number) {
 }
 
 export async function toggleTaskCompletion(id: number, completed: boolean) {
+    const ip = getIpFromHeaders(await headers());
+    const { success: rateLimitSuccess } = rateLimit(`tasks_put_${ip}`, 100, 60 * 1000);
+    if (!rateLimitSuccess) return { success: false, error: 'Too many requests' };
+
     if (typeof id !== 'number' || isNaN(id)) {
         return { success: false, error: 'Invalid Task ID' };
     }

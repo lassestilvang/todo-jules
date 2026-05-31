@@ -5,8 +5,14 @@ import { lists } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { createListSchema } from '@/lib/validators';
+import { headers } from 'next/headers';
+import { rateLimit, getIpFromHeaders } from '@/lib/rate-limit';
 
 export async function createList(name: string, color: string, emoji: string) {
+  const ip = getIpFromHeaders(await headers());
+  const { success: rateLimitSuccess } = rateLimit(`lists_post_${ip}`, 100, 60 * 1000);
+  if (!rateLimitSuccess) return { success: false, error: 'Too many requests' };
+
   const validation = createListSchema.safeParse({ name, color, emoji });
 
   if (!validation.success) {
@@ -28,6 +34,10 @@ export async function createList(name: string, color: string, emoji: string) {
 }
 
 export async function deleteList(id: number) {
+  const ip = getIpFromHeaders(await headers());
+  const { success: rateLimitSuccess } = rateLimit(`lists_delete_${ip}`, 100, 60 * 1000);
+  if (!rateLimitSuccess) return { success: false, error: 'Too many requests' };
+
   if (typeof id !== 'number' || isNaN(id)) {
     return { success: false, error: 'Invalid List ID' };
   }
@@ -45,6 +55,10 @@ export async function deleteList(id: number) {
 }
 
 export async function getLists() {
+  const ip = getIpFromHeaders(await headers());
+  const { success } = rateLimit(`lists_get_${ip}`, 100, 60 * 1000);
+  if (!success) throw new Error('Too many requests');
+
   try {
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.select(...)` with `.all()` to eliminate microtask overhead.
