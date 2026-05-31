@@ -20,21 +20,25 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
-export function getIp(request: Request): string {
+export function getIpFromHeaders(headers: Headers): string {
   // 🛡️ Sentinel: Prefer x-real-ip or standard forwarded headers over the highly spoofable left-most x-forwarded-for IP
-  const realIp = request.headers.get('x-real-ip');
+  const realIp = headers.get('x-real-ip');
   if (realIp) return realIp.trim();
 
-  const forwarded = request.headers.get('forwarded');
+  const forwarded = headers.get('forwarded');
   if (forwarded) {
     const match = forwarded.match(/for="?([^;,"]+)"?/);
     if (match) return match[1].trim();
   }
 
-  const forwardedFor = request.headers.get('x-forwarded-for');
+  const forwardedFor = headers.get('x-forwarded-for');
   if (forwardedFor) return forwardedFor.split(',')[0].trim();
 
   return 'unknown';
+}
+
+export function getIp(request: Request): string {
+  return getIpFromHeaders(request.headers);
 }
 
 export function rateLimit(identifier: string, limit: number, windowMs: number) {
