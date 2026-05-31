@@ -149,7 +149,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
             View the history of changes made to this task.
           </SheetDescription>
         </SheetHeader>
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 space-y-4" aria-live="polite" aria-atomic="true">
           {loading ? (
             <div className="flex justify-center p-12">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
