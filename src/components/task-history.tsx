@@ -92,7 +92,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
                     setHistory(data);
                 }
             } catch (error) {
-                console.error("Failed to fetch history from promise:", error instanceof Error ? error.message : 'Unknown error');
+                console.error("Failed to fetch history from promise:", error instanceof Error ? error.message : String(error));
             } finally {
                 if (isMounted) setLoading(false);
             }
