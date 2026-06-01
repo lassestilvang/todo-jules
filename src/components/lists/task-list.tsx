@@ -117,7 +117,7 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
             throw new Error(result.error || "Failed to reorder tasks");
           }
         } catch (err) {
-          console.error(err instanceof Error ? err.message : 'Unknown error');
+          console.error(err instanceof Error ? err.message : String(err));
           toast.error("Failed to save new order");
         }
       });
