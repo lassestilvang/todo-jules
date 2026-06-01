@@ -68,7 +68,14 @@ const SearchContent = () => {
         {query ? `Search Results for "${query}"` : "Search Tasks"}
       </h1>
 
-      <div className="mt-6" aria-live="polite" aria-atomic="true">
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {isLoading && "Searching tasks..."}
+        {!isLoading && error && 'Search failed: ' + error}
+        {!isLoading && debouncedQuery && tasks.length === 0 && 'No tasks found for "' + query + '"'}
+        {!isLoading && debouncedQuery && tasks.length > 0 && 'Found ' + tasks.length + ' task' + (tasks.length === 1 ? '' : 's')}
+      </div>
+
+      <div className="mt-6">
         {!query ? (
           <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg bg-card/50 text-muted-foreground">
             <SearchIcon className="h-12 w-12 opacity-20 mb-4" aria-hidden="true" />
