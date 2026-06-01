@@ -92,7 +92,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
                     setHistory(data);
                 }
             } catch (error) {
-                console.error("Failed to fetch history from promise:", error);
+                console.error("Failed to fetch history from promise:", error instanceof Error ? error.message : String(error));
             } finally {
                 if (isMounted) setLoading(false);
             }
@@ -113,7 +113,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
                 setToCache(taskId, data);
             }
         } catch (error) {
-            console.error("Failed to fetch history:", error);
+            console.error("Failed to fetch history:", error instanceof Error ? error.message : String(error));
             historyCache.delete(taskId);
         } finally {
             if (isMounted) {

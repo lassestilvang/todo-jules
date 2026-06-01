@@ -66,7 +66,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
             toast.error('Failed to create task');
         }
     } catch (error) {
-        console.error(error);
+        console.error(error instanceof Error ? error.message : String(error));
         toast.error('An error occurred');
     } finally {
         setIsPending(false);
