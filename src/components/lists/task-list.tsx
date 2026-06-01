@@ -65,6 +65,10 @@ const SortableTaskItem = React.memo(function SortableTaskItemComponent({ task }:
 });
 
 
+const keyboardSensorOptions = {
+  coordinateGetter: sortableKeyboardCoordinates,
+};
+
 export function TaskList({ tasks: initialTasks }: TaskListProps) {
   const [optimisticTasks, setOptimisticTasks] = useOptimistic(
     initialTasks,
@@ -74,9 +78,7 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
 
   const sensors = useSensors(
     useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    useSensor(KeyboardSensor, keyboardSensorOptions)
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
