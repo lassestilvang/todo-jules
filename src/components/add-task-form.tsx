@@ -100,7 +100,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full flex min-h-[80px] resize-y rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pb-6"
+            className="w-full flex min-h-[80px] resize-none rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pb-6"
             placeholder="Add details..."
             maxLength={500}
             aria-describedby="description-helper"
