@@ -12,5 +12,5 @@
 **Action:** Always interpolate the specific name or title of the item being deleted into the confirmation message (e.g., `Are you sure you want to delete the task "${task.name}"?`) to provide clear, cognitive reassurance and prevent accidental deletions.
 
 ## 2024-06-03 - Textarea Resizing with Absolute Children
-**Learning:** When designing form textareas that contain absolute-positioned child elements (such as character counters) inside their wrappers, allowing manual resizing by users can break the layout or cause overlaps.
-**Action:** Always apply `resize-none` to the textarea to prevent users from breaking the layout or causing overlaps via manual resizing.
+**Learning:** When designing form textareas that contain absolute-positioned child elements (such as character counters) inside their wrappers, allowing horizontal manual resizing by users can break the layout or cause overlaps.
+**Action:** Always apply `resize-y` to the textarea to restrict resizing to the vertical axis, preventing horizontal layout breakage while still allowing users to expand the input area.
