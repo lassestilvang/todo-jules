@@ -67,6 +67,12 @@
       "next": "16.2.6",
       "ws": "^8.20.1",
       "brace-expansion@<2.0.1": "^2.1.0"
-    }
+    },
+    "ignoredBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }
