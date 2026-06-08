@@ -107,7 +107,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
           />
           <div
             id="description-helper"
-            className="absolute bottom-2 right-2 text-[10px] text-muted-foreground pointer-events-none select-none"
+            className={`absolute bottom-2 right-2 text-[10px] pointer-events-none select-none ${description.length >= 475 ? 'text-destructive' : description.length >= 400 ? 'text-amber-500' : 'text-muted-foreground'}`}
             aria-live={description.length >= 400 ? "polite" : "off"}
           >
             {description.length}/500
