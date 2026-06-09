@@ -91,7 +91,7 @@ const SearchContent = () => {
             <h3 className="text-lg font-medium">Search Failed</h3>
             <p className="text-sm mt-1">{error}</p>
           </div>
-        ) : !isLoading && query && tasks.length === 0 ? (
+        ) : tasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg bg-card/50 text-muted-foreground">
             <SearchIcon className="h-12 w-12 opacity-20 mb-4" aria-hidden="true" />
             <h3 className="text-lg font-medium text-foreground">No tasks found</h3>
