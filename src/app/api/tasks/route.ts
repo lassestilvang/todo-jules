@@ -42,7 +42,7 @@ export async function GET(request: Request) {
     const totalPages = Math.ceil(total / limit);
 
     // 🛡️ Sentinel: Enforce page limit bounds to prevent DoS via massive offsets causing expensive table scans
-    if (page > totalPages) page = totalPages > 0 ? totalPages : 1;
+    page = Math.min(page, Math.max(1, totalPages));
 
     const offset = (page - 1) * limit;
 
