@@ -14,3 +14,7 @@
 ## 2024-06-03 - Textarea Resizing with Absolute Children
 **Learning:** When designing form textareas that contain absolute-positioned child elements (such as character counters) inside their wrappers, allowing manual resizing by users can break the layout or cause overlaps.
 **Action:** Always apply `resize-none` to the textarea to restrict manual resizing, preventing layout breakage and overlap with the absolute-positioned child elements, while still allowing the input area to be expanded programmatically if necessary.
+
+## 2026-06-07 - Dynamic Character Counter Color
+**Learning:** Character limit counters that only update a number can be easily missed by users typing quickly. Adding dynamic, peripheral visual feedback (like changing color to amber then red as the limit approaches) significantly improves the UX of constrained input fields.
+**Action:** When implementing character limit counters, always use dynamic CSS classes to change the text color (e.g., to amber at 80% capacity, and destructive red at 95%) to provide immediate, peripheral visual feedback.
