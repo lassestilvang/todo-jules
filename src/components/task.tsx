@@ -127,7 +127,7 @@ const TaskComponent = ({ task }: TaskProps) => {
                     </div>
                 )}
                  {task.deadline && (
-                    <div className="flex items-center text-xs text-red-400" title="Deadline">
+                    <div className={`flex items-center text-xs ${optimisticCompleted ? 'text-muted-foreground line-through' : 'text-red-400'}`} title="Deadline">
                         <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
                         <span className="sr-only">Deadline: </span>
                         <span suppressHydrationWarning>{dateFormatter.format(new Date(task.deadline))}</span>
