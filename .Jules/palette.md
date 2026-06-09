@@ -64,3 +64,7 @@
 ## 2026-05-24 - Dynamic Character Counters for Textareas
 **Learning:** When adding inline character limit indicators to textareas, it is essential to associate them correctly for screen readers using `aria-describedby` on the textarea, and `aria-live="polite"` on the counter container itself so updates are read out, while avoiding visually overlapping text using bottom padding.
 **Action:** Always wrap the textarea in a relative container, absolutely position the character counter, add bottom padding to the textarea, and ensure `aria-describedby` and `aria-live="polite"` are present for accessibility.
+
+## 2024-06-09 - Dynamic Character Counters for Textareas
+**Learning:** When implementing character limit counters, using dynamic CSS classes to change the text color (e.g., to amber at 80% capacity, and destructive red at 95%) provides immediate, peripheral visual feedback to users, making the limit more discoverable without interrupting their typing flow.
+**Action:** Always use dynamic CSS text colors for character limit indicators to warn users as they approach the maximum allowed length.
