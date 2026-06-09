@@ -38,9 +38,13 @@ export async function GET(request: Request) {
     if (isNaN(limit) || String(limit) !== limitParam || limit < 1) limit = 20;
     if (limit > 100) limit = 100; // Cap limit for safety
 
-    const offset = (page - 1) * limit;
-
     const total = getTaskCount();
+    const totalPages = Math.ceil(total / limit);
+
+    // 🛡️ Sentinel: Enforce page limit bounds to prevent DoS via massive offsets causing expensive table scans
+    if (page > totalPages) page = totalPages > 0 ? totalPages : 1;
+
+    const offset = (page - 1) * limit;
 
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.query.tasks.findMany()` with `db.select().from(tasks).limit().offset().all()`

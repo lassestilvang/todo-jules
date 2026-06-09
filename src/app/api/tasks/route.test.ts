@@ -104,6 +104,26 @@ describe('GET /api/tasks', () => {
 
   });
 
+  it('should cap the requested page to the total number of pages', async () => {
+    vi.mocked(cache.getTaskCount).mockReturnValue(50); // 50 items total, limit 20 means 3 pages max
+
+    // @ts-expect-error mock chain
+    const mockAllMethod = db.select().from().limit().offset().all;
+    vi.mocked(mockAllMethod).mockReturnValue([]);
+    vi.mocked(taskUtils.attachLabelsToTasks).mockReturnValue([] as unknown as import("@/lib/schema").tasks.$inferSelect[]);
+
+    const request = new Request('http://localhost/api/tasks?page=1000000&limit=20');
+    const response = await GET(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.meta.page).toBe(3);
+    expect(data.meta.totalPages).toBe(3);
+
+    // @ts-expect-error mock chain
+    expect(db.select().from().limit().offset).toHaveBeenCalledWith(40); // (3 - 1) * 20 = 40
+  });
+
   it('should use default values for invalid parameters', async () => {
     vi.mocked(cache.getTaskCount).mockReturnValue(10);
 
