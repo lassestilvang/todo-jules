@@ -6,7 +6,6 @@ import Task from '../../components/task';
 // import { Task } from '@/lib/types';
 
 import { Task as TaskType } from '@/lib/types';
-import { useDebounce } from '@/hooks/use-debounce';
 import { Search as SearchIcon, Loader2, CircleAlert } from 'lucide-react';
 
 const SearchContent = () => {
@@ -16,10 +15,9 @@ const SearchContent = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const searchParams = useSearchParams();
   const query = searchParams.get('query') || '';
-  const debouncedQuery = useDebounce(query, 300);
 
   useEffect(() => {
-    if (!debouncedQuery) {
+    if (!query) {
       setTasks([]);
       setIsLoading(false);
       return;
@@ -32,7 +30,7 @@ const SearchContent = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/search?query=${encodeURIComponent(debouncedQuery)}`, {
+        const response = await fetch(`/api/search?query=${encodeURIComponent(query)}`, {
           signal,
         });
         if (!response.ok) {
@@ -60,7 +58,7 @@ const SearchContent = () => {
     return () => {
       controller.abort();
     };
-  }, [debouncedQuery]);
+  }, [query]);
 
   return (
     <div>
@@ -71,8 +69,8 @@ const SearchContent = () => {
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {isLoading && "Searching tasks..."}
         {!isLoading && error && 'Search failed: ' + error}
-        {!isLoading && debouncedQuery && tasks.length === 0 && 'No tasks found for "' + query + '"'}
-        {!isLoading && debouncedQuery && tasks.length > 0 && 'Found ' + tasks.length + ' task' + (tasks.length === 1 ? '' : 's')}
+        {!isLoading && query && tasks.length === 0 && 'No tasks found for "' + query + '"'}
+        {!isLoading && query && tasks.length > 0 && 'Found ' + tasks.length + ' task' + (tasks.length === 1 ? '' : 's')}
       </div>
 
       <div className="mt-6">
@@ -93,7 +91,7 @@ const SearchContent = () => {
             <h3 className="text-lg font-medium">Search Failed</h3>
             <p className="text-sm mt-1">{error}</p>
           </div>
-        ) : !isLoading && debouncedQuery && tasks.length === 0 ? (
+        ) : tasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg bg-card/50 text-muted-foreground">
             <SearchIcon className="h-12 w-12 opacity-20 mb-4" aria-hidden="true" />
             <h3 className="text-lg font-medium text-foreground">No tasks found</h3>

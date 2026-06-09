@@ -106,3 +106,7 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-06-25 - Avoid inline object literals for useSensor options
 **Learning:** When using `@dnd-kit/core`'s `useSensor` or `useSensors` hooks, passing an inline object literal for sensor options (e.g., `{ coordinateGetter: sortableKeyboardCoordinates }`) inside a functional component causes the sensor reference to change on every render. This triggers expensive cascading re-renders of the `DndContext` and its children.
 **Action:** Always hoist static configuration objects for `useSensor` options outside the component definition to maintain reference equality across renders, significantly reducing unnecessary re-renders in drag-and-drop interfaces.
+
+## 2024-06-25 - Remove artificial debounce from URL search parameters
+**Learning:** Debouncing a URL parameter (via `useSearchParams`) that only updates on explicit form submission adds artificial latency to the page load without preventing any duplicate requests.
+**Action:** Never debounce URL parameters that are the result of an explicit user action. Only debounce user input state that updates on every keystroke.
