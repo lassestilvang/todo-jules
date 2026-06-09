@@ -67,3 +67,10 @@
 ## 2026-05-25 - Dynamic Character Counter Colors
 **Learning:** While displaying a numeric character limit is functional, users often don't actively read the small text. Providing progressive visual feedback (changing color from neutral to warning to critical) allows users to intuitively sense they are approaching the limit without breaking their typing flow.
 **Action:** When implementing character limit counters, use dynamic CSS classes to change the text color (e.g., to amber at 80% capacity, and destructive red at 95%) to provide immediate, peripheral visual feedback.
+## 2026-06-08 - Dynamic Color Feedback for Character Limits
+**Learning:** Providing immediate, peripheral visual feedback as users approach character limits (e.g., turning the counter text amber at 80% and red at 95%) significantly improves the form-filling experience and prevents frustration from unexpected validation errors.
+**Action:** When implementing character limit counters, use dynamic CSS classes based on the current input length to change the text color (e.g., to amber at 80% capacity, and destructive red at 95%) to provide immediate, peripheral visual feedback.
+
+## 2024-06-09 - Dynamic Character Counters for Textareas
+**Learning:** When implementing character limit counters, using dynamic CSS classes to change the text color (e.g., to amber at 80% capacity, and destructive red at 95%) provides immediate, peripheral visual feedback to users, making the limit more discoverable without interrupting their typing flow.
+**Action:** Always use dynamic CSS text colors for character limit indicators to warn users as they approach the maximum allowed length.
