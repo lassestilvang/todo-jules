@@ -43,8 +43,8 @@ const defaultClassNames = {
   day_hidden: "invisible",
 };
 
-const defaultComponents = {
-  Chevron: ({ orientation, className }: { orientation?: string, className?: string }) => orientation === "left" ? <ChevronLeft className={cn("h-4 w-4", className)} aria-hidden="true" /> : <ChevronRight className={cn("h-4 w-4", className)} aria-hidden="true" />,
+const defaultComponents: CalendarProps["components"] = {
+  Chevron: ({ orientation, className }) => orientation === "left" ? <ChevronLeft className={cn("h-4 w-4", className)} aria-hidden="true" /> : <ChevronRight className={cn("h-4 w-4", className)} aria-hidden="true" />,
 };
 
 function Calendar({
