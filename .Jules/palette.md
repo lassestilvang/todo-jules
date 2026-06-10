@@ -74,3 +74,7 @@
 ## 2024-06-09 - Dynamic Character Counters for Textareas
 **Learning:** When implementing character limit counters, using dynamic CSS classes to change the text color (e.g., to amber at 80% capacity, and destructive red at 95%) provides immediate, peripheral visual feedback to users, making the limit more discoverable without interrupting their typing flow.
 **Action:** Always use dynamic CSS text colors for character limit indicators to warn users as they approach the maximum allowed length.
+
+## 2024-05-30 - Checkbox Indicator Animation
+**Learning:** Adding subtle micro-animations to conditional UI elements (like Radix UI Checkbox indicators) significantly enhances the tactile feel of an application without requiring complex JavaScript logic. Tailwind's `tailwindcss-animate` plugin provides utilities like `animate-in zoom-in-50` which are perfect for this.
+**Action:** When working with conditional indicators (checkmarks, radio dots), apply `animate-in` utility classes to the indicator child element to provide smooth visual feedback on user interaction.
