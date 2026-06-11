@@ -2,11 +2,13 @@
 
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import Task from '../../components/task';
 // import { Task } from '@/lib/types';
 
 import { Task as TaskType } from '@/lib/types';
 import { Search as SearchIcon, Loader2, CircleAlert } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const SearchContent = () => {
   const [tasks, setTasks] = useState<TaskType[]>([]);
@@ -95,7 +97,10 @@ const SearchContent = () => {
           <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-lg bg-card/50 text-muted-foreground">
             <SearchIcon className="h-12 w-12 opacity-20 mb-4" aria-hidden="true" />
             <h3 className="text-lg font-medium text-foreground">No tasks found</h3>
-            <p className="text-sm mt-1">We couldn&apos;t find any tasks matching &quot;{query}&quot;. Try adjusting your search.</p>
+            <p className="text-sm mt-1 mb-4">We couldn&apos;t find any tasks matching &quot;{query}&quot;. Try adjusting your search.</p>
+            <Button variant="outline" asChild>
+              <Link href="/search">Clear Search</Link>
+            </Button>
           </div>
         ) : (
           <div className="space-y-4">
