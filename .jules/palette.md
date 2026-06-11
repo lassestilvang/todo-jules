@@ -18,3 +18,6 @@
 ## 2026-06-07 - Dynamic Character Counter Color
 **Learning:** Character limit counters that only update a number can be easily missed by users typing quickly. Adding dynamic, peripheral visual feedback (like changing color to amber then red as the limit approaches) significantly improves the UX of constrained input fields.
 **Action:** When implementing character limit counters, always use dynamic CSS classes to change the text color (e.g., to amber at 80% capacity, and destructive red at 95%) to provide immediate, peripheral visual feedback.
+## 2024-06-11 - Search Empty State Clear Button
+**Learning:** When users hit a search with no results, it creates a dead-end experience. A helpful, actionable "Clear Search" button makes resetting the search intuitive and reduces friction.
+**Action:** Always include an actionable 'Clear Search' or reset button that navigates the user back to the base route without query parameters in search/filter empty states.
