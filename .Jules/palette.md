@@ -78,3 +78,7 @@
 ## 2024-05-30 - Checkbox Indicator Animation
 **Learning:** Adding subtle micro-animations to conditional UI elements (like Radix UI Checkbox indicators) significantly enhances the tactile feel of an application without requiring complex JavaScript logic. Tailwind's `tailwindcss-animate` plugin provides utilities like `animate-in zoom-in-50` which are perfect for this.
 **Action:** When working with conditional indicators (checkmarks, radio dots), apply motion-safe:animate-in utility classes to the indicator child element to provide smooth visual feedback on user interaction while respecting reduced motion preferences.
+
+## 2026-06-15 - Global Hotkeys for Form Inputs
+**Learning:** Providing a keyboard shortcut (like 'n' for new task) to jump straight to a primary input field significantly speeds up keyboard-centric workflows. However, it's crucial to use `{ enableOnFormTags: false }` to prevent triggering the shortcut while the user is typing in other fields, and providing a visual `<kbd>` hint that disappears on focus helps with discoverability without adding clutter.
+**Action:** When a page has a primary form action (like 'Add Task'), add a single-key shortcut to focus the input and conditionally show a keyboard hint.
