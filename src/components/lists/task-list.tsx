@@ -26,6 +26,7 @@ import { toast } from 'sonner';
 
 interface TaskListProps {
   tasks: Task[];
+  emptyStateSubtext?: string;
 }
 
 interface SortableTaskItemProps {
@@ -69,7 +70,7 @@ const keyboardSensorOptions = {
   coordinateGetter: sortableKeyboardCoordinates,
 };
 
-export function TaskList({ tasks: initialTasks }: TaskListProps) {
+export function TaskList({ tasks: initialTasks, emptyStateSubtext }: TaskListProps) {
   const [optimisticTasks, setOptimisticTasks] = useOptimistic(
     initialTasks,
     (state, newOrder: Task[]) => newOrder
@@ -141,7 +142,7 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
         </div>
         <h3 className="text-lg font-medium text-foreground">No tasks found</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Get started by adding a new task below.
+          {emptyStateSubtext || 'Get started by adding a new task.'}
         </p>
       </div>
     );
