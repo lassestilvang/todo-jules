@@ -50,7 +50,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.2.0",
-    "@vitest/ui": "^4.1.8",
+    "@vitest/ui": "^4.1.9",
     "drizzle-kit": "^0.31.8",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
@@ -58,7 +58,7 @@
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5.4.5",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.9"
   },
   "pnpm": {
     "overrides": {
