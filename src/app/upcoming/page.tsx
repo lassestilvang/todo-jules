@@ -10,7 +10,7 @@ export default async function UpcomingPage() {
       <h1 className="text-3xl font-bold mb-6">Upcoming</h1>
 
       <div className="mb-8">
-        <TaskList tasks={tasks} />
+        <TaskList tasks={tasks} emptyStateSubtext="There are no upcoming tasks scheduled." />
       </div>
     </div>
   );

@@ -82,3 +82,7 @@
 ## 2026-06-15 - Global Hotkeys for Form Inputs
 **Learning:** Providing a keyboard shortcut (like 'n' for new task) to jump straight to a primary input field significantly speeds up keyboard-centric workflows. However, it's crucial to use `{ enableOnFormTags: false }` to prevent triggering the shortcut while the user is typing in other fields, and providing a visual `<kbd>` hint that disappears on focus helps with discoverability without adding clutter.
 **Action:** When a page has a primary form action (like 'Add Task'), add a single-key shortcut to focus the input and conditionally show a keyboard hint.
+
+## 2026-06-21 - Context-Aware Empty States
+**Learning:** Hardcoding directional or context-specific copy (e.g., 'Get started by adding a task below.') inside reusable empty state components causes a confusing user experience on pages where the referenced element (like an "Add Task" form) does not exist.
+**Action:** Always make empty state subtext configurable via props rather than hardcoding it, ensuring the message matches the specific context of the page where the component is rendered.
