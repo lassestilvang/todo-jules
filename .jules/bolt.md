@@ -110,3 +110,6 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2024-06-25 - Remove artificial debounce from URL search parameters
 **Learning:** Debouncing a URL parameter (via `useSearchParams`) that only updates on explicit form submission adds artificial latency to the page load without preventing any duplicate requests.
 **Action:** Never debounce URL parameters that are the result of an explicit user action. Only debounce user input state that updates on every keystroke.
+## 2026-06-25 - Avoid inline object literals for static configuration props
+**Learning:** When using components like `Sonner` that accept complex configuration objects (e.g., `toastOptions`), passing an inline object literal inside the functional component causes the object reference to change on every render. This triggers unnecessary re-renders of the child component and increases memory allocation and garbage collection overhead.
+**Action:** Always hoist static configuration objects outside the component definition to maintain reference equality across renders, preventing unnecessary re-renders and reducing garbage collection pressure.
