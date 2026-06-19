@@ -14,6 +14,15 @@ import { toast } from 'sonner';
 
 const dateFormatter = new Intl.DateTimeFormat();
 
+// ⚡ Bolt Optimization: Hoist static animation objects
+// Why: Moving static objects outside the component prevents them from being
+// recreated on every render, reducing memory allocation and garbage collection overhead.
+// Impact: Improves rendering performance when dealing with large lists of tasks.
+const MOTION_INITIAL = { opacity: 0, y: 10 };
+const MOTION_ANIMATE = { opacity: 1, y: 0 };
+const MOTION_EXIT = { opacity: 0, y: -10 };
+const MOTION_TRANSITION = { duration: 0.2 };
+
 interface TaskProps {
   task: Task;
 }
@@ -58,10 +67,10 @@ const TaskComponent = ({ task }: TaskProps) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.2 }}
+      initial={MOTION_INITIAL}
+      animate={MOTION_ANIMATE}
+      exit={MOTION_EXIT}
+      transition={MOTION_TRANSITION}
       className="group"
     >
       <Card className={`transition-colors hover:shadow-md ${optimisticCompleted ? 'opacity-60 bg-muted/50' : 'bg-card'} ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
