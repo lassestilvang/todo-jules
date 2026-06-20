@@ -18,6 +18,16 @@ interface TaskProps {
   task: Task;
 }
 
+// ⚡ Bolt Optimization: Hoist static Framer Motion animation objects
+// Why: Moving static objects like `initial` and `animate` outside the component
+// prevents React from creating new object references on every render. This
+// avoids unnecessary memory allocation and garbage collection overhead, especially
+// during drag-and-drop where TaskComponent renders frequently.
+const motionInitial = { opacity: 0, y: 10 };
+const motionAnimate = { opacity: 1, y: 0 };
+const motionExit = { opacity: 0, y: -10 };
+const motionTransition = { duration: 0.2 };
+
 const TaskComponent = ({ task }: TaskProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [optimisticCompleted, setOptimisticCompleted] = useOptimistic(
@@ -58,10 +68,10 @@ const TaskComponent = ({ task }: TaskProps) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.2 }}
+      initial={motionInitial}
+      animate={motionAnimate}
+      exit={motionExit}
+      transition={motionTransition}
       className="group"
     >
       <Card className={`transition-colors hover:shadow-md ${optimisticCompleted ? 'opacity-60 bg-muted/50' : 'bg-card'} ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
