@@ -5,3 +5,7 @@
 ## 2026-06-13 - Add Clear Search Button to Empty State
 **Learning:** Users encountering an empty search result state often want to start over. Forcing them to manually clear the search bar or URL query parameters creates friction.
 **Action:** Always include an actionable 'Clear Search' button or link in empty state components for search or filter interfaces, returning users directly to the base route.
+
+## 2026-06-22 - Screen Reader Context for State Transitions
+**Learning:** When displaying state changes using visual symbols like arrows, screen readers may read it confusingly or out of context.
+**Action:** Always prepend old and new values with descriptive screen-reader-only text (e.g., 'changed from', 'to') and hide visual transition symbols using `aria-hidden="true"` to provide clear context.
