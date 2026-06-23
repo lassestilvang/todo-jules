@@ -14,7 +14,7 @@ const Header = () => {
   useHotkeys('/', (e) => {
     e.preventDefault();
     inputRef.current?.focus();
-  });
+  }, { enableOnFormTags: false });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
