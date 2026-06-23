@@ -14,6 +14,15 @@ import { toast } from 'sonner';
 
 const dateFormatter = new Intl.DateTimeFormat();
 
+// ⚡ Bolt Optimization: Hoist static animation objects
+// Why: Moving static objects outside the component prevents them from being
+// recreated on every render, reducing memory allocation and garbage collection overhead.
+// Impact: Improves rendering performance when dealing with large lists of tasks.
+const MOTION_INITIAL = { opacity: 0, y: 10 };
+const MOTION_ANIMATE = { opacity: 1, y: 0 };
+const MOTION_EXIT = { opacity: 0, y: -10 };
+const MOTION_TRANSITION = { duration: 0.2 };
+
 interface TaskProps {
   task: Task;
 }

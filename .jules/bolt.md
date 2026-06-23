@@ -110,3 +110,6 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2024-06-25 - Remove artificial debounce from URL search parameters
 **Learning:** Debouncing a URL parameter (via `useSearchParams`) that only updates on explicit form submission adds artificial latency to the page load without preventing any duplicate requests.
 **Action:** Never debounce URL parameters that are the result of an explicit user action. Only debounce user input state that updates on every keystroke.
+## 2026-07-01 - Hoist static animation objects
+**Learning:** When using Framer Motion (`motion.div`), passing inline object literals for animation properties (like `initial`, `animate`, `exit`, `transition`) inside functional components causes the objects to be recreated on every render.
+**Action:** Always hoist static animation configuration objects outside the component definition to prevent unnecessary reference recreation, reducing memory allocation and garbage collection overhead.
