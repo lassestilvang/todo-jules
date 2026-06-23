@@ -27,6 +27,14 @@ interface TaskProps {
   task: Task;
 }
 
+// ⚡ Bolt Optimization: Hoist static animation configuration objects
+// Why: Prevents recreating these object references on every render,
+// reducing garbage collection overhead and potential re-renders in motion.div.
+const motionInitial = { opacity: 0, y: 10 } as const;
+const motionAnimate = { opacity: 1, y: 0 } as const;
+const motionExit = { opacity: 0, y: -10 } as const;
+const motionTransition = { duration: 0.2 } as const;
+
 const TaskComponent = ({ task }: TaskProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [optimisticCompleted, setOptimisticCompleted] = useOptimistic(
@@ -67,10 +75,10 @@ const TaskComponent = ({ task }: TaskProps) => {
 
   return (
     <motion.div
-      initial={MOTION_INITIAL}
-      animate={MOTION_ANIMATE}
-      exit={MOTION_EXIT}
-      transition={MOTION_TRANSITION}
+      initial={motionInitial}
+      animate={motionAnimate}
+      exit={motionExit}
+      transition={motionTransition}
       className="group"
     >
       <Card className={`transition-colors hover:shadow-md ${optimisticCompleted ? 'opacity-60 bg-muted/50' : 'bg-card'} ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
