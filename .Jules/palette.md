@@ -82,3 +82,6 @@
 ## 2026-06-15 - Global Hotkeys for Form Inputs
 **Learning:** Providing a keyboard shortcut (like 'n' for new task) to jump straight to a primary input field significantly speeds up keyboard-centric workflows. However, it's crucial to use `{ enableOnFormTags: false }` to prevent triggering the shortcut while the user is typing in other fields, and providing a visual `<kbd>` hint that disappears on focus helps with discoverability without adding clutter.
 **Action:** When a page has a primary form action (like 'Add Task'), add a single-key shortcut to focus the input and conditionally show a keyboard hint.
+## 2024-06-21 - Screen Reader Context for History Logs
+**Learning:** Found that isolated state changes (like "oldValue -> newValue") in the TaskHistory component were missing contextual labels for screen readers, leading to confusing announcements where the old and new values were read sequentially without explanation.
+**Action:** Always prepend old and new values in history or audit logs with descriptive screen-reader-only text (e.g., `<span className="sr-only">changed from </span>`) and hide visual transition symbols (e.g., `&rarr;`) from screen readers using `aria-hidden="true"`.
