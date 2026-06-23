@@ -177,11 +177,13 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
                       <span className="text-green-500">Task created</span>
                     ) : (
                       <>
+                        <span className="sr-only">changed from </span>
                         <span className="line-through text-red-400 mr-2">
                           <span className="sr-only">changed from </span>
                           {item.oldValue || '(empty)'}
                         </span>
                         <span aria-hidden="true">&rarr;</span>
+                        <span className="sr-only">to </span>
                         <span className="ml-2 text-green-500">
                           <span className="sr-only"> to </span>
                           {item.newValue || '(empty)'}
