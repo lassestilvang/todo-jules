@@ -18,10 +18,13 @@ interface TaskProps {
   task: Task;
 }
 
-const motionInitial = { opacity: 0, y: 10 };
-const motionAnimate = { opacity: 1, y: 0 };
-const motionExit = { opacity: 0, y: -10 };
-const motionTransition = { duration: 0.2 };
+// ⚡ Bolt Optimization: Hoist static animation configuration objects
+// Why: Prevents recreating these object references on every render,
+// reducing garbage collection overhead and potential re-renders in motion.div.
+const motionInitial = { opacity: 0, y: 10 } as const;
+const motionAnimate = { opacity: 1, y: 0 } as const;
+const motionExit = { opacity: 0, y: -10 } as const;
+const motionTransition = { duration: 0.2 } as const;
 
 const TaskComponent = ({ task }: TaskProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
