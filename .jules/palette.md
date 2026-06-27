@@ -16,3 +16,7 @@
 ## 2026-06-24 - Redundant sr-only Tags in Nested Transitions
 **Learning:** When creating accessible transitions or status changes containing old and new values, using redundant `<span className="sr-only">`/aria tags inside and outside the old/new values (e.g., nesting "changed from" inside "changed from") causes screen readers to redundantly announce "changed from changed from".
 **Action:** Ensure these `sr-only` tags are not redundantly duplicated inside nested elements to prevent screen readers from stuttering and announcing duplicated conversational context text.
+
+## 2025-01-20 - Avoid Hardcoded Semantic Colors
+**Learning:** Hardcoding hex values or specific tailwind shades (like text-red-400 or text-green-500) for state indicators leads to color contrast accessibility failures in dark mode, and prevents components from adhering to the global theme.
+**Action:** Always use semantic theme variables (like text-destructive, text-muted-foreground, or text-foreground) when indicating state to ensure accessibility and theme consistency.
