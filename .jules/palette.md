@@ -16,3 +16,7 @@
 ## 2026-06-24 - Redundant sr-only Tags in Nested Transitions
 **Learning:** When creating accessible transitions or status changes containing old and new values, using redundant `<span className="sr-only">`/aria tags inside and outside the old/new values (e.g., nesting "changed from" inside "changed from") causes screen readers to redundantly announce "changed from changed from".
 **Action:** Ensure these `sr-only` tags are not redundantly duplicated inside nested elements to prevent screen readers from stuttering and announcing duplicated conversational context text.
+
+## 2025-01-20 - Use Semantic Theme Variables for Semantic States
+**Learning:** Hardcoding specific Tailwind color shades (e.g., `text-red-400`, `text-green-500`) to indicate semantic states often fails color contrast requirements across different themes (like dark mode) and breaks design system consistency.
+**Action:** Always use semantic theme variables (e.g., `text-destructive`, `text-muted-foreground`, `text-foreground`) to indicate state, ensuring accessible color contrast and consistency across themes.
