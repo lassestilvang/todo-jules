@@ -85,3 +85,7 @@
 ## 2024-06-21 - Screen Reader Context for History Logs
 **Learning:** Found that isolated state changes (like "oldValue -> newValue") in the TaskHistory component were missing contextual labels for screen readers, leading to confusing announcements where the old and new values were read sequentially without explanation.
 **Action:** Always prepend old and new values in history or audit logs with descriptive screen-reader-only text (e.g., `<span className="sr-only">changed from </span>`) and hide visual transition symbols (e.g., `&rarr;`) from screen readers using `aria-hidden="true"`.
+
+## 2026-06-25 - Semantic Colors for Semantic State
+**Learning:** Hardcoding specific Tailwind color shades (e.g., `text-red-400`, `text-green-500`) to indicate state often fails color contrast requirements across different themes (like dark mode) and breaks design system consistency.
+**Action:** Always use semantic theme variables (e.g., `text-destructive`, `text-muted-foreground`, `text-foreground`) to ensure consistent, accessible contrast ratios across all themes.
