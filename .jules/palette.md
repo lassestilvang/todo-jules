@@ -16,3 +16,6 @@
 ## 2026-06-24 - Redundant sr-only Tags in Nested Transitions
 **Learning:** When creating accessible transitions or status changes containing old and new values, using redundant `<span className="sr-only">`/aria tags inside and outside the old/new values (e.g., nesting "changed from" inside "changed from") causes screen readers to redundantly announce "changed from changed from".
 **Action:** Ensure these `sr-only` tags are not redundantly duplicated inside nested elements to prevent screen readers from stuttering and announcing duplicated conversational context text.
+## 2025-06-30 - Keyboard Shortcuts Accessibility
+**Learning:** Adding `aria-live="polite"` to conditionally rendered visual keyboard shortcut hints (like `/` or `n`) causes screen readers to randomly announce the shortcut out of context when the input is cleared, and dynamically removing the target of an `aria-describedby` results in a broken reference.
+**Action:** Always use the dedicated `aria-keyshortcuts` attribute directly on the `<input>` element instead of relying on `aria-describedby` pointing to a conditionally rendered element, providing native and stable screen reader support for shortcuts.
