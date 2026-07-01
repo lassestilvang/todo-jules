@@ -7,3 +7,8 @@
 **Vulnerability:** The API route for fetching tasks allowed unbounded page parameters. Because SQLite processes OFFSET N by scanning and discarding N rows, an excessively large page number could result in high CPU utilization and a Denial of Service (DoS).
 **Learning:** Always validate pagination parameters against maximum reasonable bounds or total counts to prevent offset-based database exhaustion.
 **Prevention:** Calculate the maximum number of pages and clamp incoming page variables to that limit before passing to the SQL offset clause.
+
+## 2026-06-10 - Missing Cross-Origin Isolation Headers
+**Vulnerability:** Missing Cross-Origin-Opener-Policy (COOP) and Cross-Origin-Resource-Policy (CORP) headers in Next.js configuration.
+**Learning:** To provide defense-in-depth against cross-origin and side-channel attacks like Spectre, applications must explicitly declare same-origin policies to isolate their browsing context.
+**Prevention:** Always include COOP and CORP headers set to same-origin in standard security header configurations.
