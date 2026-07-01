@@ -85,3 +85,6 @@
 ## 2024-06-21 - Screen Reader Context for History Logs
 **Learning:** Found that isolated state changes (like "oldValue -> newValue") in the TaskHistory component were missing contextual labels for screen readers, leading to confusing announcements where the old and new values were read sequentially without explanation.
 **Action:** Always prepend old and new values in history or audit logs with descriptive screen-reader-only text (e.g., `<span className="sr-only">changed from </span>`) and hide visual transition symbols (e.g., `&rarr;`) from screen readers using `aria-hidden="true"`.
+## 2024-07-01 - Native ARIA Keyboard Shortcuts
+**Learning:** When providing accessibility for keyboard shortcuts tied to input fields, avoid using conditionally rendered visual hints with `aria-describedby` and `aria-live="polite"`, as this causes screen readers to announce the shortcut out of context when the target is removed. Instead, apply the native `aria-keyshortcuts` attribute directly to the `<input>` element.
+**Action:** Always use the `aria-keyshortcuts` attribute (e.g. `aria-keyshortcuts="/"`) on elements that have keyboard shortcuts to ensure screen readers announce them properly upon focus.
