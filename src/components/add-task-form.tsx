@@ -93,6 +93,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
             disabled={isPending}
             type="text"
             id="task-name"
+            aria-keyshortcuts="n"
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="What needs to be done?"
