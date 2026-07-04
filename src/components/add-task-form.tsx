@@ -97,6 +97,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
             onChange={(e) => setName(e.target.value)}
             placeholder="What needs to be done?"
             required
+            aria-keyshortcuts="n"
             className="w-full pr-8"
           />
           {name.length === 0 && !isPending && (
@@ -163,6 +164,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
         type="submit"
         disabled={isPending}
         className="w-full relative"
+        aria-keyshortcuts="Meta+Enter Control+Enter"
       >
         {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Adding...</> : (
             <>
