@@ -17,6 +17,9 @@
 **Learning:** When creating accessible transitions or status changes containing old and new values, using redundant `<span className="sr-only">`/aria tags inside and outside the old/new values (e.g., nesting "changed from" inside "changed from") causes screen readers to redundantly announce "changed from changed from".
 **Action:** Ensure these `sr-only` tags are not redundantly duplicated inside nested elements to prevent screen readers from stuttering and announcing duplicated conversational context text.
 
+## 2026-10-25 - Native HTML Accessibility for Keyboard Shortcuts
+**Learning:** Providing custom keyboard shortcuts (like `/` for search, `n` for adding tasks, or `Meta+Enter` for form submission) is a great power-user UX feature. However, using generic `<kbd>` visual hints with conditional `aria-describedby` rendering can cause screen readers to announce the shortcut out of context, creating confusion.
+**Action:** Always apply the native `aria-keyshortcuts` HTML attribute directly to the focusable `<input>` or `<button>` elements that trigger the shortcut. This provides proper semantic context, ensuring screen readers accurately announce the available shortcut directly when the element receives focus.
 ## 2026-06-25 - Semantic Theme Variables for State
 **Learning:** When indicating semantic state in UI components, avoid hardcoding specific Tailwind color shades (e.g., text-red-400, text-green-500), as they often fail color contrast requirements across different themes (like dark mode) and break design system consistency.
 **Action:** Always use semantic theme variables (e.g., text-destructive, text-muted-foreground, text-foreground).

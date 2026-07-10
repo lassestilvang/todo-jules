@@ -165,7 +165,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
         type="submit"
         disabled={isPending}
         className="w-full relative"
-        aria-keyshortcuts="Meta+Enter Control+Enter"
+        aria-keyshortcuts={isPending ? undefined : "Meta+Enter Control+Enter"}
       >
         {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Adding...</> : (
             <>
