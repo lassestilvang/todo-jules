@@ -174,7 +174,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
                   </div>
                   <div>
                     {item.changedField === 'created' ? (
-                      <span className="text-foreground">Task created</span>
+                      <span className="text-foreground font-medium">Task created</span>
                     ) : (
                       <>
                         <span className="sr-only">changed from </span>
@@ -183,7 +183,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
                         </span>
                         <span aria-hidden="true">&rarr;</span>
                         <span className="sr-only">to </span>
-                        <span className="ml-2 text-foreground">
+                        <span className="ml-2 text-foreground font-medium">
                           {item.newValue || '(empty)'}
                         </span>
                       </>

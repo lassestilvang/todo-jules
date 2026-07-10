@@ -6,6 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Search, X } from 'lucide-react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
+// ⚡ Bolt Optimization: Hoist static configuration out of the render loop
+// Why: Prevents unnecessary teardown and recreation of event listeners on every render.
+const HOTKEYS_OPTIONS = { enableOnFormTags: false };
+
 const Header = () => {
   const [query, setQuery] = useState('');
   const router = useRouter();
@@ -14,7 +18,7 @@ const Header = () => {
   useHotkeys('/', (e) => {
     e.preventDefault();
     inputRef.current?.focus();
-  }, { enableOnFormTags: false });
+  }, HOTKEYS_OPTIONS);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,9 +39,11 @@ const Header = () => {
             id="header-search-input"
             type="search"
             placeholder="Search tasks..."
+            aria-keyshortcuts="/"
             className="w-full pl-9 pr-8 bg-gray-700 border-none text-white placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-white"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            aria-keyshortcuts="Alt+/"
           />
           {query.length === 0 && (
             <kbd className="absolute right-2.5 hidden h-5 select-none items-center gap-1 rounded border border-gray-600 bg-gray-700 px-1.5 font-mono text-[10px] font-medium text-gray-400 sm:flex group-focus-within:opacity-0 transition-opacity">

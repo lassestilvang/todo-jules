@@ -15,6 +15,10 @@ interface AddTaskFormProps {
   listId?: number;
 }
 
+// ⚡ Bolt Optimization: Hoist static configuration out of the render loop
+// Why: Prevents unnecessary teardown and recreation of event listeners on every render.
+const HOTKEYS_OPTIONS = { enableOnFormTags: false };
+
 const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
   // const router = useRouter();
   const [name, setName] = useState('');
@@ -29,7 +33,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
     e.preventDefault();
     inputRef.current?.focus();
     inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, { enableOnFormTags: false });
+  }, HOTKEYS_OPTIONS);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
@@ -97,7 +101,9 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
             onChange={(e) => setName(e.target.value)}
             placeholder="What needs to be done?"
             required
+            aria-keyshortcuts="n"
             className="w-full pr-8"
+            aria-keyshortcuts="Alt+N"
           />
           {name.length === 0 && !isPending && (
             <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex group-focus-within:opacity-0 transition-opacity pointer-events-none">
@@ -163,6 +169,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
         type="submit"
         disabled={isPending}
         className="w-full relative"
+        aria-keyshortcuts={isPending ? undefined : "Meta+Enter Control+Enter"}
       >
         {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Adding...</> : (
             <>
