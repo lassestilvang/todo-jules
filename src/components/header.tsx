@@ -6,6 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Search, X } from 'lucide-react';
 import { useHotkeys } from 'react-hotkeys-hook';
 
+// ⚡ Bolt Optimization: Hoist static configuration out of the render loop
+// Why: Prevents unnecessary teardown and recreation of event listeners on every render.
+const HOTKEYS_OPTIONS = { enableOnFormTags: false };
+
 const Header = () => {
   const [query, setQuery] = useState('');
   const router = useRouter();
@@ -14,7 +18,7 @@ const Header = () => {
   useHotkeys('/', (e) => {
     e.preventDefault();
     inputRef.current?.focus();
-  }, { enableOnFormTags: false });
+  }, HOTKEYS_OPTIONS);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

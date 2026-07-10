@@ -15,6 +15,10 @@ interface AddTaskFormProps {
   listId?: number;
 }
 
+// ⚡ Bolt Optimization: Hoist static configuration out of the render loop
+// Why: Prevents unnecessary teardown and recreation of event listeners on every render.
+const HOTKEYS_OPTIONS = { enableOnFormTags: false };
+
 const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
   // const router = useRouter();
   const [name, setName] = useState('');
@@ -29,7 +33,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
     e.preventDefault();
     inputRef.current?.focus();
     inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, { enableOnFormTags: false });
+  }, HOTKEYS_OPTIONS);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
