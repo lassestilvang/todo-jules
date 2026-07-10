@@ -86,6 +86,9 @@
 **Learning:** Found that isolated state changes (like "oldValue -> newValue") in the TaskHistory component were missing contextual labels for screen readers, leading to confusing announcements where the old and new values were read sequentially without explanation.
 **Action:** Always prepend old and new values in history or audit logs with descriptive screen-reader-only text (e.g., `<span className="sr-only">changed from </span>`) and hide visual transition symbols (e.g., `&rarr;`) from screen readers using `aria-hidden="true"`.
 
+## 2026-06-25 - Semantic Theme Variables for State Indicators
+**Learning:** Hardcoded color shades (like `text-red-400` or `text-green-500`) fail to adapt properly in dark mode, causing contrast issues and breaking design system consistency.
+**Action:** Always use semantic theme variables (e.g., `text-destructive`, `text-muted-foreground`, `text-foreground`) to indicate semantic state, ensuring accessibility and consistency across all themes.
 ## 2024-07-04 - Native aria-keyshortcuts attribute
 **Learning:** When providing keyboard shortcuts tied to specific input fields or buttons, using the native `aria-keyshortcuts` attribute directly on the element is more reliable and accessible than relying on conditionally rendered visual hints with `aria-describedby` or `aria-live`. Screen readers can natively announce these shortcuts.
 **Action:** Always use the `aria-keyshortcuts` attribute on interactive elements (like inputs or buttons) that have a global or scoped keyboard shortcut associated with them.
