@@ -124,7 +124,7 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
               </p>
             </div>
           </div>
-          <Button type="submit" disabled={isPending} className="w-full relative">
+          <Button type="submit" disabled={isPending} className="w-full relative" aria-keyshortcuts={isPending ? undefined : "Meta+Enter Control+Enter"}>
             {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Creating...</> : (
               <>
                 Create List
