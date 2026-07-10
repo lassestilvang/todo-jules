@@ -97,6 +97,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
             onChange={(e) => setName(e.target.value)}
             placeholder="What needs to be done?"
             required
+            aria-keyshortcuts="n"
             className="w-full pr-8"
             aria-keyshortcuts="Alt+N"
           />

@@ -35,6 +35,7 @@ const Header = () => {
             id="header-search-input"
             type="search"
             placeholder="Search tasks..."
+            aria-keyshortcuts="/"
             className="w-full pl-9 pr-8 bg-gray-700 border-none text-white placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-white"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
