@@ -101,9 +101,8 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
             onChange={(e) => setName(e.target.value)}
             placeholder="What needs to be done?"
             required
-            aria-keyshortcuts="n"
             className="w-full pr-8"
-            aria-keyshortcuts="Alt+N"
+            aria-keyshortcuts="n Alt+N"
           />
           {name.length === 0 && !isPending && (
             <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex group-focus-within:opacity-0 transition-opacity pointer-events-none">

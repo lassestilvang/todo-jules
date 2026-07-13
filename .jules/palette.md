@@ -23,3 +23,7 @@
 ## 2026-06-25 - Semantic Theme Variables for State
 **Learning:** When indicating semantic state in UI components, avoid hardcoding specific Tailwind color shades (e.g., text-red-400, text-green-500), as they often fail color contrast requirements across different themes (like dark mode) and break design system consistency.
 **Action:** Always use semantic theme variables (e.g., text-destructive, text-muted-foreground, text-foreground).
+
+## 2024-07-13 - Multiple ARIA Keyboard Shortcuts
+**Learning:** When assigning multiple keyboard shortcuts to an element via `aria-keyshortcuts`, the ARIA specification requires them to be provided as a single space-separated string (e.g., `aria-keyshortcuts="n Alt+N"`), rather than duplicating the prop on the element, which breaks React linting and accessibility parsing.
+**Action:** Always combine multiple keyboard shortcuts into a single `aria-keyshortcuts` attribute string to ensure proper screen reader announcement and avoid linting errors.
