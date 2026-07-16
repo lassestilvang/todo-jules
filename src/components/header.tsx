@@ -42,7 +42,7 @@ const Header = () => {
             className="w-full pl-9 pr-8 bg-gray-700 border-none text-white placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-white"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            aria-keyshortcuts="/ Alt+/"
+            aria-keyshortcuts="/"
           />
           {query.length === 0 && (
             <kbd className="absolute right-2.5 hidden h-5 select-none items-center gap-1 rounded border border-gray-600 bg-gray-700 px-1.5 font-mono text-[10px] font-medium text-gray-400 sm:flex group-focus-within:opacity-0 transition-opacity pointer-events-none">
