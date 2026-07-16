@@ -27,3 +27,9 @@
 ## 2024-07-13 - Multiple ARIA Keyboard Shortcuts
 **Learning:** When assigning multiple keyboard shortcuts to an element via `aria-keyshortcuts`, the ARIA specification requires them to be provided as a single space-separated string (e.g., `aria-keyshortcuts="n Alt+N"`), rather than duplicating the prop on the element, which breaks React linting and accessibility parsing.
 **Action:** Always combine multiple keyboard shortcuts into a single `aria-keyshortcuts` attribute string to ensure proper screen reader announcement and avoid linting errors.
+## 2024-07-12 - Fix Keyboard Hint Interaction & ARIA Shortcuts
+**Learning:** React linting throws errors when duplicate `aria-keyshortcuts` are added to elements, they should be combined into a space-separated string (e.g. `aria-keyshortcuts="n Alt+N"`). Additionally, `<kbd>` absolute overlays on buttons block mouse clicks and prevent interaction.
+**Action:** Use a single `aria-keyshortcuts` string, and always apply `pointer-events-none` to visual hints (like `<kbd>`) that are placed absolutely over interactive input elements or buttons.
+## 2024-07-10 - Space-separated aria-keyshortcuts
+**Learning:** When assigning multiple keyboard shortcuts to an element using aria-keyshortcuts, passing duplicate props breaks the build and linting. Instead, native aria-keyshortcuts supports multiple shortcuts via a space-separated string (e.g., 'n Alt+N'). Also, visually positioned keyboard hints (<kbd>) over inputs should have 'pointer-events-none' to prevent click interception.
+**Action:** Use a single space-separated string for multiple shortcuts in aria-keyshortcuts and add pointer-events-none to overlaid visual hints.
