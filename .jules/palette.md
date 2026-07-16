@@ -23,3 +23,6 @@
 ## 2026-06-25 - Semantic Theme Variables for State
 **Learning:** When indicating semantic state in UI components, avoid hardcoding specific Tailwind color shades (e.g., text-red-400, text-green-500), as they often fail color contrast requirements across different themes (like dark mode) and break design system consistency.
 **Action:** Always use semantic theme variables (e.g., text-destructive, text-muted-foreground, text-foreground).
+## 2024-07-10 - Space-separated aria-keyshortcuts
+**Learning:** When assigning multiple keyboard shortcuts to an element using aria-keyshortcuts, passing duplicate props breaks the build and linting. Instead, native aria-keyshortcuts supports multiple shortcuts via a space-separated string (e.g., 'n Alt+N'). Also, visually positioned keyboard hints (<kbd>) over inputs should have 'pointer-events-none' to prevent click interception.
+**Action:** Use a single space-separated string for multiple shortcuts in aria-keyshortcuts and add pointer-events-none to overlaid visual hints.
