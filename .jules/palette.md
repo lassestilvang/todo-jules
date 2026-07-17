@@ -39,3 +39,7 @@
 ## 2024-07-10 - Space-separated aria-keyshortcuts
 **Learning:** When assigning multiple keyboard shortcuts to an element using aria-keyshortcuts, passing duplicate props breaks the build and linting. Instead, native aria-keyshortcuts supports multiple shortcuts via a space-separated string (e.g., 'n Alt+N'). Also, visually positioned keyboard hints (<kbd>) over inputs should have 'pointer-events-none' to prevent click interception.
 **Action:** Use a single space-separated string for multiple shortcuts in aria-keyshortcuts and add pointer-events-none to overlaid visual hints.
+
+## 2025-01-20 - Semantic Color Context for Screen Readers
+**Learning:** When using semantic colors to indicate a state change (e.g., turning text red for overdue deadlines), screen reader users completely miss this visual context if the underlying label remains static (e.g., just reading "Deadline: [Date]").
+**Action:** Always ensure that visual semantic cues (like error or warning colors) are accompanied by corresponding dynamic screen-reader-only text (e.g., changing "Deadline:" to "Overdue deadline:") so the meaning of the color is accessible to all users.
