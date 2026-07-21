@@ -144,9 +144,11 @@ const TaskComponent = ({ task }: TaskProps) => {
                     </div>
                 )}
                  {task.deadline && (
-                    <div className={`flex items-center text-xs ${optimisticCompleted ? 'text-muted-foreground' : (task.deadline && new Date(task.deadline) < new Date() ? 'text-destructive' : 'text-muted-foreground')}`} title="Deadline" suppressHydrationWarning>
+                    <div className={`flex items-center text-xs ${optimisticCompleted ? 'text-muted-foreground' : (task.deadline && new Date(task.deadline) < new Date() ? 'text-destructive' : 'text-muted-foreground')}`} title={!optimisticCompleted && new Date(task.deadline) < new Date() ? "Overdue deadline" : "Deadline"} suppressHydrationWarning>
                         <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
-                        <span className="sr-only">{!optimisticCompleted && task.deadline && new Date(task.deadline) < new Date() ? 'Overdue deadline: ' : 'Deadline: '}</span>
+                        <span className="sr-only">
+                            {!optimisticCompleted && new Date(task.deadline) < new Date() ? 'Overdue deadline: ' : 'Deadline: '}
+                        </span>
                         <span className={optimisticCompleted ? 'line-through' : ''} suppressHydrationWarning>{dateFormatter.format(new Date(task.deadline))}</span>
                     </div>
                 )}
