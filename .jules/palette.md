@@ -43,3 +43,6 @@
 ## 2026-10-27 - Screen Reader Context for Semantic State
 **Learning:** When using semantic colors to visually indicate a state change (like turning text red for an overdue status), screen reader users miss this context if the screen-reader-only text remains static.
 **Action:** Always conditionally update the associated screen-reader-only text (e.g., changing 'Deadline:' to 'Overdue deadline:') to provide accessible context that matches the visual semantic color state change.
+## 2025-01-20 - Semantic Color State Screen Reader Context
+**Learning:** When using semantic colors to visually indicate a state change (e.g., turning text red for an overdue status), the context is lost for visually impaired users relying on screen readers.
+**Action:** Ensure the context is accessible to screen readers by conditionally updating the associated screen-reader-only text (e.g., changing 'Deadline:' to 'Overdue deadline:').
