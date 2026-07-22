@@ -73,6 +73,12 @@ const TaskComponent = ({ task }: TaskProps) => {
     }
   };
 
+  // ⚡ Bolt Optimization: Precompute Date objects and calculations
+  // Why: Avoids creating up to 7 redundant Date objects per task render, reducing garbage collection overhead.
+  const deadlineDate = task.deadline ? new Date(task.deadline) : null;
+  const taskDate = task.date ? new Date(task.date) : null;
+  const isOverdue = deadlineDate ? deadlineDate < new Date() : false;
+
   return (
     <motion.div
       initial={motionInitial}
@@ -136,20 +142,20 @@ const TaskComponent = ({ task }: TaskProps) => {
             )}
 
             <div className="flex flex-wrap gap-2 mt-2">
-                {task.date && (
+            {taskDate && (
                     <div className="flex items-center text-xs text-muted-foreground" title="Date">
                         <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
                         <span className="sr-only">Date: </span>
-                        <span suppressHydrationWarning>{dateFormatter.format(new Date(task.date))}</span>
+                    <span suppressHydrationWarning>{dateFormatter.format(taskDate)}</span>
                     </div>
                 )}
-                 {task.deadline && (
-                    <div className={`flex items-center text-xs ${optimisticCompleted ? 'text-muted-foreground' : (task.deadline && new Date(task.deadline) < new Date() ? 'text-destructive' : 'text-muted-foreground')}`} title={!optimisticCompleted && new Date(task.deadline) < new Date() ? "Overdue deadline" : "Deadline"} suppressHydrationWarning>
+             {deadlineDate && (
+                <div className={`flex items-center text-xs ${optimisticCompleted ? 'text-muted-foreground' : (isOverdue ? 'text-destructive' : 'text-muted-foreground')}`} title={!optimisticCompleted && isOverdue ? "Overdue deadline" : "Deadline"} suppressHydrationWarning>
                         <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
                         <span className="sr-only">
-                            {!optimisticCompleted && new Date(task.deadline) < new Date() ? 'Overdue deadline: ' : 'Deadline: '}
+                        {!optimisticCompleted && isOverdue ? 'Overdue deadline: ' : 'Deadline: '}
                         </span>
-                        <span className={optimisticCompleted ? 'line-through' : ''} suppressHydrationWarning>{dateFormatter.format(new Date(task.deadline))}</span>
+                    <span className={optimisticCompleted ? 'line-through' : ''} suppressHydrationWarning>{dateFormatter.format(deadlineDate)}</span>
                     </div>
                 )}
             </div>
