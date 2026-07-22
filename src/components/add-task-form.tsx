@@ -133,6 +133,7 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
               'text-muted-foreground'
             }`}
             aria-live={description.length >= 400 ? "polite" : "off"}
+            aria-atomic="true"
           >
             {description.length}/500
           </div>
