@@ -49,3 +49,6 @@
 ## 2025-01-20 - Semantic Color State Screen Reader Context
 **Learning:** When using semantic colors to visually indicate a state change (e.g., turning text red for an overdue status), the context is lost for visually impaired users relying on screen readers.
 **Action:** Ensure the context is accessible to screen readers by conditionally updating the associated screen-reader-only text (e.g., changing 'Deadline:' to 'Overdue deadline:').
+## 2026-10-28 - Screen Reader Context for Character Limits
+**Learning:** When using aria-live to announce character limits or counters (e.g., '123/500'), screen readers may incorrectly announce only the individual changed characters rather than the full updated context if aria-atomic is not set.
+**Action:** Always apply aria-atomic="true" along with aria-live when announcing dynamic text updates like character counters to ensure the screen reader reads the full updated context.
