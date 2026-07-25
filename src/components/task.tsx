@@ -18,10 +18,6 @@ const dateFormatter = new Intl.DateTimeFormat();
 // Why: Moving static objects outside the component prevents them from being
 // recreated on every render, reducing memory allocation and garbage collection overhead.
 // Impact: Improves rendering performance when dealing with large lists of tasks.
-const MOTION_INITIAL = { opacity: 0, y: 10 };
-const MOTION_ANIMATE = { opacity: 1, y: 0 };
-const MOTION_EXIT = { opacity: 0, y: -10 };
-const MOTION_TRANSITION = { duration: 0.2 };
 
 interface TaskProps {
   task: Task;
@@ -80,6 +76,12 @@ const TaskComponent = ({ task }: TaskProps) => {
       }
     }
   };
+
+  // ⚡ Bolt Optimization: Precompute allocations to minimize GC overhead in lists
+  const now = new Date();
+  const parsedDate = task.date ? new Date(task.date) : null;
+  const parsedDeadline = task.deadline ? new Date(task.deadline) : null;
+  const isOverdue = parsedDeadline && !optimisticCompleted && parsedDeadline < now;
 
   return (
     <motion.div

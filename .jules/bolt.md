@@ -118,3 +118,6 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-07-24 - Precompute object allocations in render body
 **Learning:** Instantiating objects like `new Date()` multiple times inline within the JSX of frequently rendered components (like list items) creates unnecessary object allocations and increases garbage collection overhead.
 **Action:** Always precompute and cache object allocations at the top of the component render body instead of instantiating them multiple times within the JSX.
+## 2026-07-23 - Precompute date allocations in frequently rendered components
+**Learning:** Instantiating `new Date()` directly within the JSX of frequently rendered components (like list items in a drag-and-drop interface) causes unnecessary memory allocations on every render. This increases garbage collection overhead and can lead to micro-stutters during rapid re-renders (like scrolling or dragging).
+**Action:** Always precompute allocations (like `new Date()`) and derive necessary boolean flags (like `isOverdue`) at the top of the component render body, storing them in variables to minimize inline instantiations and reduce GC pressure.
