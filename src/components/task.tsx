@@ -18,10 +18,6 @@ const dateFormatter = new Intl.DateTimeFormat();
 // Why: Moving static objects outside the component prevents them from being
 // recreated on every render, reducing memory allocation and garbage collection overhead.
 // Impact: Improves rendering performance when dealing with large lists of tasks.
-const MOTION_INITIAL = { opacity: 0, y: 10 };
-const MOTION_ANIMATE = { opacity: 1, y: 0 };
-const MOTION_EXIT = { opacity: 0, y: -10 };
-const MOTION_TRANSITION = { duration: 0.2 };
 
 interface TaskProps {
   task: Task;
@@ -41,6 +37,14 @@ const TaskComponent = ({ task }: TaskProps) => {
     task.completed ?? false,
     (state, newCompleted: boolean) => newCompleted
   );
+
+  // ⚡ Bolt Optimization: Precompute Date objects
+  // Why: Instantiating `new Date()` multiple times inline within the JSX of a frequently
+  // rendered list item creates unnecessary object allocations and increases garbage collection overhead.
+  const now = new Date();
+  const taskDateObj = task.date ? new Date(task.date) : null;
+  const taskDeadlineObj = task.deadline ? new Date(task.deadline) : null;
+  const isOverdue = !optimisticCompleted && taskDeadlineObj && taskDeadlineObj < now;
 
   const handleToggle = async (checked: boolean) => {
     // ⚡ Bolt Optimization: Synchronous startTransition for Optimistic Updates
@@ -72,6 +76,12 @@ const TaskComponent = ({ task }: TaskProps) => {
       }
     }
   };
+
+  // ⚡ Bolt Optimization: Precompute allocations to minimize GC overhead in lists
+  const now = new Date();
+  const parsedDate = task.date ? new Date(task.date) : null;
+  const parsedDeadline = task.deadline ? new Date(task.deadline) : null;
+  const isOverdue = parsedDeadline && !optimisticCompleted && parsedDeadline < now;
 
   return (
     <motion.div
@@ -136,20 +146,20 @@ const TaskComponent = ({ task }: TaskProps) => {
             )}
 
             <div className="flex flex-wrap gap-2 mt-2">
-                {task.date && (
+                {taskDateObj && (
                     <div className="flex items-center text-xs text-muted-foreground" title="Date">
                         <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
                         <span className="sr-only">Date: </span>
-                        <span suppressHydrationWarning>{dateFormatter.format(new Date(task.date))}</span>
+                        <span suppressHydrationWarning>{dateFormatter.format(taskDateObj)}</span>
                     </div>
                 )}
-                 {task.deadline && (
-                    <div className={`flex items-center text-xs ${optimisticCompleted ? 'text-muted-foreground' : (task.deadline && new Date(task.deadline) < new Date() ? 'text-destructive' : 'text-muted-foreground')}`} title={!optimisticCompleted && new Date(task.deadline) < new Date() ? "Overdue deadline" : "Deadline"} suppressHydrationWarning>
+                 {taskDeadlineObj && (
+                    <div className={`flex items-center text-xs ${optimisticCompleted ? 'text-muted-foreground' : (isOverdue ? 'text-destructive' : 'text-muted-foreground')}`} title={isOverdue ? "Overdue deadline" : "Deadline"} suppressHydrationWarning>
                         <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
                         <span className="sr-only">
-                            {!optimisticCompleted && new Date(task.deadline) < new Date() ? 'Overdue deadline: ' : 'Deadline: '}
+                            {isOverdue ? 'Overdue deadline: ' : 'Deadline: '}
                         </span>
-                        <span className={optimisticCompleted ? 'line-through' : ''} suppressHydrationWarning>{dateFormatter.format(new Date(task.deadline))}</span>
+                        <span className={optimisticCompleted ? 'line-through' : ''} suppressHydrationWarning>{dateFormatter.format(taskDeadlineObj)}</span>
                     </div>
                 )}
             </div>
