@@ -41,9 +41,10 @@ const TaskComponent = ({ task }: TaskProps) => {
   // ⚡ Bolt Optimization: Precompute Date objects
   // Why: Instantiating `new Date()` multiple times inline within the JSX of list items causes unnecessary memory allocation and garbage collection overhead on every render.
   // Impact: Reduces object creation by up to 5x per task item, significantly improving rendering performance for large lists.
+  const now = new Date();
   const taskDateObj = task.date ? new Date(task.date) : null;
   const taskDeadlineObj = task.deadline ? new Date(task.deadline) : null;
-  const isOverdue = taskDeadlineObj ? taskDeadlineObj < new Date() : false;
+  const isOverdue = taskDeadlineObj && !optimisticCompleted ? taskDeadlineObj < now : false;
 
   const handleToggle = async (checked: boolean) => {
     // ⚡ Bolt Optimization: Synchronous startTransition for Optimistic Updates
@@ -75,12 +76,6 @@ const TaskComponent = ({ task }: TaskProps) => {
       }
     }
   };
-
-  // ⚡ Bolt Optimization: Precompute allocations to minimize GC overhead in lists
-  const now = new Date();
-  const parsedDate = task.date ? new Date(task.date) : null;
-  const parsedDeadline = task.deadline ? new Date(task.deadline) : null;
-  const isOverdue = parsedDeadline && !optimisticCompleted && parsedDeadline < now;
 
   return (
     <motion.div
