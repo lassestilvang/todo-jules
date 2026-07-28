@@ -26,7 +26,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-gray-800 text-white p-4 flex justify-between items-center">
+    <header className="bg-card text-card-foreground border-b p-4 flex justify-between items-center">
       <h1 className="text-xl font-bold">Daily Task Planner</h1>
       <form onSubmit={handleSearch} className="relative w-full max-w-sm group">
         <label htmlFor="header-search-input" className="sr-only">
@@ -39,13 +39,13 @@ const Header = () => {
             id="header-search-input"
             type="search"
             placeholder="Search tasks..."
-            className="w-full pl-9 pr-8 bg-gray-700 border-none text-white placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-white"
+            className="w-full pl-9 pr-8 bg-muted border-transparent text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             aria-keyshortcuts="/"
           />
           {query.length === 0 && (
-            <kbd className="absolute right-2.5 hidden h-5 select-none items-center gap-1 rounded border border-gray-600 bg-gray-700 px-1.5 font-mono text-[10px] font-medium text-gray-400 sm:flex group-focus-within:opacity-0 transition-opacity pointer-events-none">
+            <kbd className="absolute right-2.5 hidden h-5 select-none items-center gap-1 rounded border border-border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex group-focus-within:opacity-0 transition-opacity pointer-events-none">
               <span className="text-xs">/</span>
             </kbd>
           )}
@@ -55,7 +55,7 @@ const Header = () => {
               onClick={() => { setQuery(''); inputRef.current?.focus(); }}
               aria-label="Clear search"
               title="Clear search"
-              className="absolute right-2.5 text-gray-400 hover:text-white flex items-center justify-center p-1 rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white transition-colors"
+              className="absolute right-2.5 text-muted-foreground hover:text-foreground flex items-center justify-center p-1 rounded-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring transition-colors"
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </button>
