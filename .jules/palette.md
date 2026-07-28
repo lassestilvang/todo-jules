@@ -56,3 +56,7 @@
 ## 2026-10-28 - aria-atomic on Character Counters
 **Learning:** When using `aria-live` to announce character limits or counters (e.g., '123/500'), screen readers may incorrectly announce only the individual changed characters rather than the full updated context if `aria-atomic` is not used.
 **Action:** Always apply `aria-atomic="true"` when using `aria-live` on character counters to ensure the full updated context is announced.
+
+## 2026-10-29 - Semantic Colors for Headers
+**Learning:** Hardcoding grayscale tailwind utility classes (e.g., bg-gray-800, text-white) in headers prevents them from matching the design system and failing contrast in different themes.
+**Action:** When styling headers, always use semantic theme variables (e.g., bg-card, text-card-foreground) instead of specific gray shades.

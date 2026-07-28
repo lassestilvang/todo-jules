@@ -43,7 +43,6 @@ const TaskComponent = ({ task }: TaskProps) => {
   // Impact: Reduces object creation by up to 5x per task item, significantly improving rendering performance for large lists.
   const taskDateObj = task.date ? new Date(task.date) : null;
   const taskDeadlineObj = task.deadline ? new Date(task.deadline) : null;
-  const isOverdue = taskDeadlineObj ? taskDeadlineObj < new Date() : false;
 
   const handleToggle = async (checked: boolean) => {
     // ⚡ Bolt Optimization: Synchronous startTransition for Optimistic Updates
