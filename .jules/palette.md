@@ -60,3 +60,6 @@
 ## 2026-10-29 - Semantic Colors for Headers
 **Learning:** Hardcoding grayscale tailwind utility classes (e.g., bg-gray-800, text-white) in headers prevents them from matching the design system and failing contrast in different themes.
 **Action:** When styling headers, always use semantic theme variables (e.g., bg-card, text-card-foreground) instead of specific gray shades.
+## 2024-10-27 - Remove directional copy from empty state subtext
+**Learning:** Hardcoding directional copy (like "below") in default props for reusable empty state components creates confusing UX when the component is rendered on pages that don't have the referenced element (like a form) nearby.
+**Action:** When designing reusable empty state components, default to non-directional copy to ensure the component remains context-independent.
