@@ -63,3 +63,7 @@
 ## 2024-10-27 - Remove directional copy from empty state subtext
 **Learning:** Hardcoding directional copy (like "below") in default props for reusable empty state components creates confusing UX when the component is rendered on pages that don't have the referenced element (like a form) nearby.
 **Action:** When designing reusable empty state components, default to non-directional copy to ensure the component remains context-independent.
+
+## 2024-08-02 - Hide Shortcut Hints on Button Focus
+**Learning:** Adding global keyboard shortcut hints (like `<kbd>Cmd+Enter</kbd>`) as absolute overlays on action buttons provides helpful power-user discoverability. However, when keyboard users naturally tab to the button, the `<kbd>` element remains visible on top of the focus state, creating visual clutter and confusing redundancy (since they can just press 'Enter' directly when focused).
+**Action:** When placing visual `<kbd>` shortcut hints on interactive buttons, always add the `group` class to the button and use `group-focus-visible:opacity-0 group-focus-within:opacity-0` (or similar focus-based utility classes) on the hint to gracefully fade it out when the button receives focus.
