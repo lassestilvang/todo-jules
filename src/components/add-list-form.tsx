@@ -124,11 +124,11 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
               </p>
             </div>
           </div>
-          <Button type="submit" disabled={isPending} className="w-full relative" aria-keyshortcuts={isPending ? undefined : "Meta+Enter Control+Enter"}>
+          <Button type="submit" disabled={isPending} className="w-full relative group" aria-keyshortcuts={isPending ? undefined : "Meta+Enter Control+Enter"}>
             {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Creating...</> : (
               <>
                 Create List
-                <kbd className="absolute right-4 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex pointer-events-none">
+                <kbd className="absolute right-4 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex pointer-events-none transition-opacity group-focus-visible:opacity-0 group-focus-within:opacity-0">
                   ⌘/Ctrl Enter
                 </kbd>
               </>
