@@ -63,3 +63,7 @@
 ## 2024-10-27 - Remove directional copy from empty state subtext
 **Learning:** Hardcoding directional copy (like "below") in default props for reusable empty state components creates confusing UX when the component is rendered on pages that don't have the referenced element (like a form) nearby.
 **Action:** When designing reusable empty state components, default to non-directional copy to ensure the component remains context-independent.
+
+## 2026-10-25 - Custom Next.js 404 page
+**Learning:** The default unstyled 404 page in Next.js applications provides a poor user experience, lacking context or a way for users to return to the active application.
+**Action:** Always implement a custom `src/app/not-found.tsx` containing a branded empty state, descriptive copy, and a clear call-to-action (like returning to the home page).
