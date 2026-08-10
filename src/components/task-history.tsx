@@ -113,7 +113,15 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
             const fetchPromise = getTaskHistory(taskId);
             setToCache(taskId, [], fetchPromise);
 
-            const data = await fetchPromise;
+            const rawData = await fetchPromise;
+
+            // ⚡ Bolt Optimization: Precompute Date objects before storing in state/cache
+            // Why: Prevents instantiating new Date() multiple times inline within the JSX .map() loop
+            // which reduces unnecessary memory allocations and garbage collection overhead on every render.
+            const data = rawData.map(item => ({
+                ...item,
+                changedAt: new Date(item.changedAt)
+            }));
 
             if (isMounted) {
                 setToCache(taskId, data);
@@ -178,7 +186,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
               {formattedHistory.map((item) => (
                 <li key={item.id} className="text-sm border-b pb-2">
                   <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span suppressHydrationWarning>{item.formattedDate}</span>
+                    <span suppressHydrationWarning>{dateTimeFormatter.format(item.changedAt)}</span>
                     <span className="font-semibold capitalize">{item.changedField}</span>
                   </div>
                   <div>
