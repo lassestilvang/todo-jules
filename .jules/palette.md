@@ -67,3 +67,9 @@
 ## 2026-08-05 - Custom 404 Pages for App Router
 **Learning:** Next.js App Router applications provide an unstyled, generic 404 page by default if `not-found.tsx` is omitted. This creates a jarring UX when users hit a broken link or an invalid URL.
 **Action:** Always implement a custom `src/app/not-found.tsx` in Next.js applications containing a branded empty state and a clear call-to-action (like returning to the home page) to provide a better user experience.
+## 2024-11-20 - Custom Not Found Page
+**Learning:** By default, Next.js provides a plain, unbranded 404 page. Navigating to a non-existent URL is jarring if it breaks the applications design system.
+**Action:** To improve UX in a Next.js App Router application, implement a custom `src/app/not-found.tsx` containing a branded empty state and a clear call-to-action (like returning to the home page).
+## 2024-08-02 - Hide Shortcut Hints on Button Focus
+**Learning:** Adding global keyboard shortcut hints (like `<kbd>Cmd+Enter</kbd>`) as absolute overlays on action buttons provides helpful power-user discoverability. However, when keyboard users naturally tab to the button, the `<kbd>` element remains visible on top of the focus state, creating visual clutter and confusing redundancy (since they can just press 'Enter' directly when focused).
+**Action:** When placing visual `<kbd>` shortcut hints on interactive buttons, always add the `group` class to the button and use `group-focus-visible:opacity-0 group-focus-within:opacity-0` (or similar focus-based utility classes) on the hint to gracefully fade it out when the button receives focus.
