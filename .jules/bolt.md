@@ -121,3 +121,7 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-07-23 - Precompute date allocations in frequently rendered components
 **Learning:** Instantiating `new Date()` directly within the JSX of frequently rendered components (like list items in a drag-and-drop interface) causes unnecessary memory allocations on every render. This increases garbage collection overhead and can lead to micro-stutters during rapid re-renders (like scrolling or dragging).
 **Action:** Always precompute allocations (like `new Date()`) and derive necessary boolean flags (like `isOverdue`) at the top of the component render body, storing them in variables to minimize inline instantiations and reduce GC pressure.
+
+## 2026-08-05 - Precompute allocations in JSX loops
+**Learning:** Instantiating `new Date()` and invoking `Intl.DateTimeFormat.format()` inline inside JSX `.map()` loops causes redundant memory allocations and computationally expensive processing on every render.
+**Action:** Always precompute formatted date strings using `useMemo` outside of the render cycle when iterating over lists of items, passing the precomputed string to the JSX.
