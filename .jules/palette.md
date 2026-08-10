@@ -64,6 +64,9 @@
 **Learning:** Hardcoding directional copy (like "below") in default props for reusable empty state components creates confusing UX when the component is rendered on pages that don't have the referenced element (like a form) nearby.
 **Action:** When designing reusable empty state components, default to non-directional copy to ensure the component remains context-independent.
 
+## 2026-08-08 - Branded Custom 404 Page
+**Learning:** Next.js default 404 pages are unstyled and provide a poor user experience that breaks out of the application's design system. Creating a custom `src/app/not-found.tsx` allows you to provide a branded, themed empty state with actionable recovery links.
+**Action:** When working in Next.js App Router applications, always implement a custom `not-found.tsx` empty state that uses the project's semantic theme variables and includes a clear call-to-action (like returning home) to prevent dead-end user experiences.
 ## 2026-08-05 - Custom 404 Pages for App Router
 **Learning:** Next.js App Router applications provide an unstyled, generic 404 page by default if `not-found.tsx` is omitted. This creates a jarring UX when users hit a broken link or an invalid URL.
 **Action:** Always implement a custom `src/app/not-found.tsx` in Next.js applications containing a branded empty state and a clear call-to-action (like returning to the home page) to provide a better user experience.
