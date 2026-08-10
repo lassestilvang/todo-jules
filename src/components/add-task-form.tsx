@@ -168,13 +168,13 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
       <Button
         type="submit"
         disabled={isPending}
-        className="w-full relative"
+        className="w-full relative group"
         aria-keyshortcuts={isPending ? undefined : "Meta+Enter Control+Enter"}
       >
         {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Adding...</> : (
             <>
                 Add Task
-                <kbd className="absolute right-4 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex pointer-events-none">
+                <kbd className="absolute right-4 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex pointer-events-none transition-opacity group-focus-visible:opacity-0 group-focus-within:opacity-0">
                     <span className="text-xs">⌘/Ctrl Enter</span>
                 </kbd>
             </>
