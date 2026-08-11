@@ -41,10 +41,20 @@ const TaskComponent = ({ task }: TaskProps) => {
   // ⚡ Bolt Optimization: Precompute Date objects
   // Why: Instantiating `new Date()` multiple times inline within the JSX of list items causes unnecessary memory allocation and garbage collection overhead on every render.
   // Impact: Reduces object creation by up to 5x per task item, significantly improving rendering performance for large lists.
-  const now = new Date();
-  const taskDateObj = task.date ? new Date(task.date) : null;
-  const taskDeadlineObj = task.deadline ? new Date(task.deadline) : null;
-  const isOverdue = taskDeadlineObj && !optimisticCompleted ? taskDeadlineObj < now : false;
+
+  // ⚡ Bolt Optimization: Precompute formatted dates using useMemo
+  // Why: Invoking `Intl.DateTimeFormat.format()` and `new Date()` inside the JSX loop
+  // causes redundant processing and memory allocation on every render.
+  const formattedDate = React.useMemo(() => task.date ? dateFormatter.format(new Date(task.date)) : null, [task.date]);
+
+  const { isOverdue, formattedDeadline } = React.useMemo(() => {
+    if (!task.deadline) return { isOverdue: false, formattedDeadline: null };
+    const deadlineDate = new Date(task.deadline);
+    return {
+      isOverdue: deadlineDate < new Date(),
+      formattedDeadline: dateFormatter.format(deadlineDate)
+    };
+  }, [task.deadline]);
 
   const handleToggle = async (checked: boolean) => {
     // ⚡ Bolt Optimization: Synchronous startTransition for Optimistic Updates
@@ -140,20 +150,20 @@ const TaskComponent = ({ task }: TaskProps) => {
             )}
 
             <div className="flex flex-wrap gap-2 mt-2">
-                {taskDateObj && (
+                {formattedDate && (
                     <div className="flex items-center text-xs text-muted-foreground" title="Date">
                         <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
                         <span className="sr-only">Date: </span>
-                        <span suppressHydrationWarning>{dateFormatter.format(taskDateObj!)}</span>
+                        <span suppressHydrationWarning>{formattedDate}</span>
                     </div>
                 )}
-                 {task.deadline && (
-                    <div className={`flex items-center text-xs ${optimisticCompleted ? 'text-muted-foreground' : (isOverdue ? 'text-destructive' : 'text-muted-foreground')}`} title={!optimisticCompleted && isOverdue ? "Overdue deadline" : "Deadline"} suppressHydrationWarning>
+                 {formattedDeadline && (
+                    <div className={`flex items-center text-xs ${optimisticCompleted ? 'text-muted-foreground' : (isOverdue && !optimisticCompleted ? 'text-destructive' : 'text-muted-foreground')}`} title={!optimisticCompleted && isOverdue ? "Overdue deadline" : "Deadline"} suppressHydrationWarning>
                         <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
                         <span className="sr-only">
                             {!optimisticCompleted && isOverdue ? 'Overdue deadline: ' : 'Deadline: '}
                         </span>
-                        <span className={optimisticCompleted ? 'line-through' : ''} suppressHydrationWarning>{dateFormatter.format(taskDeadlineObj!)}</span>
+                        <span className={optimisticCompleted ? 'line-through' : ''} suppressHydrationWarning>{formattedDeadline}</span>
                     </div>
                 )}
             </div>
