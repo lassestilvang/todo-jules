@@ -11,3 +11,7 @@
 **Vulnerability:** The application was missing Cross-Origin-Opener-Policy and Cross-Origin-Resource-Policy headers in `next.config.ts`. This gap left the application more vulnerable to cross-origin data leakage and side-channel attacks like Spectre.
 **Learning:** Even if an application uses modern frameworks like Next.js, relying solely on default settings is insufficient. Implementing defense-in-depth measures, such as setting COOP and CORP to `same-origin`, ensures that sensitive data processed in the browser is isolated from malicious cross-origin documents.
 **Prevention:** Always verify that security headers (COOP, CORP, CSP, etc.) are explicitly defined and appropriately configured for all endpoints, including static and server-rendered routes.
+
+## 2026-08-06 - Preserve duplicate defense-in-depth security headers
+**Learning:** In configuration files like `next.config.ts`, what appears to be a duplicate security header (like `Cross-Origin-Opener-Policy`) may actually be a deliberate fallback mechanism to ensure older browsers respect a less restrictive policy while newer browsers apply a more secure `same-origin` policy. Removing these perceived duplicates degrades the application's defense-in-depth posture against side-channel attacks.
+**Action:** Never remove perceived duplicate security headers without fully understanding their fallback behavior. Focus strictly on adding missing protections or fixing verifiable vulnerabilities.
