@@ -125,3 +125,7 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-08-05 - Precompute allocations in JSX loops
 **Learning:** Instantiating `new Date()` and invoking `Intl.DateTimeFormat.format()` inline inside JSX `.map()` loops causes redundant memory allocations and computationally expensive processing on every render.
 **Action:** Always precompute formatted date strings using `useMemo` outside of the render cycle when iterating over lists of items, passing the precomputed string to the JSX.
+
+## 2026-08-11 - Precompute allocations in JSX lists
+**Learning:** Instantiating `new Date()` and invoking `Intl.DateTimeFormat.format()` inline inside JSX conditionals within frequently rendered components causes redundant memory allocations and computationally expensive processing on every render, especially inside list items.
+**Action:** Always precompute formatted date strings using `useMemo` outside of the render cycle for frequently rendered elements, passing the precomputed string directly to the JSX.
