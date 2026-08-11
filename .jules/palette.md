@@ -79,3 +79,6 @@
 ## 2024-08-02 - Hide Shortcut Hints on Button Focus
 **Learning:** Adding global keyboard shortcut hints (like `<kbd>Cmd+Enter</kbd>`) as absolute overlays on action buttons provides helpful power-user discoverability. However, when keyboard users naturally tab to the button, the `<kbd>` element remains visible on top of the focus state, creating visual clutter and confusing redundancy (since they can just press 'Enter' directly when focused).
 **Action:** When placing visual `<kbd>` shortcut hints on interactive buttons, always add the `group` class to the button and use `group-focus-visible:opacity-0 group-focus-within:opacity-0` (or similar focus-based utility classes) on the hint to gracefully fade it out when the button receives focus.
+## 2024-05-15 - ARIA label on Icon-only Theme Toggle
+**Learning:** Icon-only buttons without an explicit accessible label create a confusing experience for screen reader users, as the underlying SVG typically has `aria-hidden="true"` resulting in an unlabeled interactive element.
+**Action:** Always add an `aria-label` directly to `<Button size="icon">` components.
