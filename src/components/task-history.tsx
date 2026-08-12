@@ -183,10 +183,12 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
             </div>
           ) : (
             <ul className="space-y-4">
+              {/* ⚡ Bolt Optimization: Render precomputed formattedDate
+                  Why: Avoids invoking Intl.DateTimeFormat.format() on every list item render */}
               {formattedHistory.map((item) => (
                 <li key={item.id} className="text-sm border-b pb-2">
                   <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span suppressHydrationWarning>{dateTimeFormatter.format(item.changedAt)}</span>
+                    <span suppressHydrationWarning>{item.formattedDate}</span>
                     <span className="font-semibold capitalize">{item.changedField}</span>
                   </div>
                   <div>
