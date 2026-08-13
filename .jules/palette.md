@@ -82,3 +82,7 @@
 ## 2024-05-15 - ARIA label on Icon-only Theme Toggle
 **Learning:** Icon-only buttons without an explicit accessible label create a confusing experience for screen reader users, as the underlying SVG typically has `aria-hidden="true"` resulting in an unlabeled interactive element.
 **Action:** Always add an `aria-label` directly to `<Button size="icon">` components.
+
+## 2026-10-30 - Redundant sr-only in aria-labeled buttons
+**Learning:** Placing a `<span className="sr-only">` inside a button that already has an explicit `aria-label` attribute creates redundant text. Screen readers may announce the text twice (e.g., "Toggle theme, button, Toggle theme"), creating a stuttering effect that harms accessibility.
+**Action:** When a button or interactive element has a comprehensive `aria-label`, avoid nesting additional `sr-only` descriptive text within it to ensure a clean, singular screen reader announcement.
