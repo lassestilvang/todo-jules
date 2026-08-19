@@ -119,15 +119,12 @@ export async function PUT(
         }
 
         if (toUpdate.length > 0) {
-          const CHUNK_SIZE = 100;
-          for (let i = 0; i < toUpdate.length; i += CHUNK_SIZE) {
-            const chunk = toUpdate.slice(i, i + CHUNK_SIZE);
-
+          const updateBatch = (items: typeof toUpdate) => {
             const nameChunks: import('drizzle-orm').SQL[] = [];
             const completedChunks: import('drizzle-orm').SQL[] = [];
             const ids: number[] = [];
 
-            for (const item of chunk) {
+            for (const item of items) {
               nameChunks.push(sql`when ${item.id} then ${item.name}`);
               completedChunks.push(sql`when ${item.id} then ${item.completed ? 1 : 0}`);
               ids.push(item.id!);
@@ -150,6 +147,15 @@ export async function PUT(
                 )
               )
               .run();
+          };
+
+          if (toUpdate.length <= 100) {
+            updateBatch(toUpdate);
+          } else {
+            const CHUNK_SIZE = 100;
+            for (let i = 0; i < toUpdate.length; i += CHUNK_SIZE) {
+              updateBatch(toUpdate.slice(i, i + CHUNK_SIZE));
+            }
           }
         }
       }

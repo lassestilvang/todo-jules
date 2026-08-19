@@ -135,6 +135,11 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 **Learning:** Instantiating `new Date()` and invoking `Intl.DateTimeFormat.format()` inline inside JSX `.map()` loops causes redundant memory allocations and computationally expensive processing on every render.
 **Action:** Always precompute formatted date strings using `useMemo` outside of the render cycle when iterating over lists of items, passing the precomputed string to the JSX.
 
+## 2025-05-18 - Fast-path Subtask Batch Updates
+
+**Learning:** When performing bulk updates via `sql` CASE expressions in Drizzle ORM / SQLite, slice/chunk logic over array collections adds array allocation and loop iteration overhead when subtask counts are small (<= 100 items).
+
+**Action:** Extracted the batch update statement generation into a reusable helper function `updateBatch`, fast-pathing `toUpdate.length <= 100` directly while preserving chunking safety for larger payload sizes.
 ## 2026-08-19 - Optimization of Task Label Attachment and Metadata Recalculation
 **Learning:** Early returning on empty base arrays in `attachLabelsToTasks` avoids unnecessary array iterations and object allocations. Additionally, reusing pre-computed `totalPages` in response metadata avoids redundant `Math.ceil` floating-point calculations.
 **Action:** Always check array length before mapping and pre-calculate pagination metadata variables once per request handler.
