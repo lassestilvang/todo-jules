@@ -4,6 +4,8 @@ import { eq, inArray } from 'drizzle-orm';
 
 // Helper to reconstruct labels for tasks
 export function attachLabelsToTasks(baseTasks: (typeof tasks.$inferSelect)[]) {
+  if (baseTasks.length === 0) return [];
+
   const taskIds = baseTasks.map(t => t.id);
   const labelsByTaskId: Record<number, { taskId: number; label: typeof labels.$inferSelect }[]> = {};
 
