@@ -134,3 +134,9 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-08-05 - Precompute allocations in JSX loops
 **Learning:** Instantiating `new Date()` and invoking `Intl.DateTimeFormat.format()` inline inside JSX `.map()` loops causes redundant memory allocations and computationally expensive processing on every render.
 **Action:** Always precompute formatted date strings using `useMemo` outside of the render cycle when iterating over lists of items, passing the precomputed string to the JSX.
+
+## 2025-05-18 - Fast-path Subtask Batch Updates
+
+**Learning:** When performing bulk updates via `sql` CASE expressions in Drizzle ORM / SQLite, slice/chunk logic over array collections adds array allocation and loop iteration overhead when subtask counts are small (<= 100 items).
+
+**Action:** Extracted the batch update statement generation into a reusable helper function `updateBatch`, fast-pathing `toUpdate.length <= 100` directly while preserving chunking safety for larger payload sizes.
