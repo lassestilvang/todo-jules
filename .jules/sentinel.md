@@ -15,3 +15,7 @@
 ## 2026-08-06 - Preserve duplicate defense-in-depth security headers
 **Learning:** In configuration files like `next.config.ts`, what appears to be a duplicate security header (like `Cross-Origin-Opener-Policy`) may actually be a deliberate fallback mechanism to ensure older browsers respect a less restrictive policy while newer browsers apply a more secure `same-origin` policy. Removing these perceived duplicates degrades the application's defense-in-depth posture against side-channel attacks.
 **Action:** Never remove perceived duplicate security headers without fully understanding their fallback behavior. Focus strictly on adding missing protections or fixing verifiable vulnerabilities.
+## 2024-05-24 - Unbounded Data Fetching in Task History
+**Vulnerability:** The `getTaskHistory` server action used a `db.select().from(taskHistory).where(...).all()` query without a `.limit()` clause, returning an unbounded number of records.
+**Learning:** In applications where users can rapidly generate state changes (like task updates), fetching the entire history logs can lead to memory exhaustion and server-side DoS if an attacker automates thousands of updates on a single task.
+**Prevention:** Always enforce a `.limit()` clause on database queries that fetch lists of user-generated records, especially for historical or audit logs that grow linearly over time.
