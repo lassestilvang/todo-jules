@@ -15,3 +15,7 @@
 ## 2026-08-06 - Preserve duplicate defense-in-depth security headers
 **Learning:** In configuration files like `next.config.ts`, what appears to be a duplicate security header (like `Cross-Origin-Opener-Policy`) may actually be a deliberate fallback mechanism to ensure older browsers respect a less restrictive policy while newer browsers apply a more secure `same-origin` policy. Removing these perceived duplicates degrades the application's defense-in-depth posture against side-channel attacks.
 **Action:** Never remove perceived duplicate security headers without fully understanding their fallback behavior. Focus strictly on adding missing protections or fixing verifiable vulnerabilities.
+## 2025-05-31 - Missing Pagination Offset Bounds
+**Vulnerability:** The Next.js API routes for fetching tasks by day/upcoming (`getTasksForToday`, `getTasksForUpcoming`, `getTasksForNext7Days`) and their corresponding Server Actions fetched tasks without applying a maximum `.limit()`. This allows unbounded data retrieval, creating a Denial of Service (DoS) risk through memory exhaustion and database performance degradation.
+**Learning:** Even constrained queries like fetching tasks for a single day can return an unbounded number of records if the underlying user input or dataset grows large enough.
+**Prevention:** When using Drizzle ORM to fetch multiple records (e.g., `db.select().from(...).all()`), always include a `.limit()` clause to prevent unbounded data fetching vulnerabilities that could lead to memory exhaustion or Denial of Service (DoS).
