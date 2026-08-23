@@ -86,3 +86,6 @@
 ## 2026-10-30 - Redundant sr-only in aria-labeled buttons
 **Learning:** Placing a `<span className="sr-only">` inside a button that already has an explicit `aria-label` attribute creates redundant text. Screen readers may announce the text twice (e.g., "Toggle theme, button, Toggle theme"), creating a stuttering effect that harms accessibility.
 **Action:** When a button or interactive element has a comprehensive `aria-label`, avoid nesting additional `sr-only` descriptive text within it to ensure a clean, singular screen reader announcement.
+## $(date +%Y-%m-%d) - Add Tooltips to Truncated Elements
+**Learning:** Truncating text with CSS (e.g., `truncate` or `line-clamp-*`) makes interfaces look clean but hides information. Missing native `title` attributes on truncated elements degrades usability.
+**Action:** When applying truncation classes, always add a native HTML `title` attribute with the full text to ensure users can access the complete information via hover.
