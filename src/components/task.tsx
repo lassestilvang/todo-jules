@@ -146,7 +146,7 @@ const TaskComponent = ({ task }: TaskProps) => {
             </div>
 
             {task.description && (
-              <p className="text-sm text-muted-foreground line-clamp-2">{task.description}</p>
+              <p className="text-sm text-muted-foreground line-clamp-2" title={task.description}>{task.description}</p>
             )}
 
             <div className="flex flex-wrap gap-2 mt-2">
