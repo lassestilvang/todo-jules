@@ -105,7 +105,7 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                                 aria-current={isActive ? "page" : undefined}
                             >
                                 <span className="text-base" aria-hidden="true">{list.emoji}</span>
-                                <span className="truncate">{list.name}</span>
+                                <span className="truncate" title={list.name}>{list.name}</span>
                             </Link>
                             <Button
                                 variant="ghost"
