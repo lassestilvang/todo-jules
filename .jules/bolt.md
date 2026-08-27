@@ -143,3 +143,7 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-08-19 - Optimization of Task Label Attachment and Metadata Recalculation
 **Learning:** Early returning on empty base arrays in `attachLabelsToTasks` avoids unnecessary array iterations and object allocations. Additionally, reusing pre-computed `totalPages` in response metadata avoids redundant `Math.ceil` floating-point calculations.
 **Action:** Always check array length before mapping and pre-calculate pagination metadata variables once per request handler.
+
+## 2026-09-02 - Missing order tracking in drag-and-drop queries
+**Learning:** Adding an `order` field to a table schema for drag-and-drop functionality is insufficient if the database queries fetching the records do not explicitly include `asc(table.order)` in their `orderBy` clauses. Failing to sort by `order` causes the application to ignore user-defined sequences.
+**Action:** Always verify that the database queries fetching sortable entities explicitly include the sorting field (e.g., `asc(tasks.order)`) as the primary or secondary sort criteria.
