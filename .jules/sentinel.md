@@ -15,3 +15,7 @@
 ## 2026-08-06 - Preserve duplicate defense-in-depth security headers
 **Learning:** In configuration files like `next.config.ts`, what appears to be a duplicate security header (like `Cross-Origin-Opener-Policy`) may actually be a deliberate fallback mechanism to ensure older browsers respect a less restrictive policy while newer browsers apply a more secure `same-origin` policy. Removing these perceived duplicates degrades the application's defense-in-depth posture against side-channel attacks.
 **Action:** Never remove perceived duplicate security headers without fully understanding their fallback behavior. Focus strictly on adding missing protections or fixing verifiable vulnerabilities.
+## 2026-08-30 - Fix Rate Limit Evasion DoS
+**Vulnerability:** The rate limiter aggressively cleared the entire IP map when the entry count exceeded 10,000, intended to prevent memory exhaustion DoS. However, an attacker could spoof 10,000 IPs to force the map to constantly clear, effectively bypassing the rate limit for their real IP.
+**Learning:** Overly aggressive DoS mitigations that discard global state can inadvertently create authentication or rate limit evasion pathways.
+**Prevention:** Rather than flushing the entire rate limit map `rateLimitMap.clear()` during memory protection bounds checks, gracefully evict only the oldest element (`rateLimitMap.delete(rateLimitMap.keys().next().value)`) to maintain state for active legitimate users while remaining below the memory threshold limit.
