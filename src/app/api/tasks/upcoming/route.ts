@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     // ⚡ Bolt Optimization: Appended `.all()` and removed `await` to execute the query synchronously and eliminate microtask overhead.
     const allTasks = db.select().from(tasks).where(
       gte(tasks.date, today)
-    ).all();
+    ).limit(50).all();
     return NextResponse.json(allTasks);
   } catch (error) {
     console.error('Error fetching upcoming tasks:', error instanceof Error ? error.message : 'Unknown error');
