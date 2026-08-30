@@ -89,3 +89,6 @@
 ## $(date +%Y-%m-%d) - Native Tooltips for Truncated Text
 **Learning:** When visually truncating text in UI components using CSS classes like `truncate` or `line-clamp-*`, users lose access to the full content if they cannot hover to reveal it.
 **Action:** Always add a native HTML `title` attribute containing the full text to visually truncated elements to ensure users can read the complete content on hover.
+## $(date +%Y-%m-%d) - Add Tooltips to Truncated Elements
+**Learning:** Truncating text with CSS (e.g., `truncate` or `line-clamp-*`) makes interfaces look clean but hides information. Missing native `title` attributes on truncated elements degrades usability.
+**Action:** When applying truncation classes, always add a native HTML `title` attribute with the full text to ensure users can access the complete information via hover.

@@ -48,6 +48,7 @@ export const DateTimePicker = React.memo(function DateTimePicker({ date, setDate
               date ? "pr-10" : "",
               !date && "text-muted-foreground"
             )}
+            title={date ? format(date, "PPP p") : label || "Pick a date"}
           >
             <CalendarIcon className="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="flex-1 truncate text-left" title={date ? format(date, "PPP p") : label || "Pick a date"}>

@@ -104,6 +104,7 @@ const TaskComponent = ({ task }: TaskProps) => {
                 checked={optimisticCompleted}
                 onCheckedChange={handleToggle}
                 aria-label={`Mark ${task.name} as ${optimisticCompleted ? 'incomplete' : 'complete'}`}
+                title={`Mark as ${optimisticCompleted ? 'incomplete' : 'complete'}`}
             />
           </div>
 
