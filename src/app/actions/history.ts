@@ -20,6 +20,7 @@ export async function getTaskHistory(taskId: number) {
       .from(taskHistory)
       .where(eq(taskHistory.taskId, taskId))
       .orderBy(desc(taskHistory.changedAt))
+      .limit(100) // 🛡️ Sentinel: Prevent unbounded data fetching (Memory DoS)
       .all();
     return history;
   } catch (error) {

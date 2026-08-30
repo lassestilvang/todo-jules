@@ -55,6 +55,7 @@ export async function getTasksForToday() {
     .from(tasks)
     .where(and(gte(tasks.date, start), lte(tasks.date, end)))
     .orderBy(asc(tasks.date))
+    .limit(50)
     .all();
 
   return attachLabelsToTasks(baseTasks);
@@ -70,6 +71,7 @@ export async function getTasksForUpcoming() {
     .from(tasks)
     .where(gte(tasks.date, end))
     .orderBy(asc(tasks.date))
+    .limit(50)
     .all();
 
   return attachLabelsToTasks(baseTasks);
@@ -85,6 +87,7 @@ export async function getTasksForNext7Days() {
     .from(tasks)
     .where(and(gte(tasks.date, start), lte(tasks.date, end)))
     .orderBy(asc(tasks.date))
+    .limit(50)
     .all();
 
   return attachLabelsToTasks(baseTasks);
