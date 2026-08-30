@@ -2,6 +2,11 @@ import { db } from '@/lib/db';
 import { taskLabels, labels, tasks } from '@/lib/schema';
 import { eq, inArray } from 'drizzle-orm';
 
+// ⚡ Bolt Optimization: Cache empty array reference
+// Why: Prevents creating a new empty array reference for every task that doesn't have labels,
+// reducing memory allocations and garbage collection overhead during large task list fetches.
+const EMPTY_LABELS: never[] = [];
+
 // Helper to reconstruct labels for tasks
 export function attachLabelsToTasks(baseTasks: (typeof tasks.$inferSelect)[]) {
   if (baseTasks.length === 0) return [];
@@ -31,6 +36,6 @@ export function attachLabelsToTasks(baseTasks: (typeof tasks.$inferSelect)[]) {
 
   return baseTasks.map(task => ({
     ...task,
-    labels: labelsByTaskId[task.id] || []
+    labels: labelsByTaskId[task.id] || EMPTY_LABELS
   }));
 }
