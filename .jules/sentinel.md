@@ -15,6 +15,11 @@
 ## 2026-08-06 - Preserve duplicate defense-in-depth security headers
 **Learning:** In configuration files like `next.config.ts`, what appears to be a duplicate security header (like `Cross-Origin-Opener-Policy`) may actually be a deliberate fallback mechanism to ensure older browsers respect a less restrictive policy while newer browsers apply a more secure `same-origin` policy. Removing these perceived duplicates degrades the application's defense-in-depth posture against side-channel attacks.
 **Action:** Never remove perceived duplicate security headers without fully understanding their fallback behavior. Focus strictly on adding missing protections or fixing verifiable vulnerabilities.
+
+## 2026-09-08 - Overriding dependencies prevents security updates
+**Vulnerability:** Next.js was explicitly pinned to a vulnerable version (`16.2.6`) inside the `pnpm.overrides` section of `package.json`, preventing automated security updates and exposing the application to multiple Cache Confusion and Denial of Service (DoS) vulnerabilities.
+**Learning:** Hardcoding application framework versions in dependency overrides bypasses standard vulnerability resolution workflows and locks the project to insecure releases.
+**Prevention:** Avoid placing primary frameworks like Next.js in `pnpm.overrides` unless absolutely necessary to resolve a temporary subdependency conflict, and ensure such overrides are strictly version-bounded (e.g., `>=`) rather than exactly pinned.
 ## 2024-05-18 - Attempt to prevent unbounded data fetching in APIs
 
 **Vulnerability:** API routes and server actions (`getTasksForToday`, `getTasksForUpcoming`, `getLists`, etc.) fetched data using `db.select().from(...).all()` without a `.limit()` clause. An attacker could potentially cause resource exhaustion (Memory DoS) by populating thousands of items.
