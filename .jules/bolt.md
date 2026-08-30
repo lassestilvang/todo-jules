@@ -143,3 +143,7 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-08-19 - Optimization of Task Label Attachment and Metadata Recalculation
 **Learning:** Early returning on empty base arrays in `attachLabelsToTasks` avoids unnecessary array iterations and object allocations. Additionally, reusing pre-computed `totalPages` in response metadata avoids redundant `Math.ceil` floating-point calculations.
 **Action:** Always check array length before mapping and pre-calculate pagination metadata variables once per request handler.
+
+## 2026-10-24 - Extract inline fallback empty arrays to static constants
+**Learning:** Using an inline fallback (like `|| []` or `prop = []`) creates a new array reference on every execution/render. In React, this can trigger unnecessary re-renders in child components that consume these props, and during large list map operations, it increases memory allocation and garbage collection overhead.
+**Action:** Extract inline fallback empty arrays into module-level constants (e.g., `const EMPTY_ARRAY: never[] = [];`) to stabilize object references and minimize redundant memory allocations.
