@@ -44,7 +44,11 @@ export function getIp(request: Request): string {
 export function rateLimit(identifier: string, limit: number, windowMs: number) {
   // 🛡️ Sentinel: Prevent Memory Exhaustion DoS via unbounded Map growth from IP spoofing
   if (rateLimitMap.size > 10000) {
-    rateLimitMap.clear();
+    // Evict the oldest entry instead of clearing the entire map to prevent rate limit evasion
+    const firstKey = rateLimitMap.keys().next().value;
+    if (firstKey) {
+      rateLimitMap.delete(firstKey);
+    }
   }
 
   const now = Date.now();
