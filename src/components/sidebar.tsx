@@ -26,9 +26,13 @@ const links = [
   { href: '/upcoming', label: 'Upcoming', icon: LayoutList },
 ];
 
-const EMPTY_ARRAY: never[] = [];
+// ⚡ Bolt Optimization: Extract default empty array prop
+// Why: Using an inline fallback (initialLists = []) creates a new array reference
+// on every render if the prop is undefined, potentially triggering unnecessary
+// re-renders in child components. Extracting to a module-level constant preserves reference equality.
+const EMPTY_LISTS: never[] = [];
 
-const Sidebar = ({ initialLists = EMPTY_ARRAY }: SidebarProps) => {
+const Sidebar = ({ initialLists = EMPTY_LISTS }: SidebarProps) => {
   const pathname = usePathname();
   const [deletingId, setDeletingId] = useState<number | null>(null);
 

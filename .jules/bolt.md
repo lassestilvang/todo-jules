@@ -144,6 +144,9 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 **Learning:** Early returning on empty base arrays in `attachLabelsToTasks` avoids unnecessary array iterations and object allocations. Additionally, reusing pre-computed `totalPages` in response metadata avoids redundant `Math.ceil` floating-point calculations.
 **Action:** Always check array length before mapping and pre-calculate pagination metadata variables once per request handler.
 
+## 2026-10-24 - Extract inline fallback empty arrays to static constants
+**Learning:** Using an inline fallback (like `|| []` or `prop = []`) creates a new array reference on every execution/render. In React, this can trigger unnecessary re-renders in child components that consume these props, and during large list map operations, it increases memory allocation and garbage collection overhead.
+**Action:** Extract inline fallback empty arrays into module-level constants (e.g., `const EMPTY_ARRAY: never[] = [];`) to stabilize object references and minimize redundant memory allocations.
 ## 2026-09-02 - Missing order tracking in drag-and-drop queries
 **Learning:** Adding an `order` field to a table schema for drag-and-drop functionality is insufficient if the database queries fetching the records do not explicitly include `asc(table.order)` in their `orderBy` clauses. Failing to sort by `order` causes the application to ignore user-defined sequences.
 **Action:** Always verify that the database queries fetching sortable entities explicitly include the sorting field (e.g., `asc(tasks.order)`) as the primary or secondary sort criteria.

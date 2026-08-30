@@ -2,11 +2,11 @@ import { db } from '@/lib/db';
 import { taskLabels, labels, tasks } from '@/lib/schema';
 import { eq, inArray } from 'drizzle-orm';
 
+// ⚡ Bolt Optimization: Module-level fallback empty array
+// Why: Prevents creating a new empty array reference on every call for tasks without labels.
+// This stabilizes object references for React component props and reduces memory allocation
+// and garbage collection overhead during large map operations.
 const EMPTY_ARRAY: never[] = [];
-// ⚡ Bolt Optimization: Cache empty array reference
-// Why: Prevents creating a new empty array reference for every task that doesn't have labels,
-// reducing memory allocations and garbage collection overhead during large task list fetches.
-const EMPTY_LABELS: never[] = [];
 
 // Helper to reconstruct labels for tasks
 export function attachLabelsToTasks(baseTasks: (typeof tasks.$inferSelect)[]) {
@@ -38,6 +38,5 @@ export function attachLabelsToTasks(baseTasks: (typeof tasks.$inferSelect)[]) {
   return baseTasks.map(task => ({
     ...task,
     labels: labelsByTaskId[task.id] || EMPTY_ARRAY
-    labels: labelsByTaskId[task.id] || EMPTY_LABELS
   }));
 }
