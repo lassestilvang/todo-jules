@@ -26,7 +26,9 @@ const links = [
   { href: '/upcoming', label: 'Upcoming', icon: LayoutList },
 ];
 
-const Sidebar = ({ initialLists = [] }: SidebarProps) => {
+const EMPTY_ARRAY: never[] = [];
+
+const Sidebar = ({ initialLists = EMPTY_ARRAY }: SidebarProps) => {
   const pathname = usePathname();
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
