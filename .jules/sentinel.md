@@ -20,3 +20,11 @@
 **Vulnerability:** API routes and server actions (`getTasksForToday`, `getTasksForUpcoming`, `getLists`, etc.) fetched data using `db.select().from(...).all()` without a `.limit()` clause. An attacker could potentially cause resource exhaustion (Memory DoS) by populating thousands of items.
 **Learning:** Hardcoding a `.limit(100)` to unbounded queries safely resolves the technical vulnerability but creates a severe functional regression (silent data truncation) if the application UI does not implement proper pagination to handle or indicate the missing items.
 **Prevention:** When enforcing bounded queries, ensure the application architecture (APIs and UI components) properly implements and handles pagination before unconditionally appending `.limit()` to data retrieval logic.
+## 2024-05-24 - Unbounded Data Fetching in Task History
+**Vulnerability:** The `getTaskHistory` server action used a `db.select().from(taskHistory).where(...).all()` query without a `.limit()` clause, returning an unbounded number of records.
+**Learning:** In applications where users can rapidly generate state changes (like task updates), fetching the entire history logs can lead to memory exhaustion and server-side DoS if an attacker automates thousands of updates on a single task.
+**Prevention:** Always enforce a `.limit()` clause on database queries that fetch lists of user-generated records, especially for historical or audit logs that grow linearly over time.
+## 2025-05-31 - Missing Pagination Offset Bounds
+**Vulnerability:** The Next.js API routes for fetching tasks by day/upcoming (`getTasksForToday`, `getTasksForUpcoming`, `getTasksForNext7Days`) and their corresponding Server Actions fetched tasks without applying a maximum `.limit()`. This allows unbounded data retrieval, creating a Denial of Service (DoS) risk through memory exhaustion and database performance degradation.
+**Learning:** Even constrained queries like fetching tasks for a single day can return an unbounded number of records if the underlying user input or dataset grows large enough.
+**Prevention:** When using Drizzle ORM to fetch multiple records (e.g., `db.select().from(...).all()`), always include a `.limit()` clause to prevent unbounded data fetching vulnerabilities that could lead to memory exhaustion or Denial of Service (DoS).
