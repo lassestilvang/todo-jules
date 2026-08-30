@@ -37,6 +37,7 @@ interface CacheEntry {
 const historyCache = new Map<number, CacheEntry>();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const MAX_CACHE_SIZE = 100;
+const EMPTY_ARRAY: never[] = [];
 
 const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
     year: 'numeric', month: 'numeric', day: 'numeric',
@@ -66,7 +67,7 @@ function setToCache(taskId: number, data: HistoryItem[], promise?: Promise<Histo
 }
 
 export function TaskHistory({ taskId }: TaskHistoryProps) {
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [history, setHistory] = useState<HistoryItem[]>(EMPTY_ARRAY);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -111,7 +112,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
         setLoading(true);
         try {
             const fetchPromise = getTaskHistory(taskId);
-            setToCache(taskId, [], fetchPromise);
+            setToCache(taskId, EMPTY_ARRAY, fetchPromise);
 
             const rawData = await fetchPromise;
 

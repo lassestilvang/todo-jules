@@ -26,7 +26,9 @@ const links = [
   { href: '/upcoming', label: 'Upcoming', icon: LayoutList },
 ];
 
-const Sidebar = ({ initialLists = [] }: SidebarProps) => {
+const EMPTY_ARRAY: never[] = [];
+
+const Sidebar = ({ initialLists = EMPTY_ARRAY }: SidebarProps) => {
   const pathname = usePathname();
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -105,7 +107,7 @@ const Sidebar = ({ initialLists = [] }: SidebarProps) => {
                                 aria-current={isActive ? "page" : undefined}
                             >
                                 <span className="text-base" aria-hidden="true">{list.emoji}</span>
-                                <span className="truncate">{list.name}</span>
+                                <span className="truncate" title={list.name}>{list.name}</span>
                             </Link>
                             <Button
                                 variant="ghost"
