@@ -70,7 +70,9 @@ const keyboardSensorOptions = {
   coordinateGetter: sortableKeyboardCoordinates,
 };
 
-export function TaskList({ tasks: initialTasks, emptyStateSubtext = "Get started by adding a new task." }: TaskListProps) {
+const EMPTY_ARRAY: never[] = [];
+
+export function TaskList({ tasks: initialTasks = EMPTY_ARRAY, emptyStateSubtext = "Get started by adding a new task." }: TaskListProps) {
   const [optimisticTasks, setOptimisticTasks] = useOptimistic(
     initialTasks,
     (state, newOrder: Task[]) => newOrder
