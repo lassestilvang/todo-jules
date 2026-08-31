@@ -38,6 +38,7 @@ const Header = () => {
             ref={inputRef}
             id="header-search-input"
             type="search"
+            aria-keyshortcuts="/"
             placeholder="Search tasks..."
             className="w-full pl-9 pr-8 bg-muted border-transparent text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring"
             value={query}
