@@ -1,7 +1,8 @@
-## 2026-04-13
+## 2026-06-03 - Separate Optimistic UI updates from Server Actions in startTransition
 
-**Performance Optimization for Database Subtask Updates**
+**Learning:** React's `startTransition` expects a synchronous callback for immediate state updates. When combining optimistic UI updates (e.g., using `useOptimistic`) with asynchronous server actions, any state updates or asynchronous operations after an `await` lose the transition context and delay the UI's perceived responsiveness.
 
+**Action:** Split the logic into two distinct `startTransition` calls: a synchronous one for `setOptimisticState` to ensure the UI reacts instantly, and a separate asynchronous one for the server action to maintain the pending state and track the operation's duration.
 - **Problem**: When updating an array of subtasks on the `PUT /api/tasks/[id]` endpoint, using a `for...of` loop sequentially issuing multiple `.update(subtasks)` calls (the N+1 query pattern) dramatically increased execution latency.
 - **Solution**: The sequential loop was substituted with a batched update, utilizing a `CASE` statement inside the `set()` values mapping `subtasks.id` to specific values. Chunking (e.g., 100 items per chunk) was implemented to maintain operations within SQLite bounds.
 - **Impact**: Batching drastically reduced the wait time of individual ORM queries from an initial ~180-220ms benchmark to ~30-50ms (a consistent 65-85% performance enhancement).

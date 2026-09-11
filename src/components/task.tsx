@@ -64,7 +64,10 @@ const TaskComponent = ({ task }: TaskProps) => {
     });
     startTransition(async () => {
       try {
-        await toggleTaskCompletion(task.id, checked);
+        const result = await toggleTaskCompletion(task.id, checked);
+        if (!result.success) {
+          toast.error('Failed to update task status');
+        }
       } catch {
         toast.error('Failed to update task status');
       }
