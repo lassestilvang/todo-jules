@@ -26,6 +26,7 @@ import { toast } from 'sonner';
 
 interface TaskListProps {
   tasks: Task[];
+  emptyStateSubtext?: string;
 }
 
 interface SortableTaskItemProps {
@@ -51,14 +52,27 @@ const SortableTaskItem = React.memo(function SortableTaskItemComponent({ task }:
     };
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        <div
+          ref={setNodeRef}
+          style={style}
+          {...attributes}
+          {...listeners}
+          className={`rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          tabIndex={0}
+        >
             <TaskComponent task={task} />
         </div>
     );
 });
 
 
-export function TaskList({ tasks: initialTasks }: TaskListProps) {
+const keyboardSensorOptions = {
+  coordinateGetter: sortableKeyboardCoordinates,
+};
+
+const EMPTY_ARRAY: never[] = [];
+
+export function TaskList({ tasks: initialTasks = EMPTY_ARRAY, emptyStateSubtext = "Get started by adding a new task." }: TaskListProps) {
   const [optimisticTasks, setOptimisticTasks] = useOptimistic(
     initialTasks,
     (state, newOrder: Task[]) => newOrder
@@ -67,9 +81,7 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
 
   const sensors = useSensors(
     useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    useSensor(KeyboardSensor, keyboardSensorOptions)
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -110,12 +122,19 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
             throw new Error(result.error || "Failed to reorder tasks");
           }
         } catch (err) {
-          console.error(err);
+          console.error(err instanceof Error ? err.message : String(err));
           toast.error("Failed to save new order");
         }
       });
     }
   };
+
+  // ⚡ Bolt Optimization: Memoize task IDs array for SortableContext
+  // Why: SortableContext triggers expensive cascading re-renders across the
+  // entire drag-and-drop tree if the `items` array reference changes. By
+  // memoizing the mapped task IDs array, we ensure SortableContext only updates
+  // when the actual order or composition of tasks changes, not on every render.
+  const taskIds = React.useMemo(() => optimisticTasks.map(t => t.id), [optimisticTasks]);
 
   if (optimisticTasks.length === 0) {
     return (
@@ -125,7 +144,7 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
         </div>
         <h3 className="text-lg font-medium text-foreground">No tasks found</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          Get started by adding a new task below.
+          {emptyStateSubtext}
         </p>
       </div>
     );
@@ -138,7 +157,7 @@ export function TaskList({ tasks: initialTasks }: TaskListProps) {
       onDragEnd={handleDragEnd}
     >
       <SortableContext
-        items={optimisticTasks.map(t => t.id)}
+        items={taskIds}
         strategy={verticalListSortingStrategy}
       >
         <div className="space-y-4">

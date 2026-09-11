@@ -10,6 +10,9 @@ import { createTaskSchema, updateTaskSchema } from '@/lib/validators';
 import { z } from 'zod';
 import { invalidateTaskCountCache } from '@/lib/cache';
 import { attachLabelsToTasks } from '@/lib/task-utils';
+import { HistoryLog } from '@/lib/history';
+import { headers } from 'next/headers';
+import { rateLimit, getIpFromHeaders } from '@/lib/rate-limit';
 
 // Helper to get today's start and end timestamps
 const getTodayRange = () => {
@@ -28,52 +31,73 @@ const getNext7DaysRange = () => {
 };
 
 export async function getTasksForInbox() {
-  const baseTasks = await db.select()
+  const ip = getIpFromHeaders(await headers());
+  const { success } = rateLimit(`tasks_inbox_get_${ip}`, 100, 60 * 1000);
+  if (!success) throw new Error('Too many requests');
+
+  const baseTasks = db.select()
     .from(tasks)
     .where(isNull(tasks.listId))
     .limit(50)
     .orderBy(desc(tasks.createdAt))
     .all();
 
-  return await attachLabelsToTasks(baseTasks);
+  return attachLabelsToTasks(baseTasks);
 }
 
 export async function getTasksForToday() {
+  const ip = getIpFromHeaders(await headers());
+  const { success } = rateLimit(`tasks_today_get_${ip}`, 100, 60 * 1000);
+  if (!success) throw new Error('Too many requests');
+
   const { start, end } = getTodayRange();
-  const baseTasks = await db.select()
+  const baseTasks = db.select()
     .from(tasks)
     .where(and(gte(tasks.date, start), lte(tasks.date, end)))
     .orderBy(asc(tasks.date))
+    .limit(50)
     .all();
 
-  return await attachLabelsToTasks(baseTasks);
+  return attachLabelsToTasks(baseTasks);
 }
 
 export async function getTasksForUpcoming() {
+  const ip = getIpFromHeaders(await headers());
+  const { success } = rateLimit(`tasks_upcoming_get_${ip}`, 100, 60 * 1000);
+  if (!success) throw new Error('Too many requests');
+
   const { end } = getTodayRange(); // Tasks after today
-  const baseTasks = await db.select()
+  const baseTasks = db.select()
     .from(tasks)
     .where(gte(tasks.date, end))
     .orderBy(asc(tasks.date))
+    .limit(50)
     .all();
 
-  return await attachLabelsToTasks(baseTasks);
+  return attachLabelsToTasks(baseTasks);
 }
 
 export async function getTasksForNext7Days() {
+  const ip = getIpFromHeaders(await headers());
+  const { success } = rateLimit(`tasks_next7days_get_${ip}`, 100, 60 * 1000);
+  if (!success) throw new Error('Too many requests');
+
   const { start, end } = getNext7DaysRange();
-  const baseTasks = await db.select()
+  const baseTasks = db.select()
     .from(tasks)
     .where(and(gte(tasks.date, start), lte(tasks.date, end)))
     .orderBy(asc(tasks.date))
+    .limit(50)
     .all();
 
-  return await attachLabelsToTasks(baseTasks);
+  return attachLabelsToTasks(baseTasks);
 }
 
-import { HistoryLog } from '@/lib/history';
-
 export async function createTask(data: z.input<typeof createTaskSchema>) {
+  const ip = getIpFromHeaders(await headers());
+  const { success: rateLimitSuccess } = rateLimit(`tasks_post_${ip}`, 100, 60 * 1000);
+  if (!rateLimitSuccess) return { success: false, error: 'Too many requests' };
+
   const validation = createTaskSchema.safeParse(data);
   if (!validation.success) {
       return { success: false, error: validation.error.flatten().fieldErrors };
@@ -82,14 +106,15 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
   try {
     // Extract only the fields belonging to the tasks table to prevent
     // crash or mass assignment vulnerabilities from nested relational data
-    const { subtasks, labels, reminders, attachments, ...taskData } = validation.data;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { subtasks: payloadSubtasks, labels: payloadLabels, reminders: payloadReminders, attachments: payloadAttachments, ...taskData } = validation.data;
 
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.insert(...).returning()` with `db.insert(...).returning().all()`
     // to eliminate microtask overhead and event loop blocking.
     const newTask = db.insert(tasks).values(taskData).returning().get();
-    after(async () => {
-        await logTaskHistory([
+    after(() => {
+        logTaskHistory([
           {
             taskId: newTask.id,
             changedField: 'created',
@@ -103,12 +128,16 @@ export async function createTask(data: z.input<typeof createTaskSchema>) {
     revalidatePath('/', 'layout');
     return { success: true, data: newTask };
   } catch (error) {
-    console.error('Failed to create task:', error);
+    console.error('Failed to create task:', error instanceof Error ? error.message : (typeof error === 'string' ? error : 'Unknown error'));
     return { success: false, error: 'Failed to create task' };
   }
 }
 
 export async function updateTask(id: number, data: Partial<typeof tasks.$inferInsert>) {
+  const ip = getIpFromHeaders(await headers());
+  const { success: rateLimitSuccess } = rateLimit(`tasks_put_${ip}`, 100, 60 * 1000);
+  if (!rateLimitSuccess) return { success: false, error: 'Too many requests' };
+
   if (typeof id !== 'number' || isNaN(id)) {
     return { success: false, error: 'Invalid Task ID' };
   }
@@ -121,21 +150,27 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
   const validatedData = validation.data;
 
   try {
-    const currentTask = await db.query.tasks.findFirst({
-      where: eq(tasks.id, id),
-    });
+    // ⚡ Bolt Optimization: Use core query builder API instead of relational API
+    // Replaced await db.query.tasks.findFirst() with await db.select().from(tasks).where().get()
+    // to optimize query construction while maintaining driver compatibility.
+    const currentTask = await db.select().from(tasks).where(eq(tasks.id, id)).get();
 
     if (!currentTask) return { success: false, error: 'Task not found' };
 
     // Extract only the fields belonging to the tasks table to prevent
     // crash or mass assignment vulnerabilities from nested relational data
-    const { subtasks, labels, reminders, attachments, ...taskData } = validatedData;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { subtasks: payloadSubtasks, labels: payloadLabels, reminders: payloadReminders, attachments: payloadAttachments, ...taskData } = validatedData;
 
-    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
-    // Replaced `await db.update(...).returning()` with `.returning().all()`
-    // to eliminate microtask overhead and event loop blocking.
-    const result = db.update(tasks).set(taskData as Partial<typeof tasks.$inferInsert>).where(eq(tasks.id, id)).returning().all();
-    const updatedTask = result[0];
+    let updatedTask = currentTask;
+
+    if (Object.keys(taskData).length > 0) {
+      // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+      // Replaced `await db.update(...).returning()` with `.returning().all()`
+      // to eliminate microtask overhead and event loop blocking.
+      const result = db.update(tasks).set(taskData as Partial<typeof tasks.$inferInsert>).where(eq(tasks.id, id)).returning().all();
+      updatedTask = result[0] ?? currentTask;
+    }
 
     // Log history for changed fields
     const historyLogs: HistoryLog[] = [];
@@ -154,19 +189,23 @@ export async function updateTask(id: number, data: Partial<typeof tasks.$inferIn
       }
     }
 
-    after(async () => {
-        await logTaskHistory(historyLogs);
+    after(() => {
+        logTaskHistory(historyLogs);
     });
 
     revalidatePath('/', 'layout');
     return { success: true, data: updatedTask };
   } catch (error) {
-    console.error('Failed to update task:', error);
+    console.error('Failed to update task:', error instanceof Error ? error.message : 'Unknown error');
     return { success: false, error: 'Failed to update task' };
   }
 }
 
 export async function deleteTask(id: number) {
+  const ip = getIpFromHeaders(await headers());
+  const { success: rateLimitSuccess } = rateLimit(`tasks_delete_${ip}`, 100, 60 * 1000);
+  if (!rateLimitSuccess) return { success: false, error: 'Too many requests' };
+
   if (typeof id !== 'number' || isNaN(id)) {
     return { success: false, error: 'Invalid Task ID' };
   }
@@ -180,12 +219,16 @@ export async function deleteTask(id: number) {
     revalidatePath('/', 'layout');
     return { success: true };
   } catch (error) {
-    console.error('Failed to delete task:', error);
+    console.error('Failed to delete task:', error instanceof Error ? error.message : 'Unknown error');
     return { success: false, error: 'Failed to delete task' };
   }
 }
 
 export async function toggleTaskCompletion(id: number, completed: boolean) {
+    const ip = getIpFromHeaders(await headers());
+    const { success: rateLimitSuccess } = rateLimit(`tasks_put_${ip}`, 100, 60 * 1000);
+    if (!rateLimitSuccess) return { success: false, error: 'Too many requests' };
+
     if (typeof id !== 'number' || isNaN(id)) {
         return { success: false, error: 'Invalid Task ID' };
     }

@@ -2,6 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from './route';
 import { db } from '@/lib/db';
 
+vi.mock('@/lib/task-utils', () => ({
+  attachLabelsToTasks: vi.fn((tasks) => tasks),
+}));
+
 vi.mock('@/lib/db', () => ({
   db: {
     select: vi.fn(),
@@ -48,7 +52,7 @@ describe('GET /api/search', () => {
     ];
 
     const whereMock = vi.fn().mockReturnValue({
-      limit: vi.fn().mockResolvedValue(mockTasks)
+      limit: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue(mockTasks) })
     });
 
     vi.mocked(db.select).mockReturnValue({
@@ -82,7 +86,7 @@ describe('GET /api/search', () => {
     vi.mocked(db.select).mockReturnValue({
       from: vi.fn().mockReturnValue({
         where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue(mockTasks)
+          limit: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue(mockTasks) })
         })
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -48,11 +49,18 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      e.currentTarget.requestSubmit();
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-sm"
             aria-label="Create new list"
             title="Create new list"
         >
@@ -62,8 +70,12 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Create new list</DialogTitle>
+          <DialogDescription className="sr-only">
+            Fill out the form below to create a new list.
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+        <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="py-4">
+          <fieldset disabled={isPending} className="space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium mb-1">
               Name <span className="text-destructive" aria-hidden="true">*</span>
@@ -103,13 +115,26 @@ const AddListForm = ({ onListAdded }: AddListFormProps) => {
                 onChange={(e) => setEmoji(e.target.value)}
                 maxLength={2}
                 className="w-full"
+                placeholder="📋"
+                aria-describedby="emoji-helper"
                 required
               />
+              <p id="emoji-helper" className="text-[11px] text-muted-foreground mt-1.5">
+                Tip: Press <kbd className="font-mono bg-muted/50 px-1 py-0.5 rounded border border-muted whitespace-nowrap">Win + .</kbd> or <kbd className="font-mono bg-muted/50 px-1 py-0.5 rounded border border-muted whitespace-nowrap">Cmd + Ctrl + Space</kbd>
+              </p>
             </div>
           </div>
-          <Button type="submit" disabled={isPending} className="w-full">
-            {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Creating...</> : 'Create List'}
+          <Button type="submit" disabled={isPending} className="w-full relative group" aria-keyshortcuts={isPending ? undefined : "Meta+Enter Control+Enter"}>
+            {isPending ? <><Loader2 className="animate-spin" aria-hidden="true" /> Creating...</> : (
+              <>
+                Create List
+                <kbd className="absolute right-4 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex pointer-events-none transition-opacity group-focus-visible:opacity-0 group-focus-within:opacity-0">
+                  ⌘/Ctrl Enter
+                </kbd>
+              </>
+            )}
           </Button>
+          </fieldset>
         </form>
       </DialogContent>
     </Dialog>

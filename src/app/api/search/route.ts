@@ -1,10 +1,22 @@
+import { rateLimit, getIp } from '@/lib/rate-limit';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
 import { sql } from 'drizzle-orm';
+import { attachLabelsToTasks } from '@/lib/task-utils';
 
 export async function GET(request: Request) {
   try {
+    const ip = getIp(request);
+    const { success } = rateLimit(`search_get_${ip}`, 100, 60 * 1000);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many requests, please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('query');
 
@@ -25,15 +37,19 @@ export async function GET(request: Request) {
       return NextResponse.json([]);
     }
 
-    const results = await db
+    const results = db
       .select()
       .from(tasks)
       .where(sql`id IN (SELECT rowid FROM tasks_fts WHERE tasks_fts MATCH ${'"' + sanitizedQuery + '"*'})`)
-      .limit(20);
+      .limit(20)
+      .all();
 
-    return NextResponse.json(results);
+    // Bulk fetch and attach labels to tasks to avoid N+1 queries.
+    const tasksWithLabels = attachLabelsToTasks(results);
+
+    return NextResponse.json(tasksWithLabels);
   } catch (error) {
-    console.error('Error searching tasks:', error);
+    console.error('Error searching tasks:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Failed to search tasks' }, { status: 500 });
   }
 }

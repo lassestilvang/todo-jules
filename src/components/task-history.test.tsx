@@ -26,6 +26,8 @@ vi.mock('@/components/ui/sheet', () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SheetTitle: ({ children }: any) => <div>{children}</div>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  SheetDescription: ({ children }: any) => <div>{children}</div>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   SheetTrigger: ({ children }: any) => <div>{children}</div>,
 }));
 

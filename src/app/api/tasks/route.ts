@@ -1,3 +1,4 @@
+import { rateLimit, getIp } from '@/lib/rate-limit';
 import { NextResponse } from 'next/server';
 import { db } from '../../../lib/db';
 import {
@@ -12,9 +13,20 @@ import {
 
 import { createTaskSchema } from '../../../lib/validators';
 import { getTaskCount, invalidateTaskCountCache } from '../../../lib/cache';
+import { attachLabelsToTasks } from '../../../lib/task-utils';
 
 export async function GET(request: Request) {
   try {
+    const ip = getIp(request);
+    const { success } = rateLimit(`tasks_get_${ip}`, 100, 60 * 1000);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many requests, please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const pageParam = searchParams.get('page') || '1';
     const limitParam = searchParams.get('limit') || '20';
@@ -26,22 +38,24 @@ export async function GET(request: Request) {
     if (isNaN(limit) || String(limit) !== limitParam || limit < 1) limit = 20;
     if (limit > 100) limit = 100; // Cap limit for safety
 
+    const total = getTaskCount();
+    const totalPages = Math.ceil(total / limit);
+
+    // 🛡️ Sentinel: Enforce page limit bounds to prevent DoS via massive offsets causing expensive table scans
+    page = Math.min(page, Math.max(1, totalPages));
+
     const offset = (page - 1) * limit;
 
-    const total = getTaskCount();
+    // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
+    // Replaced `await db.query.tasks.findMany()` with `db.select().from(tasks).limit().offset().all()`
+    // to eliminate microtask overhead caused by relational queries in Drizzle.
+    const baseTasks = db.select()
+      .from(tasks)
+      .limit(limit)
+      .offset(offset)
+      .all();
 
-    // ⚡ Bolt Optimization: Use Drizzle's built-in relational query
-    // This significantly improves maintainability by replacing manual N+1 
-    // aggregation logic with Drizzle's native relation mapping.
-    const allTasks = await db.query.tasks.findMany({
-      limit,
-      offset,
-      with: {
-        labels: {
-          with: { label: true }
-        }
-      }
-    });
+    const allTasks = attachLabelsToTasks(baseTasks);
 
     return NextResponse.json({
       data: allTasks,
@@ -49,11 +63,11 @@ export async function GET(request: Request) {
         total,
         page,
         limit,
-        totalPages: Math.ceil(total / limit),
+        totalPages,
       },
     });
   } catch (error) {
-    console.error('Error fetching tasks:', error);
+    console.error('Error fetching tasks:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
       { error: 'Failed to fetch tasks' },
       { status: 500 }
@@ -63,6 +77,23 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    // Basic rate limit: 100 requests per minute per IP
+    const ip = getIp(request);
+    const { success } = rateLimit(`tasks_post_${ip}`, 100, 60 * 1000);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many requests, please try again later.' },
+        { status: 429 }
+      );
+    }
+
+    // 🛡️ Sentinel: Enforce application/json to prevent CSRF attacks via simple requests
+    const contentType = request.headers.get('content-type');
+    if (!contentType || !/^application\/json(;.*)?$/i.test(contentType.trim())) {
+      return NextResponse.json({ error: 'Unsupported Media Type' }, { status: 415 });
+    }
+
     const body = await request.json();
     const validation = createTaskSchema.safeParse(body);
 
@@ -119,6 +150,7 @@ export async function POST(request: Request) {
         tx.insert(reminders).values(
             validatedBody.reminders.map((reminder) => ({
               ...reminder,
+              remindAt: reminder.remindAt!,
               taskId: newTask.id,
             }))
           ).run();
@@ -145,7 +177,7 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error creating task:', error);
+    console.error('Error creating task:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
       { error: 'Failed to create task' },
       { status: 500 }

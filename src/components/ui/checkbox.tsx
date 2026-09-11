@@ -19,7 +19,7 @@ const Checkbox = React.forwardRef<
     {...props}
   >
     <CheckboxPrimitive.Indicator
-      className={cn("flex items-center justify-center text-current")}
+      className={cn("flex items-center justify-center text-current motion-safe:animate-in motion-safe:zoom-in-50 motion-safe:fade-in-0 motion-safe:duration-200")}
     >
       <Check className="h-4 w-4" aria-hidden="true" />
     </CheckboxPrimitive.Indicator>

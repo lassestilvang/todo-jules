@@ -10,7 +10,7 @@ export default async function Next7DaysPage() {
       <h1 className="text-3xl font-bold mb-6">Next 7 Days</h1>
 
       <div className="mb-8">
-        <TaskList tasks={tasks} />
+        <TaskList tasks={tasks} emptyStateSubtext="You have no tasks scheduled for the next 7 days." />
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import { rateLimit, getIp } from '@/lib/rate-limit';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { lists } from '@/lib/schema';
@@ -43,11 +44,28 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const ip = getIp(request);
+    const { success } = rateLimit(`lists_put_${ip}`, 100, 60 * 1000);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many requests, please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { id: idString } = await params;
     const id = parseInt(idString, 10);
     if (!/^\d+$/.test(idString)) {
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
     }
+
+    // 🛡️ Sentinel: Enforce application/json to prevent CSRF attacks via simple requests
+    const contentType = request.headers.get('content-type');
+    if (!contentType || contentType.split(';')[0].trim().toLowerCase() !== 'application/json') {
+      return NextResponse.json({ error: 'Unsupported Media Type' }, { status: 415 });
+    }
+
     const body = await request.json();
     const validation = updateListSchema.safeParse(body);
 
@@ -57,11 +75,25 @@ export async function PUT(
 
     const { name, color, emoji } = validation.data;
 
+    // 🛡️ Sentinel: Prevent "No values to set" error
+    const updateData = Object.fromEntries(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      Object.entries({ name, color, emoji }).filter(([_, v]) => v !== undefined)
+    );
+
+    if (Object.keys(updateData).length === 0) {
+      const existingList = db.select().from(lists).where(eq(lists.id, id)).get();
+      if (!existingList) {
+        return NextResponse.json({ error: 'List not found' }, { status: 404 });
+      }
+      return NextResponse.json(existingList);
+    }
+
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.update(...)` with `.all()` to eliminate microtask overhead.
     const [updatedList] = db
       .update(lists)
-      .set({ name, color, emoji })
+      .set(updateData)
       .where(eq(lists.id, id))
       .returning()
       .all();
@@ -72,7 +104,7 @@ export async function PUT(
 
     return NextResponse.json(updatedList);
   } catch (error) {
-    console.error('Error updating list:', error);
+    console.error('Error updating list:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
@@ -105,6 +137,16 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const ip = getIp(request);
+    const { success: rateLimitSuccess } = rateLimit(`lists_delete_${ip}`, 100, 60 * 1000);
+
+    if (!rateLimitSuccess) {
+      return NextResponse.json(
+        { error: 'Too many requests, please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { id: idString } = await params;
     const id = parseInt(idString, 10);
     if (!/^\d+$/.test(idString)) {
@@ -121,7 +163,7 @@ export async function DELETE(
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.error('Error deleting list:', error);
+    console.error('Error deleting list:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

@@ -2,31 +2,33 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST, GET } from './route'; // Assumed .ts
 import { db } from '../../../lib/db';
 import * as cache from '../../../lib/cache';
+import * as taskUtils from '../../../lib/task-utils';
 
 // Mock dependencies
-vi.mock('../../../lib/db', () => ({
-  db: {
-    query: {
-      tasks: {
-        findMany: vi.fn(),
-      },
+vi.mock('../../../lib/db', () => {
+  const mockAll = vi.fn();
+  const mockOffset = vi.fn().mockReturnValue({ all: mockAll });
+  const mockLimit = vi.fn().mockReturnValue({ offset: mockOffset });
+  const mockFrom = vi.fn().mockReturnValue({ limit: mockLimit });
+  const mockSelect = vi.fn().mockReturnValue({ from: mockFrom });
+
+  return {
+    db: {
+      transaction: vi.fn(),
+      select: mockSelect,
     },
-    transaction: vi.fn(),
-    select: vi.fn().mockReturnValue({
-        from: vi.fn().mockReturnValue({
-            limit: vi.fn().mockReturnValue({
-                offset: vi.fn().mockReturnValue({
-                    all: vi.fn().mockReturnValue([])
-                })
-            })
-        })
-    }),
-  },
-}));
+    // We export these internal mocks for tests to inspect if needed via db._mocks
+    // Note: Vitest vi.mock can be tricky with exported internals, so we'll just check calls through the chain in tests or export a spy helper.
+  };
+});
 
 vi.mock('../../../lib/cache', () => ({
   getTaskCount: vi.fn(),
   invalidateTaskCountCache: vi.fn(),
+}));
+
+vi.mock('../../../lib/task-utils', () => ({
+  attachLabelsToTasks: vi.fn(),
 }));
 
 const mockTask = {
@@ -48,8 +50,10 @@ describe('GET /api/tasks', () => {
   it('should return a paginated list of tasks', async () => {
     vi.mocked(cache.getTaskCount).mockReturnValue(10);
 
-    // @ts-expect-error mock
-    vi.mocked(db.query.tasks.findMany).mockResolvedValue([mockTask]);
+    // @ts-expect-error mock chain
+    const mockAllMethod = db.select().from().limit().offset().all;
+    vi.mocked(mockAllMethod).mockReturnValue([mockTask]);
+    vi.mocked(taskUtils.attachLabelsToTasks).mockReturnValue([mockTask] as unknown as import("@/lib/schema").tasks.$inferSelect[]);
 
     const request = new Request('http://localhost/api/tasks?page=1&limit=10');
     const response = await GET(request);
@@ -63,15 +67,22 @@ describe('GET /api/tasks', () => {
       limit: 10,
       totalPages: 1
     });
-    expect(db.query.tasks.findMany).toHaveBeenCalled();
+    expect(db.select).toHaveBeenCalled();
+    // @ts-expect-error mock chain
+    expect(db.select().from().limit).toHaveBeenCalledWith(10);
+    // @ts-expect-error mock chain
+    expect(db.select().from().limit().offset).toHaveBeenCalledWith(0);
+    expect(mockAllMethod).toHaveBeenCalled();
     expect(cache.getTaskCount).toHaveBeenCalledTimes(1);
   });
 
   it('should handle pagination parameters correctly', async () => {
     vi.mocked(cache.getTaskCount).mockReturnValue(50);
 
-    // @ts-expect-error mock
-    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
+    // @ts-expect-error mock chain
+    const mockAllMethod = db.select().from().limit().offset().all;
+    vi.mocked(mockAllMethod).mockReturnValue([]);
+    vi.mocked(taskUtils.attachLabelsToTasks).mockReturnValue([] as unknown as import("@/lib/schema").tasks.$inferSelect[]);
 
     const request = new Request('http://localhost/api/tasks?page=3&limit=5');
     const response = await GET(request);
@@ -84,15 +95,42 @@ describe('GET /api/tasks', () => {
       limit: 5,
       totalPages: 10
     });
-    expect(db.query.tasks.findMany).toHaveBeenCalledWith({ limit: 5, offset: 10, with: { labels: { with: { label: true } } } });
+    expect(db.select).toHaveBeenCalled();
+    // @ts-expect-error mock chain
+    expect(db.select().from().limit).toHaveBeenCalledWith(5);
+    // @ts-expect-error mock chain
+    expect(db.select().from().limit().offset).toHaveBeenCalledWith(10);
+    expect(mockAllMethod).toHaveBeenCalled();
 
+  });
+
+  it('should cap the requested page to the total number of pages', async () => {
+    vi.mocked(cache.getTaskCount).mockReturnValue(50); // 50 items total, limit 20 means 3 pages max
+
+    // @ts-expect-error mock chain
+    const mockAllMethod = db.select().from().limit().offset().all;
+    vi.mocked(mockAllMethod).mockReturnValue([]);
+    vi.mocked(taskUtils.attachLabelsToTasks).mockReturnValue([] as unknown as import("@/lib/schema").tasks.$inferSelect[]);
+
+    const request = new Request('http://localhost/api/tasks?page=1000000&limit=20');
+    const response = await GET(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.meta.page).toBe(3);
+    expect(data.meta.totalPages).toBe(3);
+
+    // @ts-expect-error mock chain
+    expect(db.select().from().limit().offset).toHaveBeenCalledWith(40); // (3 - 1) * 20 = 40
   });
 
   it('should use default values for invalid parameters', async () => {
     vi.mocked(cache.getTaskCount).mockReturnValue(10);
 
-    // @ts-expect-error mock
-    vi.mocked(db.query.tasks.findMany).mockResolvedValue([]);
+    // @ts-expect-error mock chain
+    const mockAllMethod = db.select().from().limit().offset().all;
+    vi.mocked(mockAllMethod).mockReturnValue([]);
+    vi.mocked(taskUtils.attachLabelsToTasks).mockReturnValue([] as unknown as import("@/lib/schema").tasks.$inferSelect[]);
 
     // Test with invalid page and limit
     const request = new Request('http://localhost/api/tasks?page=abc&limit=-5');
@@ -118,6 +156,9 @@ describe('POST /api/tasks', () => {
     const newTask = { name: 'Test Task', listId: 1 };
     const request = new Request('http://localhost/api/tasks', {
       method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
       body: JSON.stringify(newTask),
     });
 

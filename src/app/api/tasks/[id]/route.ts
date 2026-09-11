@@ -1,3 +1,4 @@
+import { rateLimit, getIp } from '@/lib/rate-limit';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import {
@@ -16,11 +17,28 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const ip = getIp(request);
+    const { success } = rateLimit(`tasks_put_${ip}`, 100, 60 * 1000);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many requests, please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { id } = await params;
     const taskId = parseInt(id, 10);
     if (Number.isNaN(taskId) || String(taskId) !== id) {
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
     }
+
+    // 🛡️ Sentinel: Enforce application/json to prevent CSRF attacks via simple requests
+    const contentType = request.headers.get('content-type');
+    if (!contentType || contentType.split(';')[0].trim().toLowerCase() !== 'application/json') {
+      return NextResponse.json({ error: 'Unsupported Media Type' }, { status: 415 });
+    }
+
     const body = await request.json();
     const validation = updateTaskSchema.safeParse(body);
 
@@ -33,7 +51,8 @@ export async function PUT(
     const updatedTask = db.transaction((tx) => {
       let updated;
 
-      const { subtasks, labels, reminders, attachments, ...taskData } = validatedBody;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { subtasks: payloadSubtasks, labels: payloadLabels, reminders: payloadReminders, attachments: payloadAttachments, ...taskData } = validatedBody;
 
       if (Object.keys(taskData).length > 0) {
         const [result] = tx
@@ -60,8 +79,8 @@ export async function PUT(
       }
 
       // Handle subtasks
-      if (validatedBody.subtasks) {
-        const { incomingIds, toInsert, toUpdate } = validatedBody.subtasks.reduce(
+      if (payloadSubtasks) {
+        const { incomingIds, toInsert, toUpdate } = payloadSubtasks.reduce(
           (acc, st) => {
             if (st.id !== undefined) {
               acc.incomingIds.push(st.id);
@@ -78,7 +97,7 @@ export async function PUT(
           {
             incomingIds: [] as number[],
             toInsert: [] as { name: string; completed: boolean; taskId: number }[],
-            toUpdate: [] as NonNullable<typeof validatedBody.subtasks>,
+            toUpdate: [] as NonNullable<typeof payloadSubtasks>,
           }
         );
 
@@ -100,15 +119,12 @@ export async function PUT(
         }
 
         if (toUpdate.length > 0) {
-          const CHUNK_SIZE = 100;
-          for (let i = 0; i < toUpdate.length; i += CHUNK_SIZE) {
-            const chunk = toUpdate.slice(i, i + CHUNK_SIZE);
-
+          const updateBatch = (items: typeof toUpdate) => {
             const nameChunks: import('drizzle-orm').SQL[] = [];
             const completedChunks: import('drizzle-orm').SQL[] = [];
             const ids: number[] = [];
 
-            for (const item of chunk) {
+            for (const item of items) {
               nameChunks.push(sql`when ${item.id} then ${item.name}`);
               completedChunks.push(sql`when ${item.id} then ${item.completed ? 1 : 0}`);
               ids.push(item.id!);
@@ -131,17 +147,26 @@ export async function PUT(
                 )
               )
               .run();
+          };
+
+          if (toUpdate.length <= 100) {
+            updateBatch(toUpdate);
+          } else {
+            const CHUNK_SIZE = 100;
+            for (let i = 0; i < toUpdate.length; i += CHUNK_SIZE) {
+              updateBatch(toUpdate.slice(i, i + CHUNK_SIZE));
+            }
           }
         }
       }
 
       // Handle labels
-      if (validatedBody.labels) {
+      if (payloadLabels) {
         tx.delete(taskLabels).where(eq(taskLabels.taskId, taskId)).run();
-        if (validatedBody.labels.length > 0) {
+        if (payloadLabels.length > 0) {
           tx.insert(taskLabels)
             .values(
-              validatedBody.labels.map((labelId) => ({
+              payloadLabels.map((labelId) => ({
                 taskId: taskId,
                 labelId,
               }))
@@ -151,13 +176,14 @@ export async function PUT(
       }
 
       // Handle reminders
-      if (validatedBody.reminders) {
+      if (payloadReminders) {
         tx.delete(reminders).where(eq(reminders.taskId, taskId)).run();
-        if (validatedBody.reminders.length > 0) {
+        if (payloadReminders.length > 0) {
           tx.insert(reminders)
             .values(
-              validatedBody.reminders.map((reminder) => ({
+              payloadReminders.map((reminder) => ({
                 ...reminder,
+                remindAt: reminder.remindAt!,
                 taskId: taskId,
               }))
             )
@@ -166,12 +192,12 @@ export async function PUT(
       }
 
       // Handle attachments
-      if (validatedBody.attachments) {
+      if (payloadAttachments) {
         tx.delete(attachments).where(eq(attachments.taskId, taskId)).run();
-        if (validatedBody.attachments.length > 0) {
+        if (payloadAttachments.length > 0) {
           tx.insert(attachments)
             .values(
-              validatedBody.attachments.map((attachment) => ({
+              payloadAttachments.map((attachment) => ({
                 ...attachment,
                 taskId: taskId,
               }))
@@ -188,7 +214,7 @@ export async function PUT(
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error updating task:', error);
+    console.error('Error updating task:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
       { error: 'Failed to update task' },
       { status: 500 }
@@ -201,6 +227,16 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const ip = getIp(request);
+    const { success: rateLimitSuccess } = rateLimit(`tasks_delete_${ip}`, 100, 60 * 1000);
+
+    if (!rateLimitSuccess) {
+      return NextResponse.json(
+        { error: 'Too many requests, please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { id } = await params;
     const taskId = parseInt(id, 10);
     if (Number.isNaN(taskId) || String(taskId) !== id) {
@@ -218,7 +254,7 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error deleting task:', error);
+    console.error('Error deleting task:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
       { error: 'Failed to delete task' },
       { status: 500 }

@@ -1,3 +1,4 @@
+import { rateLimit, getIp } from '@/lib/rate-limit';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { lists } from '@/lib/schema';
@@ -30,6 +31,23 @@ import { createListSchema } from '@/lib/validators';
  */
 export async function POST(request: Request) {
   try {
+    // Basic rate limit: 100 requests per minute per IP
+    const ip = getIp(request);
+    const { success } = rateLimit(`lists_post_${ip}`, 100, 60 * 1000);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many requests, please try again later.' },
+        { status: 429 }
+      );
+    }
+
+    // 🛡️ Sentinel: Enforce application/json to prevent CSRF attacks via simple requests
+    const contentType = request.headers.get('content-type');
+    if (!contentType || contentType.split(';')[0].trim().toLowerCase() !== 'application/json') {
+      return NextResponse.json({ error: 'Unsupported Media Type' }, { status: 415 });
+    }
+
     const body = await request.json();
     const validation = createListSchema.safeParse(body);
 
@@ -49,7 +67,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newList, { status: 201 });
   } catch (error) {
-    console.error('Error creating list:', error);
+    console.error('Error creating list:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
@@ -72,14 +90,24 @@ export async function POST(request: Request) {
  *       500:
  *         description: Internal server error.
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const ip = getIp(request);
+    const { success } = rateLimit(`lists_get_${ip}`, 100, 60 * 1000);
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Too many requests, please try again later.' },
+        { status: 429 }
+      );
+    }
+
     // ⚡ Bolt Optimization: Use synchronous better-sqlite3 execution
     // Replaced `await db.select(...)` with `.all()` to eliminate microtask overhead.
     const allLists = db.select().from(lists).all();
     return NextResponse.json(allLists);
   } catch (error) {
-    console.error('Error fetching lists:', error);
+    console.error('Error fetching lists:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

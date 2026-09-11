@@ -3,15 +3,15 @@ import { taskHistory } from './schema';
 
 export type HistoryLog = Omit<typeof taskHistory.$inferInsert, 'id' | 'changedAt'>;
 
-export async function logTaskHistory(logs: HistoryLog[]) {
+export function logTaskHistory(logs: HistoryLog[]) {
   if (logs.length === 0) {
     return;
   }
 
   try {
-    await db.insert(taskHistory).values(logs);
+    db.insert(taskHistory).values(logs).run();
   } catch (error) {
-    console.error('Failed to log task history:', error);
+    console.error('Failed to log task history:', error instanceof Error ? error.message : 'Unknown error');
     // We don't want to fail the main action if logging fails, but we should know about it
   }
 }

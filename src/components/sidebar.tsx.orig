@@ -9,44 +9,29 @@ import { ThemeToggle } from './theme-toggle';
 import AddListForm from './add-list-form';
 import { deleteList } from '@/app/actions/list';
 import { Button } from './ui/button';
-import { toast } from 'sonner';
 
 interface SidebarProps {
   initialLists?: { id: number; name: string; color: string; emoji: string }[];
 }
 
-// ⚡ Bolt Optimization: Hoist static configuration out of the render loop
-// Why: The links array is static. By defining it outside the component,
-// we prevent a new array and its 4 nested object references from being
-// needlessly allocated and garbage collected on every re-render of the Sidebar.
-const links = [
-  { href: '/', label: 'Inbox', icon: Inbox },
-  { href: '/today', label: 'Today', icon: Calendar },
-  { href: '/next7days', label: 'Next 7 Days', icon: CalendarDays },
-  { href: '/upcoming', label: 'Upcoming', icon: LayoutList },
-];
-
-// ⚡ Bolt Optimization: Extract default empty array prop
-// Why: Using an inline fallback (initialLists = []) creates a new array reference
-// on every render if the prop is undefined, potentially triggering unnecessary
-// re-renders in child components. Extracting to a module-level constant preserves reference equality.
-const EMPTY_LISTS: never[] = [];
-
-const Sidebar = ({ initialLists = EMPTY_LISTS }: SidebarProps) => {
+const Sidebar = ({ initialLists = [] }: SidebarProps) => {
   const pathname = usePathname();
   const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const links = [
+    { href: '/', label: 'Inbox', icon: Inbox },
+    { href: '/today', label: 'Today', icon: Calendar },
+    { href: '/next7days', label: 'Next 7 Days', icon: CalendarDays },
+    { href: '/upcoming', label: 'Upcoming', icon: LayoutList },
+  ];
 
   const handleDeleteList = async (e: React.MouseEvent, id: number) => {
     e.preventDefault();
     e.stopPropagation();
-    const listToDelete = initialLists.find(l => l.id === id);
-    if (window.confirm(`Are you sure you want to delete the list "${listToDelete?.name || 'this list'}"?`)) {
+    if(confirm('Are you sure you want to delete this list?')) {
         setDeletingId(id);
         try {
             await deleteList(id);
-            toast.success(`List "${listToDelete?.name || ''}" deleted`);
-        } catch {
-            toast.error('Failed to delete list');
         } finally {
             setDeletingId(null);
         }
@@ -99,9 +84,8 @@ const Sidebar = ({ initialLists = EMPTY_LISTS }: SidebarProps) => {
                 )}
                 {initialLists.map((list) => {
                     const isActive = pathname === `/lists/${list.id}`;
-                    const isDeleting = deletingId === list.id;
                     return (
-                        <li key={list.id} className={cn("group flex items-center transition-opacity", isDeleting && "opacity-50 pointer-events-none")}>
+                        <li key={list.id} className="group flex items-center">
                             <Link
                                 href={`/lists/${list.id}`}
                                 className={cn(
@@ -111,7 +95,7 @@ const Sidebar = ({ initialLists = EMPTY_LISTS }: SidebarProps) => {
                                 aria-current={isActive ? "page" : undefined}
                             >
                                 <span className="text-base" aria-hidden="true">{list.emoji}</span>
-                                <span className="truncate" title={list.name}>{list.name}</span>
+                                <span className="truncate">{list.name}</span>
                             </Link>
                             <Button
                                 variant="ghost"
@@ -120,11 +104,11 @@ const Sidebar = ({ initialLists = EMPTY_LISTS }: SidebarProps) => {
                                     "h-8 w-8 text-muted-foreground hover:text-destructive transition-opacity",
                                     deletingId === list.id
                                         ? "opacity-100"
-                                        : "opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
+                                        : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
                                 )}
                                 onClick={(e) => handleDeleteList(e, list.id)}
                                 aria-label={`Delete list ${list.name}`}
-                                title={deletingId === list.id ? 'Deleting list...' : 'Delete list'}
+                                title="Delete list"
                                 disabled={deletingId === list.id}
                             >
                                 {deletingId === list.id ? (

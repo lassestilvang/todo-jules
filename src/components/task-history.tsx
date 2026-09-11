@@ -5,6 +5,7 @@ import { getTaskHistory } from '@/app/actions/history';
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -36,6 +37,12 @@ interface CacheEntry {
 const historyCache = new Map<number, CacheEntry>();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const MAX_CACHE_SIZE = 100;
+const EMPTY_ARRAY: never[] = [];
+
+const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+    year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: 'numeric', minute: 'numeric', second: 'numeric'
+});
 
 function getFromCache(taskId: number): CacheEntry | null {
   const entry = historyCache.get(taskId);
@@ -60,9 +67,18 @@ function setToCache(taskId: number, data: HistoryItem[], promise?: Promise<Histo
 }
 
 export function TaskHistory({ taskId }: TaskHistoryProps) {
-  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [history, setHistory] = useState<HistoryItem[]>(EMPTY_ARRAY);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // ⚡ Bolt Optimization: Precompute Date objects
+  // Why: Instantiating `new Date()` multiple times inline within the JSX of frequently rendered components causes unnecessary memory allocation and garbage collection overhead.
+  const formattedHistory = React.useMemo(() => {
+    return history.map(item => ({
+      ...item,
+      formattedDate: dateTimeFormatter.format(new Date(item.changedAt))
+    }));
+  }, [history]);
 
   // Initialize state on open
   useEffect(() => {
@@ -86,7 +102,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
                     setHistory(data);
                 }
             } catch (error) {
-                console.error("Failed to fetch history from promise", error);
+                console.error("Failed to fetch history from promise:", error instanceof Error ? error.message : String(error));
             } finally {
                 if (isMounted) setLoading(false);
             }
@@ -96,9 +112,17 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
         setLoading(true);
         try {
             const fetchPromise = getTaskHistory(taskId);
-            setToCache(taskId, [], fetchPromise);
+            setToCache(taskId, EMPTY_ARRAY, fetchPromise);
 
-            const data = await fetchPromise;
+            const rawData = await fetchPromise;
+
+            // ⚡ Bolt Optimization: Precompute Date objects before storing in state/cache
+            // Why: Prevents instantiating new Date() multiple times inline within the JSX .map() loop
+            // which reduces unnecessary memory allocations and garbage collection overhead on every render.
+            const data = rawData.map(item => ({
+                ...item,
+                changedAt: new Date(item.changedAt)
+            }));
 
             if (isMounted) {
                 setToCache(taskId, data);
@@ -107,7 +131,7 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
                 setToCache(taskId, data);
             }
         } catch (error) {
-            console.error("Failed to fetch history", error);
+            console.error("Failed to fetch history:", error instanceof Error ? error.message : String(error));
             historyCache.delete(taskId);
         } finally {
             if (isMounted) {
@@ -126,16 +150,24 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="sm" aria-label="View task history">
-          <History className="h-4 w-4 mr-1" aria-hidden="true" />
-          History
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-muted-foreground hover:text-primary transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 md:data-[state=open]:opacity-100"
+          aria-label="View task history"
+          title="View task history"
+        >
+          <History className="h-4 w-4" aria-hidden="true" />
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Task History</SheetTitle>
+          <SheetDescription className="sr-only">
+            View the history of changes made to this task.
+          </SheetDescription>
         </SheetHeader>
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 space-y-4" aria-live="polite" aria-atomic="true">
           {loading ? (
             <div className="flex justify-center p-12">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -152,22 +184,26 @@ export function TaskHistory({ taskId }: TaskHistoryProps) {
             </div>
           ) : (
             <ul className="space-y-4">
-              {history.map((item) => (
+              {/* ⚡ Bolt Optimization: Render precomputed formattedDate
+                  Why: Avoids invoking Intl.DateTimeFormat.format() on every list item render */}
+              {formattedHistory.map((item) => (
                 <li key={item.id} className="text-sm border-b pb-2">
                   <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                    <span>{new Date(item.changedAt).toLocaleString()}</span>
+                    <span suppressHydrationWarning>{item.formattedDate}</span>
                     <span className="font-semibold capitalize">{item.changedField}</span>
                   </div>
                   <div>
                     {item.changedField === 'created' ? (
-                      <span className="text-green-500">Task created</span>
+                      <span className="text-foreground font-medium">Task created</span>
                     ) : (
                       <>
-                        <span className="line-through text-red-400 mr-2">
+                        <span className="sr-only">changed from </span>
+                        <span className="line-through text-muted-foreground mr-2">
                           {item.oldValue || '(empty)'}
                         </span>
-                        <span>&rarr;</span>
-                        <span className="ml-2 text-green-500">
+                        <span aria-hidden="true">&rarr;</span>
+                        <span className="sr-only">to </span>
+                        <span className="ml-2 text-foreground font-medium">
                           {item.newValue || '(empty)'}
                         </span>
                       </>

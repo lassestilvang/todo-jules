@@ -5,31 +5,16 @@ import { motion } from 'framer-motion';
 import { Task } from '@/lib/types';
 import { toggleTaskCompletion, deleteTask } from '@/app/actions/task';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Trash2, Loader2 } from 'lucide-react';
 import { TaskHistory } from '@/components/task-history';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
-const dateFormatter = new Intl.DateTimeFormat();
-
-// ⚡ Bolt Optimization: Hoist static animation objects
-// Why: Moving static objects outside the component prevents them from being
-// recreated on every render, reducing memory allocation and garbage collection overhead.
-// Impact: Improves rendering performance when dealing with large lists of tasks.
-
 interface TaskProps {
   task: Task;
 }
-
-// ⚡ Bolt Optimization: Hoist static animation configuration objects
-// Why: Prevents recreating these object references on every render,
-// reducing garbage collection overhead and potential re-renders in motion.div.
-const motionInitial = { opacity: 0, y: 10 } as const;
-const motionAnimate = { opacity: 1, y: 0 } as const;
-const motionExit = { opacity: 0, y: -10 } as const;
-const motionTransition = { duration: 0.2 } as const;
 
 const TaskComponent = ({ task }: TaskProps) => {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -37,24 +22,6 @@ const TaskComponent = ({ task }: TaskProps) => {
     task.completed ?? false,
     (state, newCompleted: boolean) => newCompleted
   );
-
-  // ⚡ Bolt Optimization: Precompute Date objects
-  // Why: Instantiating `new Date()` multiple times inline within the JSX of list items causes unnecessary memory allocation and garbage collection overhead on every render.
-  // Impact: Reduces object creation by up to 5x per task item, significantly improving rendering performance for large lists.
-
-  // ⚡ Bolt Optimization: Precompute formatted dates using useMemo
-  // Why: Invoking `Intl.DateTimeFormat.format()` and `new Date()` inside the JSX loop
-  // causes redundant processing and memory allocation on every render.
-  const formattedDate = React.useMemo(() => task.date ? dateFormatter.format(new Date(task.date)) : null, [task.date]);
-
-  const { isOverdue, formattedDeadline } = React.useMemo(() => {
-    if (!task.deadline) return { isOverdue: false, formattedDeadline: null };
-    const deadlineDate = new Date(task.deadline);
-    return {
-      isOverdue: deadlineDate < new Date(),
-      formattedDeadline: dateFormatter.format(deadlineDate)
-    };
-  }, [task.deadline]);
 
   const handleToggle = async (checked: boolean) => {
     // ⚡ Bolt Optimization: Synchronous startTransition for Optimistic Updates
@@ -64,10 +31,7 @@ const TaskComponent = ({ task }: TaskProps) => {
     });
     startTransition(async () => {
       try {
-        const result = await toggleTaskCompletion(task.id, checked);
-        if (!result.success) {
-          toast.error('Failed to update task status');
-        }
+        await toggleTaskCompletion(task.id, checked);
       } catch {
         toast.error('Failed to update task status');
       }
@@ -77,13 +41,10 @@ const TaskComponent = ({ task }: TaskProps) => {
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (window.confirm(`Are you sure you want to delete the task "${task.name}"?`)) {
+    if (window.confirm('Are you sure you want to delete this task?')) {
       setIsDeleting(true);
       try {
         await deleteTask(task.id);
-        toast.success('Task deleted');
-      } catch {
-        toast.error('Failed to delete task');
       } finally {
         setIsDeleting(false);
       }
@@ -92,22 +53,20 @@ const TaskComponent = ({ task }: TaskProps) => {
 
   return (
     <motion.div
-      initial={motionInitial}
-      animate={motionAnimate}
-      exit={motionExit}
-      transition={motionTransition}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.2 }}
       className="group"
     >
-      <Card className={`transition-colors hover:shadow-md ${optimisticCompleted ? 'opacity-60 bg-muted/50' : 'bg-card'} ${isDeleting ? 'opacity-50 pointer-events-none' : ''}`}>
-        <fieldset disabled={isDeleting} className="w-full m-0 p-0 border-0">
-          <div className="p-4 flex items-start gap-4">
+      <Card className={`mb-3 transition-colors hover:shadow-md ${optimisticCompleted ? 'opacity-60 bg-muted/50' : 'bg-card'}`}>
+        <CardContent className="p-4 flex items-start gap-4">
           <div className="pt-1">
             <Checkbox
                 id={`task-${task.id}`}
                 checked={optimisticCompleted}
                 onCheckedChange={handleToggle}
                 aria-label={`Mark ${task.name} as ${optimisticCompleted ? 'incomplete' : 'complete'}`}
-                title={`Mark as ${optimisticCompleted ? 'incomplete' : 'complete'}`}
             />
           </div>
 
@@ -133,10 +92,10 @@ const TaskComponent = ({ task }: TaskProps) => {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive transition-opacity opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive transition-opacity opacity-0 group-hover:opacity-100 focus-within:opacity-100"
                         onClick={handleDelete}
                         aria-label={`Delete task ${task.name}`}
-                        title={isDeleting ? 'Deleting task...' : 'Delete task'}
+                        title="Delete task"
                         disabled={isDeleting}
                         style={{ opacity: isDeleting ? 1 : undefined }}
                     >
@@ -150,24 +109,22 @@ const TaskComponent = ({ task }: TaskProps) => {
             </div>
 
             {task.description && (
-              <p className="text-sm text-muted-foreground line-clamp-2" title={task.description}>{task.description}</p>
+              <p className="text-sm text-muted-foreground line-clamp-2">{task.description}</p>
             )}
 
             <div className="flex flex-wrap gap-2 mt-2">
-                {formattedDate && (
+                {task.date && (
                     <div className="flex items-center text-xs text-muted-foreground" title="Date">
                         <Calendar className="h-3 w-3 mr-1" aria-hidden="true" />
                         <span className="sr-only">Date: </span>
-                        <span suppressHydrationWarning>{formattedDate}</span>
+                        {new Date(task.date).toLocaleDateString()}
                     </div>
                 )}
-                 {formattedDeadline && (
-                    <div className={`flex items-center text-xs ${optimisticCompleted ? 'text-muted-foreground' : (isOverdue && !optimisticCompleted ? 'text-destructive' : 'text-muted-foreground')}`} title={!optimisticCompleted && isOverdue ? "Overdue deadline" : "Deadline"} suppressHydrationWarning>
+                 {task.deadline && (
+                    <div className="flex items-center text-xs text-red-400" title="Deadline">
                         <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
-                        <span className="sr-only">
-                            {!optimisticCompleted && isOverdue ? 'Overdue deadline: ' : 'Deadline: '}
-                        </span>
-                        <span className={optimisticCompleted ? 'line-through' : ''} suppressHydrationWarning>{formattedDeadline}</span>
+                        <span className="sr-only">Deadline: </span>
+                        {new Date(task.deadline).toLocaleDateString()}
                     </div>
                 )}
             </div>
@@ -192,8 +149,7 @@ const TaskComponent = ({ task }: TaskProps) => {
               </div>
             )}
           </div>
-          </div>
-        </fieldset>
+        </CardContent>
       </Card>
     </motion.div>
   );
