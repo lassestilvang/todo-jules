@@ -135,7 +135,8 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
             aria-live={description.length >= 400 ? "polite" : "off"}
             aria-atomic="true"
           >
-            {description.length}/500
+            <span aria-hidden="true">{description.length}/500</span>
+            <span className="sr-only">{description.length} of 500 characters</span>
           </div>
         </div>
       </div>

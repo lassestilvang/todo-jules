@@ -108,3 +108,6 @@
 ## $(date +%Y-%m-%d) - Add Tooltips to Truncated Elements
 **Learning:** Truncating text with CSS (e.g., `truncate` or `line-clamp-*`) makes interfaces look clean but hides information. Missing native `title` attributes on truncated elements degrades usability.
 **Action:** When applying truncation classes, always add a native HTML `title` attribute with the full text to ensure users can access the complete information via hover.
+## $(date +%Y-%m-%d) - Screen Reader Context for Character Limits
+**Learning:** When displaying a visual fraction for character limits or counters (e.g., '400/500'), screen readers may read the fraction literally without context (e.g., "four hundred slash five hundred").
+**Action:** Always wrap the visual fraction in `aria-hidden="true"` and provide a `<span className="sr-only">` element containing full-sentence context (e.g., '400 of 500 characters') to ensure screen readers announce it naturally.
