@@ -10,8 +10,10 @@ import { Search as SearchIcon, Loader2, CircleAlert, X } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
+const EMPTY_TASKS: never[] = [];
+
 const SearchContent = () => {
-  const [tasks, setTasks] = useState<TaskType[]>([]);
+  const [tasks, setTasks] = useState<TaskType[]>(EMPTY_TASKS);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
@@ -19,7 +21,7 @@ const SearchContent = () => {
 
   useEffect(() => {
     if (!query) {
-      setTasks([]);
+      setTasks(EMPTY_TASKS);
       setIsLoading(false);
       return;
     }
@@ -46,7 +48,7 @@ const SearchContent = () => {
         }
         console.error('Search error:', err instanceof Error ? err.message : String(err));
         setError('Failed to search tasks. Please try again.');
-        setTasks([]);
+        setTasks(EMPTY_TASKS);
       } finally {
         if (!signal.aborted) {
           setIsLoading(false);

@@ -154,3 +154,6 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-08-27 - Pre-allocate empty fallback arrays
 **Learning:** Returning inline empty arrays (e.g., `labelsByTaskId[task.id] || []`) inside loops or array `.map()` calls creates a new array reference in memory for every item that falls back to the default. In large collections (like lists of tasks), this causes O(N) unnecessary memory allocations and increases garbage collection overhead. Furthermore, returning a new array reference breaks reference equality for React components downstream, potentially causing redundant re-renders.
 **Action:** Always extract inline fallback arrays to a static module-level constant (e.g., `const EMPTY_LABELS: never[] = [];`) and use that constant reference in loops or data transformations.
+## 2026-10-25 - Extract inline fallback empty arrays to static constants in search state
+**Learning:** Using inline empty arrays `[]` in React `useState` and state setters triggers redundant memory allocations.
+**Action:** Extracted the inline fallback empty array `[]` in `src/app/search/page.tsx` to a module-level constant `EMPTY_TASKS` to stabilize object references and minimize redundant memory allocations.
