@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
-import { eq, isNull, and, gte, lte, asc, desc } from 'drizzle-orm';
+import { eq, isNull, and, gte, lte, asc, desc, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { after } from 'next/server';
 import { logTaskHistory } from '@/lib/history';
@@ -30,17 +30,59 @@ const getNext7DaysRange = () => {
   return { start, end };
 };
 
+// ⚡ Bolt Optimization: Use Drizzle Prepared Statements
+// Why: Compiling queries via `.prepare()` caches the SQL generation and parameter binding plan,
+// drastically reducing the overhead of repetitive database operations compared to invoking
+// `db.select()...all()` inline on every request.
+// They are lazily initialized to prevent Next.js from failing during the build phase
+// if the database schema is not fully instantiated.
+
+let inboxTasksPrepared: ReturnType<typeof db.select> | any;
+let tasksInRangePrepared: ReturnType<typeof db.select> | any;
+let upcomingTasksPrepared: ReturnType<typeof db.select> | any;
+
+function getPreparedInboxTasks() {
+  if (!inboxTasksPrepared) {
+    inboxTasksPrepared = db.select()
+      .from(tasks)
+      .where(isNull(tasks.listId))
+      .limit(50)
+      .orderBy(desc(tasks.createdAt))
+      .prepare();
+  }
+  return inboxTasksPrepared;
+}
+
+function getPreparedTasksInRange() {
+  if (!tasksInRangePrepared) {
+    tasksInRangePrepared = db.select()
+      .from(tasks)
+      .where(and(gte(tasks.date, sql.placeholder('start')), lte(tasks.date, sql.placeholder('end'))))
+      .orderBy(asc(tasks.date))
+      .limit(50)
+      .prepare();
+  }
+  return tasksInRangePrepared;
+}
+
+function getPreparedUpcomingTasks() {
+  if (!upcomingTasksPrepared) {
+    upcomingTasksPrepared = db.select()
+      .from(tasks)
+      .where(gte(tasks.date, sql.placeholder('start')))
+      .orderBy(asc(tasks.date))
+      .limit(50)
+      .prepare();
+  }
+  return upcomingTasksPrepared;
+}
+
 export async function getTasksForInbox() {
   const ip = getIpFromHeaders(await headers());
   const { success } = rateLimit(`tasks_inbox_get_${ip}`, 100, 60 * 1000);
   if (!success) throw new Error('Too many requests');
 
-  const baseTasks = db.select()
-    .from(tasks)
-    .where(isNull(tasks.listId))
-    .limit(50)
-    .orderBy(desc(tasks.createdAt))
-    .all();
+  const baseTasks = getPreparedInboxTasks().all();
 
   return attachLabelsToTasks(baseTasks);
 }
@@ -51,12 +93,7 @@ export async function getTasksForToday() {
   if (!success) throw new Error('Too many requests');
 
   const { start, end } = getTodayRange();
-  const baseTasks = db.select()
-    .from(tasks)
-    .where(and(gte(tasks.date, start), lte(tasks.date, end)))
-    .orderBy(asc(tasks.date))
-    .limit(50)
-    .all();
+  const baseTasks = getPreparedTasksInRange().all({ start: start.getTime(), end: end.getTime() });
 
   return attachLabelsToTasks(baseTasks);
 }
@@ -67,12 +104,7 @@ export async function getTasksForUpcoming() {
   if (!success) throw new Error('Too many requests');
 
   const { end } = getTodayRange(); // Tasks after today
-  const baseTasks = db.select()
-    .from(tasks)
-    .where(gte(tasks.date, end))
-    .orderBy(asc(tasks.date))
-    .limit(50)
-    .all();
+  const baseTasks = getPreparedUpcomingTasks().all({ start: end.getTime() });
 
   return attachLabelsToTasks(baseTasks);
 }
@@ -83,12 +115,7 @@ export async function getTasksForNext7Days() {
   if (!success) throw new Error('Too many requests');
 
   const { start, end } = getNext7DaysRange();
-  const baseTasks = db.select()
-    .from(tasks)
-    .where(and(gte(tasks.date, start), lte(tasks.date, end)))
-    .orderBy(asc(tasks.date))
-    .limit(50)
-    .all();
+  const baseTasks = getPreparedTasksInRange().all({ start: start.getTime(), end: end.getTime() });
 
   return attachLabelsToTasks(baseTasks);
 }

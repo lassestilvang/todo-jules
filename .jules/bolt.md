@@ -154,3 +154,9 @@ Additionally, redundant variables like an unused `toInsert` were optimized, and 
 ## 2026-08-27 - Pre-allocate empty fallback arrays
 **Learning:** Returning inline empty arrays (e.g., `labelsByTaskId[task.id] || []`) inside loops or array `.map()` calls creates a new array reference in memory for every item that falls back to the default. In large collections (like lists of tasks), this causes O(N) unnecessary memory allocations and increases garbage collection overhead. Furthermore, returning a new array reference breaks reference equality for React components downstream, potentially causing redundant re-renders.
 **Action:** Always extract inline fallback arrays to a static module-level constant (e.g., `const EMPTY_LABELS: never[] = [];`) and use that constant reference in loops or data transformations.
+## 2024-05-24 - Drizzle Prepared Statements with Dates
+**Learning:** When using `drizzle-orm`'s `.prepare()` with `better-sqlite3`, parameters bound via `sql.placeholder()` for timestamp columns must be explicitly converted to numbers (e.g., using `.getTime()`). `better-sqlite3` throws a TypeError if passed raw `Date` objects.
+**Action:** Always convert Date objects to their numeric timestamp representation before passing them as arguments to prepared statements.
+## 2024-05-24 - Lazy initialize prepared statements in Next.js Server Actions
+**Learning:** When using `better-sqlite3` and `drizzle-orm`'s `.prepare()`, defining prepared statements at the top-level module scope of a Next.js Server Action file causes the query to compile during the `next build` phase. If the database tables aren't fully instantiated in the CI/build environment, the build will crash with `SqliteError: no such table`.
+**Action:** Always lazily initialize prepared statements inside a getter function so they are only compiled during the first actual execution at runtime, rather than during module load time.
