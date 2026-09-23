@@ -129,13 +129,16 @@ const AddTaskForm = ({ onTaskAdded, listId }: AddTaskFormProps) => {
             id="description-helper"
             className={`absolute bottom-2 right-2 text-[10px] pointer-events-none select-none transition-colors ${
               description.length >= 480 ? 'text-destructive font-medium' :
-              description.length >= 400 ? 'text-amber-700 dark:text-amber-500' :
+              description.length >= 400 ? 'text-foreground font-medium' :
               'text-muted-foreground'
             }`}
             aria-live={description.length >= 400 ? "polite" : "off"}
             aria-atomic="true"
           >
-            {description.length}/500
+            <span aria-hidden="true">{description.length}/500</span>
+            <span className="sr-only">
+              {description.length} of 500 characters{description.length >= 480 ? ', near limit' : ''}
+            </span>
           </div>
         </div>
       </div>
