@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { tasks } from '@/lib/schema';
-import { eq, isNull, and, gte, lte, asc, desc } from 'drizzle-orm';
+import { eq, isNull, and, gte, lte, asc, desc, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { after } from 'next/server';
 import { logTaskHistory } from '@/lib/history';
@@ -30,19 +30,36 @@ const getNext7DaysRange = () => {
   return { start, end };
 };
 
+let inboxQuery: ReturnType<typeof createInboxQuery> | undefined;
+function createInboxQuery() {
+  return db.select()
+    .from(tasks)
+    .where(isNull(tasks.listId))
+    .limit(50)
+    .orderBy(desc(tasks.createdAt))
+    .prepare();
+}
+
 export async function getTasksForInbox() {
   const ip = getIpFromHeaders(await headers());
   const { success } = rateLimit(`tasks_inbox_get_${ip}`, 100, 60 * 1000);
   if (!success) throw new Error('Too many requests');
 
-  const baseTasks = db.select()
-    .from(tasks)
-    .where(isNull(tasks.listId))
-    .limit(50)
-    .orderBy(desc(tasks.createdAt))
-    .all();
+  // ⚡ Bolt Optimization: Lazily initialize prepared statements to eliminate query compilation overhead
+  if (!inboxQuery) inboxQuery = createInboxQuery();
+  const baseTasks = inboxQuery.all() as (typeof tasks.$inferSelect)[];
 
   return attachLabelsToTasks(baseTasks);
+}
+
+let dateRangeQuery: ReturnType<typeof createDateRangeQuery> | undefined;
+function createDateRangeQuery() {
+  return db.select()
+    .from(tasks)
+    .where(and(gte(tasks.date, sql.placeholder('start')), lte(tasks.date, sql.placeholder('end'))))
+    .orderBy(asc(tasks.date))
+    .limit(50)
+    .prepare();
 }
 
 export async function getTasksForToday() {
@@ -51,14 +68,23 @@ export async function getTasksForToday() {
   if (!success) throw new Error('Too many requests');
 
   const { start, end } = getTodayRange();
-  const baseTasks = db.select()
-    .from(tasks)
-    .where(and(gte(tasks.date, start), lte(tasks.date, end)))
-    .orderBy(asc(tasks.date))
-    .limit(50)
-    .all();
+
+  // ⚡ Bolt Optimization: Lazily initialize prepared statements to eliminate query compilation overhead
+  // Parameters bound via sql.placeholder() for timestamp columns must be explicitly converted from Date objects to numbers.
+  if (!dateRangeQuery) dateRangeQuery = createDateRangeQuery();
+  const baseTasks = dateRangeQuery.all({ start: start.getTime(), end: end.getTime() }) as (typeof tasks.$inferSelect)[];
 
   return attachLabelsToTasks(baseTasks);
+}
+
+let upcomingQuery: ReturnType<typeof createUpcomingQuery> | undefined;
+function createUpcomingQuery() {
+  return db.select()
+    .from(tasks)
+    .where(gte(tasks.date, sql.placeholder('start')))
+    .orderBy(asc(tasks.date))
+    .limit(50)
+    .prepare();
 }
 
 export async function getTasksForUpcoming() {
@@ -67,12 +93,11 @@ export async function getTasksForUpcoming() {
   if (!success) throw new Error('Too many requests');
 
   const { end } = getTodayRange(); // Tasks after today
-  const baseTasks = db.select()
-    .from(tasks)
-    .where(gte(tasks.date, end))
-    .orderBy(asc(tasks.date))
-    .limit(50)
-    .all();
+
+  // ⚡ Bolt Optimization: Lazily initialize prepared statements to eliminate query compilation overhead
+  // Parameters bound via sql.placeholder() for timestamp columns must be explicitly converted from Date objects to numbers.
+  if (!upcomingQuery) upcomingQuery = createUpcomingQuery();
+  const baseTasks = upcomingQuery.all({ start: end.getTime() }) as (typeof tasks.$inferSelect)[];
 
   return attachLabelsToTasks(baseTasks);
 }
@@ -83,12 +108,11 @@ export async function getTasksForNext7Days() {
   if (!success) throw new Error('Too many requests');
 
   const { start, end } = getNext7DaysRange();
-  const baseTasks = db.select()
-    .from(tasks)
-    .where(and(gte(tasks.date, start), lte(tasks.date, end)))
-    .orderBy(asc(tasks.date))
-    .limit(50)
-    .all();
+
+  // ⚡ Bolt Optimization: Lazily initialize prepared statements to eliminate query compilation overhead
+  // Parameters bound via sql.placeholder() for timestamp columns must be explicitly converted from Date objects to numbers.
+  if (!dateRangeQuery) dateRangeQuery = createDateRangeQuery();
+  const baseTasks = dateRangeQuery.all({ start: start.getTime(), end: end.getTime() }) as (typeof tasks.$inferSelect)[];
 
   return attachLabelsToTasks(baseTasks);
 }
